@@ -1,0 +1,6 @@
+[submodule "cli"]
+	path = cli
+	url = git@github.com:jstormes/cli.git
+[submodule "app"]
+	path = app
+	url = git@github.com:jstormes/app.git
