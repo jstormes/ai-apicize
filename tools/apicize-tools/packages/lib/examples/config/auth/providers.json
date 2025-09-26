@@ -1,0 +1,28 @@
+{
+  "providers": {
+    "main-api": {
+      "type": "OAuth2Client",
+      "config": {
+        "accessTokenUrl": "${env.AUTH_URL}/token",
+        "clientId": "${env.CLIENT_ID}",
+        "clientSecret": "${env.CLIENT_SECRET}",
+        "scope": "api:read api:write",
+        "audience": "https://api.example.com"
+      }
+    },
+    "basic-auth": {
+      "type": "Basic",
+      "config": {
+        "username": "${env.BASIC_USERNAME}",
+        "password": "${env.BASIC_PASSWORD}"
+      }
+    },
+    "api-key": {
+      "type": "ApiKey",
+      "config": {
+        "header": "X-API-Key",
+        "value": "${env.API_KEY}"
+      }
+    }
+  }
+}
