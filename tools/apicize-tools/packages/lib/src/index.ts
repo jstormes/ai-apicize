@@ -9,7 +9,7 @@ export * from './validation/validator';
 
 // Core utilities
 export * from './config';
-// export * from './variables';  // TODO: Implement in Phase 2 Step 2.2
+export * from './variables';
 // export * from './client';     // TODO: Implement in Phase 2 Step 2.3
 // export * from './auth';       // TODO: Implement in Phase 2 Step 2.4
 
