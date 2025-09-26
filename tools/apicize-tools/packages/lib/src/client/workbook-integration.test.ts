@@ -2,7 +2,16 @@ import { IntegratedApicizeClient } from './integrated-client';
 import { ConfigManager } from '../config/config-manager';
 import { VariableEngine } from '../variables/variable-engine';
 import { validateApicizeFile } from '../validation/validator';
-import { ApicizeWorkbook, Request, RequestGroup, RequestConfig, HttpMethod, BodyType, ApiKeyAuthorization, BasicAuthorization } from '../types';
+import {
+  ApicizeWorkbook,
+  Request,
+  RequestGroup,
+  RequestConfig,
+  HttpMethod,
+  BodyType,
+  ApiKeyAuthorization,
+  BasicAuthorization,
+} from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -20,7 +29,10 @@ function mockFetchForIntegration() {
             status: 200,
             statusText: 'OK',
             headers: new Headers({ 'content-type': 'application/json' }),
-            text: () => Promise.resolve('{"id": "test-id-123", "author": "Test Author", "quote": "Test Quote"}'),
+            text: () =>
+              Promise.resolve(
+                '{"id": "test-id-123", "author": "Test Author", "quote": "Test Quote"}'
+              ),
             redirected: false,
             url: url as string,
           });
@@ -30,7 +42,10 @@ function mockFetchForIntegration() {
             status: 200,
             statusText: 'OK',
             headers: new Headers({ 'content-type': 'application/json' }),
-            text: () => Promise.resolve('{"id": "test-id-123", "author": "Test Author", "quote": "Updated Quote"}'),
+            text: () =>
+              Promise.resolve(
+                '{"id": "test-id-123", "author": "Test Author", "quote": "Updated Quote"}'
+              ),
             redirected: false,
             url: url as string,
           });
@@ -195,7 +210,10 @@ describe('Workbook Integration Tests', () => {
 
     beforeEach(() => {
       // Load the authentication workbook
-      const workbookPath = path.join(__dirname, '../../../examples/workbooks/with-authentication.apicize');
+      const workbookPath = path.join(
+        __dirname,
+        '../../../examples/workbooks/with-authentication.apicize'
+      );
       const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
       authWorkbook = JSON.parse(workbookContent);
 
@@ -259,7 +277,10 @@ describe('Workbook Integration Tests', () => {
 
     beforeEach(() => {
       // Load the request groups workbook
-      const workbookPath = path.join(__dirname, '../../../examples/workbooks/request-groups.apicize');
+      const workbookPath = path.join(
+        __dirname,
+        '../../../examples/workbooks/request-groups.apicize'
+      );
       const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
       requestGroupsWorkbook = JSON.parse(workbookContent);
 
@@ -280,7 +301,13 @@ describe('Workbook Integration Tests', () => {
 
   describe('HTTP Client Feature Coverage', () => {
     it('should handle all HTTP methods from workbooks', async () => {
-      const methods: HttpMethod[] = [HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH];
+      const methods: HttpMethod[] = [
+        HttpMethod.GET,
+        HttpMethod.POST,
+        HttpMethod.PUT,
+        HttpMethod.DELETE,
+        HttpMethod.PATCH,
+      ];
 
       for (const method of methods) {
         const requestConfig: RequestConfig = {
