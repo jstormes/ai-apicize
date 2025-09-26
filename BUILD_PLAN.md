@@ -5,13 +5,18 @@ This plan outlines the step-by-step development of the Apicize toolset for conve
 
 ## Project Structure
 ```
-apicize-tools/
-├── packages/
-│   ├── lib/                 # @apicize/lib - Core library
-│   ├── tools/              # @apicize/tools - CLI tools
-│   └── examples/           # Example .apicize files for testing
-├── docs/                   # Documentation
-└── tests/                  # Integration tests
+tools/
+└── apicize-tools/          # Main development directory
+    ├── packages/
+    │   ├── lib/            # @apicize/lib - Core library
+    │   ├── tools/          # @apicize/tools - CLI tools
+    │   └── examples/       # Example .apicize files for testing
+    ├── docs/               # Documentation
+    ├── tests/              # Integration tests
+    ├── package.json        # Root package configuration
+    ├── tsconfig.json       # TypeScript configuration
+    ├── jest.config.js      # Jest testing configuration
+    └── .eslintrc.json      # ESLint configuration
 ```
 
 ---
