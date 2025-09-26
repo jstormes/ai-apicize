@@ -1,1 +1,5 @@
 tools/convert/node_modules/
+.idea/ai-apicize.iml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/inspectionProfiles/Project_Default.xml
