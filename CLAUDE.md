@@ -8,6 +8,31 @@ This project involves creating tools to work with `.apicize` files - JSON-based 
 - **Create**: Generate new .apicize files from scratch
 - **Execute**: Run the exported TypeScript tests directly with Mocha
 
+### Installation and Distribution
+The Apicize tools will be distributed as a global npm package for easy command-line access:
+
+```bash
+# Install globally via npm
+npm install -g @apicize/tools
+
+# Or using npx without installation
+npx @apicize/tools export myfile.apicize
+
+# Available commands after global installation
+apicize export <file.apicize>    # Export to TypeScript
+apicize import <test-folder>      # Import back to .apicize
+apicize create <name>             # Create new .apicize file
+apicize validate <file.apicize>  # Validate file structure
+apicize run <file.apicize>       # Execute tests directly
+
+# CLI Usage Examples
+apicize export demo.apicize --output ./tests --scenario production
+apicize import ./tests/demo --output demo-modified.apicize
+apicize create new-api-test --template rest-crud
+apicize validate *.apicize
+apicize run demo.apicize --scenario staging --reporter json
+```
+
 ### Goal
 Enable seamless bidirectional conversion between Apicize's JSON format and executable TypeScript tests while maintaining complete data fidelity for round-trip operations.
 
@@ -43,9 +68,16 @@ Hierarchical tree structure containing requests and request groups.
     ],
     "body": {
         "type": "None|Text|JSON|XML|Form|Raw",
-        "data": "...",
-        "formatted": "..." // Optional formatted version
+        "data": string | object | NameValuePair[] | Uint8Array,  // Type depends on body.type
+        "formatted": string  // Optional pretty-printed version for display
     },
+    // Body data types by type:
+    // - None: data is undefined
+    // - Text: data is string
+    // - JSON: data is object (will be stringified)
+    // - XML: data is string
+    // - Form: data is NameValuePair[] array
+    // - Raw: data is Uint8Array
     "queryStringParams": [
         {"name": "param", "value": "value"}
     ],
@@ -83,12 +115,13 @@ Hierarchical tree structure containing requests and request groups.
 ```
 
 ### 2. Test Code Structure
-Tests are embedded as TypeScript strings using Mocha/Chai syntax:
+Tests are embedded as TypeScript strings in .apicize files using Mocha/Chai syntax:
 
 ```typescript
+// This code is stored as a string in the .apicize JSON file
 describe('Test Suite', () => {
     it('Test Case', () => {
-        // Access response object
+        // Access response object (synchronous in test context)
         expect(response.status).to.equal(200)
 
         // Type-safe body handling
@@ -109,10 +142,13 @@ describe('Test Suite', () => {
 ```
 
 #### Test Context Objects
-- `response`: Contains status, body, headers from API response
-- `$`: Object containing scenario variables
-- `output(key, value)`: Function to pass data between tests
-- `BodyType`: Enum for response body types (JSON, XML, Text, etc.)
+When exported to TypeScript, the test runtime provides these objects:
+- `response`: Contains the HTTP response (status, body, headers) from the executed request
+- `$`: Object containing scenario variables and outputs from previous tests
+- `output(key, value)`: Function to pass data to subsequent tests (stored in $)
+- `BodyType`: Enum for response body type checking (imported from @apicize/lib)
+
+**Note**: In the original .apicize file, tests appear synchronous. During export, the framework handles async execution by running the request in `beforeEach` and making the response available to the test code.
 
 ### 3. Scenarios Section
 Named sets of variables for different test environments:
@@ -196,10 +232,24 @@ Variable sources:
 
 ### Export Tool (.apicize → TypeScript)
 
-1. **File Structure**
-   - Generate one test file per request group
-   - Preserve hierarchical structure using describe blocks
-   - Include metadata comments for reimport
+1. **File Generation Strategy**
+   - Create one folder per .apicize workbook under `tests/`
+   - Generate `index.spec.ts` as the main entry point
+   - Split large request groups into separate files in `suites/` folder
+   - Each file maintains hierarchical structure using describe blocks
+   - All metadata preserved in comments for reimport
+
+   Example structure for a workbook:
+   ```
+   tests/
+   └── [workbook-name]/
+       ├── index.spec.ts         # Main entry, imports all suites
+       ├── suites/
+       │   ├── group1.spec.ts    # First top-level group
+       │   └── group2.spec.ts    # Second top-level group
+       └── metadata/
+           └── workbook.json     # Complete original .apicize data
+   ```
 
 2. **Metadata Format**
    ```typescript
@@ -479,6 +529,8 @@ exported-tests/
 ```
 
 ### Authentication Configuration (config/auth/providers.json)
+
+The authentication system maps string references to provider configurations. When a test specifies `auth: 'main-api'`, the system looks up the configuration from this file:
 ```json
 {
   "providers": {
@@ -545,24 +597,14 @@ Each exported TypeScript file includes:
 
 ```typescript
 // Auto-generated from [filename].apicize
-import { describe, it, before, after } from 'mocha';
+import { describe, it, before, after, beforeEach } from 'mocha';
 import { expect } from 'chai';
-import { TestHelper, ApicizeContext, BodyType } from '../../../lib';
-
-// Runtime Types
-enum BodyType {
-    None = 'None',
-    Text = 'Text',
-    JSON = 'JSON',
-    XML = 'XML',
-    Form = 'Form',
-    Raw = 'Raw'
-}
-
-// Global context
-declare const response: ApicizeResponse;
-declare const $: Record<string, any>;
-declare function output(key: string, value: any): void;
+import {
+    TestHelper,
+    ApicizeContext,
+    ApicizeResponse,
+    BodyType
+} from '@apicize/lib';  // Imported from library, not defined locally
 
 /* @apicize-file-metadata
 {
@@ -571,25 +613,60 @@ declare function output(key: string, value: any): void;
     "exportDate": "2024-01-01T00:00:00Z"
 }
 @apicize-file-metadata-end */
+
+// Test context will be initialized in beforeEach hook
+let context: ApicizeContext;
+let response: ApicizeResponse;
+let $: Record<string, any>;
+const output = (key: string, value: any): void => {
+    context?.output(key, value);
+};
 ```
 
 #### Request to Test Conversion
 ```typescript
 describe('[Group Name]', () => {
-    /* @apicize-request-metadata
+    /* @apicize-group-metadata
     {
-        "id": "uuid",
-        "url": "https://api.example.com/{{endpoint}}",
-        "method": "POST",
-        "headers": [...],
-        "body": {...},
-        "timeout": 30000
+        "id": "group-uuid",
+        "execution": "SEQUENTIAL",
+        "selectedScenario": {...}
     }
-    @apicize-request-metadata-end */
+    @apicize-group-metadata-end */
 
     describe('[Request Name]', () => {
-        it('should execute test', async () => {
-            // Original test code from .apicize
+        /* @apicize-request-metadata
+        {
+            "id": "request-uuid",
+            "url": "https://api.example.com/{{endpoint}}",
+            "method": "POST",
+            "headers": [...],
+            "body": {...},
+            "timeout": 30000
+        }
+        @apicize-request-metadata-end */
+
+        beforeEach(async () => {
+            // Initialize context for this test
+            const helper = new TestHelper();
+            context = await helper.setupTest('[Request Name]');
+
+            // Execute the actual HTTP request
+            response = await context.execute({
+                url: context.substituteVariables("https://api.example.com/{{endpoint}}"),
+                method: "POST",
+                headers: context.headers,
+                body: context.body,
+                timeout: 30000
+            });
+
+            // Set up variables for test code
+            $ = context.$;
+        });
+
+        it('should pass the embedded test', async () => {
+            // Original test code from .apicize file is inserted here
+            // It can now use response, $, and output() directly
         });
     });
 });
@@ -622,7 +699,11 @@ describe('response', () => {
             ? response.body.data
             : expect.fail('Response body is not JSON');
 
-        expect(data.field).to.equal(expectedValue);
+        // Access variables from scenario via $
+        expect(data.field).to.equal($.expectedValue);
+
+        // Or use hardcoded values
+        expect(data.status).to.equal('success');
     });
 });
 
@@ -695,7 +776,8 @@ export class TestHelper {
 ```typescript
 import { describe, it, before } from 'mocha';
 import { expect } from 'chai';
-import { TestHelper, ApicizeContext, BodyType } from '../../../lib';
+// Import path uses npm package name for consistency
+import { TestHelper, ApicizeContext, BodyType } from '@apicize/lib';
 
 describe('CRUD Operations', function() {
     let context: ApicizeContext;
@@ -706,25 +788,29 @@ describe('CRUD Operations', function() {
     });
 
     describe('Create quote', () => {
-        it('should create successfully', async () => {
-            const response = await context.execute({
+        beforeEach(async () => {
+            // Request execution happens here
+            response = await context.execute({
                 service: 'quotes',
                 endpoint: 'create',
                 method: 'POST',
                 body: {
-                    author: context.$.author,
-                    quote: context.$.quote
+                    author: $.author,
+                    quote: $.quote
                 },
-                auth: 'main-api'
+                auth: 'main-api'  // Maps to config/auth/providers.json
             });
+        });
 
+        it('should create successfully', () => {
+            // Original test code from .apicize runs here with response available
             expect(response.status).to.equal(200);
 
             const data = (response.body.type == BodyType.JSON)
                 ? response.body.data
                 : expect.fail('Response body is not JSON');
 
-            context.output('id', data.id);
+            output('id', data.id);  // Saves to $ for next test
         });
     });
 });
@@ -805,10 +891,51 @@ The scaffolded structure supports multiple execution modes:
 7. **Debug Mode**: `npm run test:debug`
 8. **Watch Mode**: `npm run test:watch`
 
-## Package.json Scripts
+## Package Configuration
+
+### Global Tool Package.json
+The main @apicize/tools package for global installation:
 
 ```json
 {
+  "name": "@apicize/tools",
+  "version": "1.0.0",
+  "description": "CLI tools for working with .apicize API test files",
+  "bin": {
+    "apicize": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "preferGlobal": true,
+  "dependencies": {
+    "@apicize/lib": "^1.0.0",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build"
+  }
+}
+```
+
+### Generated Test Project Package.json
+For exported test projects:
+
+```json
+{
+  "name": "apicize-tests",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
     "test": "mocha",
     "test:watch": "mocha --watch",
@@ -818,11 +945,22 @@ The scaffolded structure supports multiple execution modes:
     "test:single": "mocha --grep",
     "test:report": "mocha --reporter mochawesome",
     "test:coverage": "nyc mocha",
-    "import": "ts-node scripts/import.ts",
-    "export": "ts-node scripts/export.ts",
-    "validate": "ts-node scripts/validate.ts",
-    "config:check": "ts-node scripts/config-manager.ts check",
-    "config:merge": "ts-node scripts/config-manager.ts merge"
+    "import": "apicize import .",
+    "validate": "apicize validate"
+  },
+  "dependencies": {
+    "@apicize/lib": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.0",
+    "@types/chai": "^4.3.0",
+    "mocha": "^10.0.0",
+    "chai": "^4.3.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "cross-env": "^7.0.3",
+    "mochawesome": "^7.1.0",
+    "nyc": "^15.1.0"
   }
 }
 ```
