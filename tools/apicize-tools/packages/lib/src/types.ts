@@ -9,7 +9,7 @@ export enum BodyType {
   JSON = 'JSON',
   XML = 'XML',
   Form = 'Form',
-  Raw = 'Raw'
+  Raw = 'Raw',
 }
 
 export enum HttpMethod {
@@ -19,32 +19,32 @@ export enum HttpMethod {
   DELETE = 'DELETE',
   PATCH = 'PATCH',
   HEAD = 'HEAD',
-  OPTIONS = 'OPTIONS'
+  OPTIONS = 'OPTIONS',
 }
 
 export enum ExecutionMode {
   SEQUENTIAL = 'SEQUENTIAL',
-  CONCURRENT = 'CONCURRENT'
+  CONCURRENT = 'CONCURRENT',
 }
 
 export enum AuthorizationType {
   Basic = 'Basic',
   OAuth2Client = 'OAuth2Client',
   OAuth2Pkce = 'OAuth2Pkce',
-  ApiKey = 'ApiKey'
+  ApiKey = 'ApiKey',
 }
 
 export enum VariableType {
   TEXT = 'TEXT',
   JSON = 'JSON',
   FILE_JSON = 'FILE-JSON',
-  FILE_CSV = 'FILE-CSV'
+  FILE_CSV = 'FILE-CSV',
 }
 
 export enum DataType {
   JSON = 'JSON',
   FILE_JSON = 'FILE-JSON',
-  FILE_CSV = 'FILE-CSV'
+  FILE_CSV = 'FILE-CSV',
 }
 
 export type RequestMode = 'cors' | 'no-cors' | 'same-origin';

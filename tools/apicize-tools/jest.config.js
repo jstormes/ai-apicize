@@ -22,7 +22,7 @@ module.exports = {
     'lcov',
     'html'
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@apicize/lib(.*)$': '<rootDir>/packages/lib/src$1',
     '^@apicize/tools(.*)$': '<rootDir>/packages/tools/src$1'
   },

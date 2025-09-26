@@ -9,6 +9,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
+    "test:lib": "jest packages/lib/src",
+    "test:validation": "jest packages/lib/src/validation",
     "lint": "eslint . --ext .ts",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
     "verify": "npm run build && npm run test && npm run lint",

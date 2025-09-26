@@ -25,7 +25,7 @@ export class ApicizeValidator {
       allErrors: true,
       verbose: true,
       strict: false,
-      allowUnionTypes: true
+      allowUnionTypes: true,
     });
 
     addFormats(this.ajv);
@@ -44,14 +44,14 @@ export class ApicizeValidator {
     if (valid) {
       return {
         valid: true,
-        errors: []
+        errors: [],
       };
     }
 
     const errors = this.formatErrors(this.validateFunction.errors || []);
     return {
       valid: false,
-      errors
+      errors,
     };
   }
 
@@ -77,7 +77,7 @@ export class ApicizeValidator {
       message: this.getHumanReadableMessage(error),
       keyword: error.keyword,
       params: error.params,
-      schemaPath: error.schemaPath
+      schemaPath: error.schemaPath,
     }));
   }
 
@@ -119,9 +119,7 @@ export class ApicizeValidator {
    * Format multiple errors into a single message
    */
   private formatErrorMessage(errors: ValidationError[]): string {
-    return errors
-      .map((error, index) => `  ${index + 1}. ${error.message}`)
-      .join('\n');
+    return errors.map((error, index) => `  ${index + 1}. ${error.message}`).join('\n');
   }
 
   /**
@@ -133,13 +131,15 @@ export class ApicizeValidator {
     if (!sectionSchema) {
       return {
         valid: false,
-        errors: [{
-          path: `/${sectionName}`,
-          message: `Unknown section '${sectionName}'`,
-          keyword: 'unknown',
-          params: {},
-          schemaPath: ''
-        }]
+        errors: [
+          {
+            path: `/${sectionName}`,
+            message: `Unknown section '${sectionName}'`,
+            keyword: 'unknown',
+            params: {},
+            schemaPath: '',
+          },
+        ],
       };
     }
 
@@ -152,7 +152,7 @@ export class ApicizeValidator {
 
     return {
       valid: false,
-      errors: this.formatErrors(validateSection.errors || [])
+      errors: this.formatErrors(validateSection.errors || []),
     };
   }
 
