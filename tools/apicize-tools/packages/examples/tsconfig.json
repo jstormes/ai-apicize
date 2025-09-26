@@ -3,16 +3,13 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "composite": true,
-    "resolveJsonModule": true
+    "composite": true
   },
   "include": [
-    "src/**/*",
-    "src/**/*.json"
+    "src/**/*"
   ],
   "exclude": [
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "dist"
+    "dist",
+    "node_modules"
   ]
 }

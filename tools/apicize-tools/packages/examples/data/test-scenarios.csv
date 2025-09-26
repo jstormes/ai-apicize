@@ -1,0 +1,4 @@
+scenario,apiUrl,timeout,expectedStatus
+development,http://localhost:3000,5000,200
+staging,https://staging-api.example.com,10000,200
+production,https://api.example.com,15000,200

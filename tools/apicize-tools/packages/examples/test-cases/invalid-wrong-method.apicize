@@ -1,0 +1,11 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "req-001",
+      "name": "Test Request",
+      "url": "https://example.com",
+      "method": "INVALID_METHOD"
+    }
+  ]
+}

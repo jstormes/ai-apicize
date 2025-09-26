@@ -12,7 +12,9 @@
     "lint": "eslint . --ext .ts",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
     "verify": "npm run build && npm run test && npm run lint",
-    "dev": "npm run dev --workspaces --if-present"
+    "dev": "npm run dev --workspaces --if-present",
+    "validate-workbooks": "node scripts/validate-workbooks.js",
+    "step-test": "npm run build && npm run validate-workbooks"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",

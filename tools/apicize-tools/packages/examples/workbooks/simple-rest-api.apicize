@@ -1,0 +1,66 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "req-001",
+      "name": "Get Users",
+      "url": "https://jsonplaceholder.typicode.com/users",
+      "method": "GET",
+      "test": "describe('status', () => {\n  it('should return 200', () => {\n    expect(response.status).to.equal(200)\n  })\n})\n\ndescribe('response', () => {\n  it('should be an array', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(Array.isArray(data)).to.be.true\n  })\n})",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "timeout": 5000,
+      "runs": 1
+    },
+    {
+      "id": "req-002",
+      "name": "Create User",
+      "url": "https://jsonplaceholder.typicode.com/users",
+      "method": "POST",
+      "test": "describe('status', () => {\n  it('should return 201', () => {\n    expect(response.status).to.equal(201)\n  })\n})\n\ndescribe('response', () => {\n  it('should contain an id', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(data.id).to.exist\n    output('userId', data.id)\n  })\n})",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "JSON",
+        "data": {
+          "name": "{{userName}}",
+          "email": "{{userEmail}}",
+          "username": "{{username}}"
+        }
+      },
+      "timeout": 5000,
+      "runs": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "scenario-dev",
+      "name": "Development",
+      "variables": [
+        {
+          "name": "userName",
+          "value": "John Doe",
+          "type": "TEXT"
+        },
+        {
+          "name": "userEmail",
+          "value": "john@example.com",
+          "type": "TEXT"
+        },
+        {
+          "name": "username",
+          "value": "johndoe",
+          "type": "TEXT"
+        }
+      ]
+    }
+  ]
+}

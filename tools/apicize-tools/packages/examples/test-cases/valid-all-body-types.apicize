@@ -1,0 +1,67 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "req-none-body",
+      "name": "Request with no body",
+      "url": "https://httpbin.org/get",
+      "method": "GET",
+      "body": {
+        "type": "None"
+      }
+    },
+    {
+      "id": "req-text-body",
+      "name": "Request with text body",
+      "url": "https://httpbin.org/post",
+      "method": "POST",
+      "body": {
+        "type": "Text",
+        "data": "This is plain text content"
+      }
+    },
+    {
+      "id": "req-json-body",
+      "name": "Request with JSON body",
+      "url": "https://httpbin.org/post",
+      "method": "POST",
+      "body": {
+        "type": "JSON",
+        "data": {
+          "key": "value",
+          "number": 42,
+          "boolean": true
+        }
+      }
+    },
+    {
+      "id": "req-xml-body",
+      "name": "Request with XML body",
+      "url": "https://httpbin.org/post",
+      "method": "POST",
+      "body": {
+        "type": "XML",
+        "data": "<?xml version=\"1.0\"?><root><element>value</element></root>"
+      }
+    },
+    {
+      "id": "req-form-body",
+      "name": "Request with form body",
+      "url": "https://httpbin.org/post",
+      "method": "POST",
+      "body": {
+        "type": "Form",
+        "data": [
+          {
+            "name": "field1",
+            "value": "value1"
+          },
+          {
+            "name": "field2",
+            "value": "value2"
+          }
+        ]
+      }
+    }
+  ]
+}

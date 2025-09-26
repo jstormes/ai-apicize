@@ -42,6 +42,7 @@ tools/
 - [ ] All packages properly reference each other
 
 **Test Command**: `npm run verify` (runs build, test, lint)
+**Workbook Validation**: `npm run step-test` (validates all example workbooks)
 
 ---
 
@@ -64,6 +65,7 @@ tools/
 - [ ] No `any` types used
 
 **Test Command**: `npm run test:types` (type-only tests)
+**Workbook Validation**: `npm run step-test` (ensures type changes don't break workbook compatibility)
 
 ---
 
@@ -83,7 +85,8 @@ tools/
 - [ ] Validation function exports: `validateApicizeFile(data)`
 
 **Test Command**: `npm run test:validation`
-**Test Data**: Use `app/app/src-tauri/help/demo/demo.apicize`
+**Workbook Validation**: `npm run step-test` (validates all 5 example workbooks for schema compatibility)
+**Test Data**: Uses complete example collection including demo.apicize
 
 ---
 
@@ -105,6 +108,7 @@ tools/
 - [ ] Invalid configs throw descriptive errors
 
 **Test Command**: `npm run test:config`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Create sample config files
 
 ---
@@ -126,6 +130,7 @@ tools/
 - [ ] Object/array traversal works
 
 **Test Command**: `npm run test:variables`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -147,6 +152,7 @@ tools/
 - [ ] Network errors handled gracefully
 
 **Test Command**: `npm run test:client`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Target**: Use httpbin.org for testing
 
 ---
@@ -169,6 +175,7 @@ tools/
 - [ ] Invalid auth configs fail gracefully
 
 **Test Command**: `npm run test:auth`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Target**: Use httpbin.org/basic-auth endpoints
 
 ---
@@ -192,6 +199,7 @@ tools/
 - [ ] Helper methods work: `parser.getRequests()`, `parser.getScenarios()`
 
 **Test Command**: `npm run test:parser`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: `demo.apicize` and manually created invalid files
 
 ---
@@ -213,6 +221,7 @@ tools/
 - [ ] Invalid JSON in metadata throws errors
 
 **Test Command**: `npm run test:metadata`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Create sample TypeScript files with metadata
 
 ---
@@ -234,6 +243,7 @@ tools/
 - [ ] Identifies which tests belong to which requests
 
 **Test Command**: `npm run test:extractor`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Create sample TypeScript test files
 
 ---
@@ -259,6 +269,7 @@ tools/
 - [ ] Different templates produce different structures
 
 **Test Command**: `npm run test:templates`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -279,6 +290,7 @@ tools/
 - [ ] Test hierarchy matches request structure
 
 **Test Command**: `npm run test:generator`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Use demo.apicize for conversion
 
 ---
@@ -300,6 +312,7 @@ tools/
 - [ ] `npm test` runs successfully (even if tests fail)
 
 **Test Command**: `npm run test:scaffold`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -320,6 +333,7 @@ tools/
 - [ ] All metadata preserved for round-trip
 
 **Test Command**: `npm run test:export-full`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Export demo.apicize and run generated tests
 
 ---
@@ -343,6 +357,7 @@ tools/
 - [ ] Creates accurate project map
 
 **Test Command**: `npm run test:scanner`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Use output from Step 4.4
 
 ---
@@ -364,6 +379,7 @@ tools/
 - [ ] Generated requests pass validation
 
 **Test Command**: `npm run test:reconstructor`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -384,6 +400,7 @@ tools/
 - [ ] Handles modified test files reasonably
 
 **Test Command**: `npm run test:import-full`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Data**: Round-trip test with demo.apicize
 
 ---
@@ -407,6 +424,7 @@ tools/
 - [ ] Progress indicators display correctly
 
 **Test Command**: Manual CLI testing
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -427,6 +445,7 @@ tools/
 - [ ] Export options function correctly
 
 **Test Command**: `npm run test:cli-export`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -447,6 +466,7 @@ tools/
 - [ ] Handles missing metadata gracefully
 
 **Test Command**: `npm run test:cli-import`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -467,6 +487,7 @@ tools/
 - [ ] All commands have consistent UX
 
 **Test Command**: `npm run test:cli-all`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -489,6 +510,7 @@ tools/
 - [ ] Performance is acceptable
 
 **Test Command**: `npm run test:integration`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -509,6 +531,7 @@ tools/
 - [ ] API docs cover all public interfaces
 
 **Test Command**: Manual review and user testing
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -529,6 +552,7 @@ tools/
 - [ ] Performance metrics documented
 
 **Test Command**: `npm run test:performance`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -551,6 +575,7 @@ tools/
 - [ ] Only necessary files are packaged
 
 **Test Command**: `npm run test:package`
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 
@@ -571,6 +596,7 @@ tools/
 - [ ] Packages publish to npm successfully
 
 **Test Command**: Test publish to npm test registry
+**Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 
 ---
 

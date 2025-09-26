@@ -1,0 +1,533 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://apicize.com/schemas/apicize/v1.0",
+  "title": "Apicize Workbook",
+  "description": "Schema for .apicize API testing workbook files",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "type": "number",
+      "description": "Version of the .apicize file format",
+      "minimum": 1.0,
+      "maximum": 1.0
+    },
+    "requests": {
+      "type": "array",
+      "description": "Array of requests and request groups",
+      "items": {
+        "$ref": "#/definitions/requestOrGroup"
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "description": "Named sets of variables for different test environments",
+      "items": { "$ref": "#/definitions/scenario" }
+    },
+    "authorizations": {
+      "type": "array",
+      "description": "Authentication configurations",
+      "items": { "$ref": "#/definitions/authorization" }
+    },
+    "certificates": {
+      "type": "array",
+      "description": "Certificate configurations",
+      "items": { "$ref": "#/definitions/certificate" }
+    },
+    "proxies": {
+      "type": "array",
+      "description": "Proxy configurations",
+      "items": { "$ref": "#/definitions/proxy" }
+    },
+    "data": {
+      "type": "array",
+      "description": "External data sources",
+      "items": { "$ref": "#/definitions/externalData" }
+    },
+    "defaults": {
+      "$ref": "#/definitions/defaults"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "requestOrGroup": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the request, may contain {{variables}}"
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+        },
+        "test": {
+          "type": "string",
+          "description": "Mocha/Chai TypeScript test code as string"
+        },
+        "headers": {
+          "type": "array",
+          "description": "HTTP headers",
+          "items": { "$ref": "#/definitions/nameValuePair" }
+        },
+        "body": {
+          "$ref": "#/definitions/requestBody"
+        },
+        "queryStringParams": {
+          "type": "array",
+          "description": "Query string parameters",
+          "items": { "$ref": "#/definitions/nameValuePair" }
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Request timeout in milliseconds",
+          "minimum": 0
+        },
+        "numberOfRedirects": {
+          "type": "integer",
+          "description": "Maximum number of redirects to follow",
+          "minimum": 0
+        },
+        "runs": {
+          "type": "integer",
+          "description": "Number of times to run",
+          "minimum": 1
+        },
+        "multiRunExecution": {
+          "type": "string",
+          "description": "How to execute multiple runs",
+          "enum": ["SEQUENTIAL", "CONCURRENT"]
+        },
+        "keepAlive": {
+          "type": "boolean",
+          "description": "Keep connection alive"
+        },
+        "acceptInvalidCerts": {
+          "type": "boolean",
+          "description": "Accept invalid SSL certificates"
+        },
+        "mode": {
+          "type": "string",
+          "description": "CORS mode",
+          "enum": ["cors", "no-cors", "same-origin"]
+        },
+        "referrer": {
+          "type": "string",
+          "description": "Referrer URL"
+        },
+        "referrerPolicy": {
+          "type": "string",
+          "description": "Referrer policy"
+        },
+        "duplex": {
+          "type": "string",
+          "description": "Duplex mode"
+        },
+        "children": {
+          "type": "array",
+          "description": "Child requests and groups",
+          "items": {
+            "$ref": "#/definitions/requestOrGroup"
+          }
+        },
+        "execution": {
+          "type": "string",
+          "description": "Execution order for children",
+          "enum": ["SEQUENTIAL", "CONCURRENT"]
+        },
+        "selectedScenario": {
+          "$ref": "#/definitions/reference"
+        },
+        "selectedData": {
+          "$ref": "#/definitions/reference"
+        }
+      },
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "required": ["id", "name", "url", "method"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the request"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the request"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the request, may contain {{variables}}"
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+        },
+        "test": {
+          "type": "string",
+          "description": "Mocha/Chai TypeScript test code as string"
+        },
+        "headers": {
+          "type": "array",
+          "description": "HTTP headers",
+          "items": { "$ref": "#/definitions/nameValuePair" }
+        },
+        "body": {
+          "$ref": "#/definitions/requestBody"
+        },
+        "queryStringParams": {
+          "type": "array",
+          "description": "Query string parameters",
+          "items": { "$ref": "#/definitions/nameValuePair" }
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Request timeout in milliseconds",
+          "minimum": 0
+        },
+        "numberOfRedirects": {
+          "type": "integer",
+          "description": "Maximum number of redirects to follow",
+          "minimum": 0
+        },
+        "runs": {
+          "type": "integer",
+          "description": "Number of times to run this request",
+          "minimum": 1
+        },
+        "multiRunExecution": {
+          "type": "string",
+          "description": "How to execute multiple runs",
+          "enum": ["SEQUENTIAL", "CONCURRENT"]
+        },
+        "keepAlive": {
+          "type": "boolean",
+          "description": "Keep connection alive"
+        },
+        "acceptInvalidCerts": {
+          "type": "boolean",
+          "description": "Accept invalid SSL certificates"
+        },
+        "mode": {
+          "type": "string",
+          "description": "CORS mode",
+          "enum": ["cors", "no-cors", "same-origin"]
+        },
+        "referrer": {
+          "type": "string",
+          "description": "Referrer URL"
+        },
+        "referrerPolicy": {
+          "type": "string",
+          "description": "Referrer policy"
+        },
+        "duplex": {
+          "type": "string",
+          "description": "Duplex mode"
+        }
+      },
+      "additionalProperties": false
+    },
+    "requestGroup": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the group"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the request group"
+        },
+        "children": {
+          "type": "array",
+          "description": "Child requests and groups",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/request" },
+              { "$ref": "#/definitions/requestGroup" }
+            ]
+          }
+        },
+        "execution": {
+          "type": "string",
+          "description": "Execution order for children",
+          "enum": ["SEQUENTIAL", "CONCURRENT"]
+        },
+        "runs": {
+          "type": "integer",
+          "description": "Number of times to run this group",
+          "minimum": 1
+        },
+        "multiRunExecution": {
+          "type": "string",
+          "description": "How to execute multiple runs",
+          "enum": ["SEQUENTIAL", "CONCURRENT"]
+        },
+        "selectedScenario": {
+          "$ref": "#/definitions/reference"
+        },
+        "selectedData": {
+          "$ref": "#/definitions/reference"
+        }
+      },
+      "additionalProperties": false
+    },
+    "requestBody": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Body content type",
+          "enum": ["None", "Text", "JSON", "XML", "Form", "Raw"]
+        },
+        "data": {
+          "description": "Body data, type depends on body.type"
+        },
+        "formatted": {
+          "type": "string",
+          "description": "Pretty-printed version for display"
+        }
+      },
+      "additionalProperties": false
+    },
+    "nameValuePair": {
+      "type": "object",
+      "required": ["name", "value"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "object",
+      "required": ["id", "name", "variables"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the scenario"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the scenario"
+        },
+        "variables": {
+          "type": "array",
+          "description": "Variables for this scenario",
+          "items": {
+            "type": "object",
+            "required": ["name", "value"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Variable name"
+              },
+              "value": {
+                "description": "Variable value"
+              },
+              "type": {
+                "type": "string",
+                "description": "Variable type",
+                "enum": ["TEXT", "JSON", "FILE-JSON", "FILE-CSV"]
+              },
+              "disabled": {
+                "type": "boolean",
+                "description": "Whether this variable is disabled"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "authorization": {
+      "type": "object",
+      "required": ["id", "name", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the authorization"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the authorization"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of authorization",
+          "enum": ["Basic", "OAuth2Client", "OAuth2Pkce", "ApiKey"]
+        },
+        "username": {
+          "type": "string",
+          "description": "Username for Basic auth"
+        },
+        "password": {
+          "type": "string",
+          "description": "Password for Basic auth"
+        },
+        "accessTokenUrl": {
+          "type": "string",
+          "description": "Token URL for OAuth2"
+        },
+        "authorizeUrl": {
+          "type": "string",
+          "description": "Authorization URL for OAuth2 PKCE"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Client ID for OAuth2"
+        },
+        "clientSecret": {
+          "type": "string",
+          "description": "Client secret for OAuth2 Client Credentials"
+        },
+        "audience": {
+          "type": "string",
+          "description": "Audience for OAuth2"
+        },
+        "scope": {
+          "type": "string",
+          "description": "Scope for OAuth2"
+        },
+        "header": {
+          "type": "string",
+          "description": "Header name for API key"
+        },
+        "value": {
+          "type": "string",
+          "description": "API key value"
+        },
+        "selectedCertificate": {
+          "$ref": "#/definitions/reference"
+        },
+        "selectedProxy": {
+          "$ref": "#/definitions/reference"
+        },
+        "sendCredentialsInBody": {
+          "type": "boolean",
+          "description": "Whether to send credentials in request body"
+        },
+        "warnings": {
+          "description": "Validation warnings"
+        }
+      },
+      "additionalProperties": false
+    },
+    "certificate": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "cert": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "passphrase": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "proxy": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "externalData": {
+      "type": "object",
+      "required": ["id", "name", "type", "source"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["JSON", "FILE-JSON", "FILE-CSV"]
+        },
+        "source": {
+          "type": "string"
+        },
+        "validation_errors": {}
+      },
+      "additionalProperties": false
+    },
+    "reference": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "selectedAuthorization": {
+          "$ref": "#/definitions/reference"
+        },
+        "selectedCertificate": {
+          "$ref": "#/definitions/reference"
+        },
+        "selectedProxy": {
+          "$ref": "#/definitions/reference"
+        },
+        "selectedScenario": {
+          "$ref": "#/definitions/reference"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

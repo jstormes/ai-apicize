@@ -1,0 +1,17 @@
+[
+    {
+        "author": "Arthur C. Clarke",
+        "quote": "Any sufficiently advanced technology is indistinguishable from magic.",
+        "test-quote": "Two possibilities exist: Either we are alone in the Universe or we are not. Both are equally terrifying."
+    },
+    {
+        "author": "Carl Sagan",
+        "quote": "Somewhere, something incredible is waiting to be known.",
+        "test-quote": "Nothing disturbs me more than the glorification of stupidity."
+    },
+    {
+        "author": "Lewis Carroll",
+        "quote": "Why, sometimes I've believed as many as six impossible things before breakfast.",
+        "test-quote": "One of the deep secrets of life is that all that is really worth the doing is what we do for others."
+    }
+]

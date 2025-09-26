@@ -1,0 +1,61 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "group-001",
+      "name": "User Management",
+      "children": [
+        {
+          "id": "subgroup-001",
+          "name": "User CRUD",
+          "children": [
+            {
+              "id": "req-create-user",
+              "name": "Create User",
+              "url": "https://jsonplaceholder.typicode.com/users",
+              "method": "POST",
+              "test": "describe('user creation', () => {\n  it('should create user successfully', () => {\n    expect(response.status).to.equal(201)\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    output('createdUserId', data.id)\n  })\n})",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "type": "JSON",
+                "data": {
+                  "name": "Test User",
+                  "email": "test@example.com"
+                }
+              },
+              "timeout": 5000,
+              "runs": 1
+            },
+            {
+              "id": "req-get-user",
+              "name": "Get Created User",
+              "url": "https://jsonplaceholder.typicode.com/users/{{createdUserId}}",
+              "method": "GET",
+              "test": "describe('user retrieval', () => {\n  it('should retrieve user successfully', () => {\n    expect(response.status).to.equal(200)\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(data.id).to.equal($.createdUserId)\n  })\n})",
+              "timeout": 5000,
+              "runs": 1
+            }
+          ],
+          "execution": "SEQUENTIAL",
+          "runs": 1
+        },
+        {
+          "id": "req-list-users",
+          "name": "List All Users",
+          "url": "https://jsonplaceholder.typicode.com/users",
+          "method": "GET",
+          "test": "describe('user listing', () => {\n  it('should list users successfully', () => {\n    expect(response.status).to.equal(200)\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(Array.isArray(data)).to.be.true\n  })\n})",
+          "timeout": 5000,
+          "runs": 1
+        }
+      ],
+      "execution": "SEQUENTIAL",
+      "runs": 1
+    }
+  ]
+}

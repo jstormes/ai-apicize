@@ -1,0 +1,10 @@
+{
+  "requests": [
+    {
+      "id": "req-001",
+      "name": "Test Request",
+      "url": "https://example.com",
+      "method": "GET"
+    }
+  ]
+}

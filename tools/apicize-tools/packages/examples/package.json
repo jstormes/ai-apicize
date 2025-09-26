@@ -3,16 +3,29 @@
   "version": "1.0.0",
   "description": "Example .apicize files for testing and development",
   "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "echo \"Examples package - no build needed\"",
+    "build": "tsc",
     "test": "echo \"Examples package - no tests to run\"",
     "lint": "echo \"Examples package - no code to lint\""
   },
+  "files": [
+    "dist/",
+    "workbooks/",
+    "data/",
+    "test-cases/",
+    "README.md"
+  ],
   "keywords": [
     "apicize",
     "examples",
     "api-testing"
   ],
   "author": "Apicize Tools",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
 }

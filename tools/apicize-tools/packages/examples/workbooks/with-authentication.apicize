@@ -1,0 +1,59 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "auth-test-001",
+      "name": "Protected Endpoint",
+      "url": "https://httpbin.org/bearer",
+      "method": "GET",
+      "test": "describe('authentication', () => {\n  it('should return 200 with valid token', () => {\n    expect(response.status).to.equal(200)\n  })\n\n  it('should contain authenticated flag', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(data.authenticated).to.be.true\n  })\n})",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "timeout": 10000,
+      "runs": 1
+    }
+  ],
+  "authorizations": [
+    {
+      "id": "bearer-auth",
+      "name": "Bearer Token",
+      "type": "ApiKey",
+      "header": "Authorization",
+      "value": "Bearer {{token}}"
+    },
+    {
+      "id": "basic-auth",
+      "name": "Basic Authentication",
+      "type": "Basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "auth-scenario",
+      "name": "Authentication Test",
+      "variables": [
+        {
+          "name": "token",
+          "value": "test-token-123",
+          "type": "TEXT"
+        },
+        {
+          "name": "username",
+          "value": "testuser",
+          "type": "TEXT"
+        },
+        {
+          "name": "password",
+          "value": "testpass",
+          "type": "TEXT"
+        }
+      ]
+    }
+  ]
+}
