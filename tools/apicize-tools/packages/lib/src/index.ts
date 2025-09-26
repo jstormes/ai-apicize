@@ -12,6 +12,7 @@ export * from './config';
 export * from './variables';
 export * from './client'; // ✅ Implemented in Phase 2 Step 2.3
 export * from './auth'; // ✅ Implemented in Phase 2 Step 2.4
+export * from './parser'; // ✅ Implemented in Phase 3 Step 3.1
 
 // Version information
 export const version = '1.0.0';
