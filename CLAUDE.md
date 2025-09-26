@@ -33,6 +33,18 @@ apicize validate *.apicize
 apicize run demo.apicize --scenario staging --reporter json
 ```
 
+### Development Location
+**All new tools and utilities should be created in the `/tools` directory.**
+
+This includes:
+- Custom export/import tools
+- CLI utilities
+- Test generators
+- Configuration managers
+- Helper scripts
+
+The `/tools` directory serves as the central location for all Apicize tooling development.
+
 ### Goal
 Enable seamless bidirectional conversion between Apicize's JSON format and executable TypeScript tests while maintaining complete data fidelity for round-trip operations.
 
