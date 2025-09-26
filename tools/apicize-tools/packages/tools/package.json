@@ -1,0 +1,47 @@
+{
+  "name": "@apicize/tools",
+  "version": "1.0.0",
+  "description": "CLI tools for working with .apicize API test files",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "apicize": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "lint": "echo 'Linting handled at root level'",
+    "clean": "rimraf dist",
+    "dev": "tsx src/cli.ts"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "dependencies": {
+    "@apicize/lib": "^1.0.0",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.5"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.3",
+    "tsx": "^4.0.0",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "preferGlobal": true,
+  "keywords": [
+    "apicize",
+    "cli",
+    "api-testing",
+    "typescript",
+    "mocha",
+    "chai"
+  ],
+  "author": "Apicize Tools",
+  "license": "MIT"
+}

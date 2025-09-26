@@ -1,0 +1,32 @@
+{
+  "name": "@apicize/lib",
+  "version": "1.0.0",
+  "description": "Core library for Apicize tools",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --passWithNoTests",
+    "lint": "echo 'Linting handled at root level'",
+    "clean": "rimraf dist",
+    "dev": "tsc --watch"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "axios": "^1.5.0"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5"
+  },
+  "keywords": [
+    "apicize",
+    "api-testing",
+    "typescript"
+  ],
+  "author": "Apicize Tools",
+  "license": "MIT"
+}
