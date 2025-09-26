@@ -268,7 +268,8 @@ export class VariableEngine {
       const currentRow = this.context.csvData[this.context.currentRowIndex];
       if (currentRow) {
         for (const [name, value] of Object.entries(currentRow)) {
-          if (!(name in variables)) { // Don't override higher priority variables
+          if (!(name in variables)) {
+            // Don't override higher priority variables
             variables[name] = {
               value,
               source: 'csv',
@@ -282,7 +283,8 @@ export class VariableEngine {
     // Add JSON data
     if (this.context.jsonData) {
       for (const [name, value] of Object.entries(this.context.jsonData)) {
-        if (!(name in variables)) { // Don't override higher priority variables
+        if (!(name in variables)) {
+          // Don't override higher priority variables
           variables[name] = {
             value,
             source: 'json',
@@ -295,7 +297,8 @@ export class VariableEngine {
     // Add environment variables (lowest priority)
     if (this.context.environmentVars) {
       for (const [name, value] of Object.entries(this.context.environmentVars)) {
-        if (!(name in variables)) { // Don't override higher priority variables
+        if (!(name in variables)) {
+          // Don't override higher priority variables
           variables[name] = {
             value,
             source: 'environment',

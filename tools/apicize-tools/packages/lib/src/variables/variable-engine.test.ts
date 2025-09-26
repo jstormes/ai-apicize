@@ -19,7 +19,7 @@ describe('VariableEngine', () => {
       engine.setOutputs({
         greeting: 'Hello',
         name: 'World',
-        punctuation: '!'
+        punctuation: '!',
       });
       const result = engine.substituteString('{{greeting}} {{name}}{{punctuation}}');
       expect(result).toBe('Hello World!');
@@ -62,8 +62,8 @@ describe('VariableEngine', () => {
         baseUrl: 'http://{{host}}:{{port}}',
         paths: {
           api: '/api/{{host}}',
-          health: '/health'
-        }
+          health: '/health',
+        },
       };
 
       const result = engine.substitute(input);
@@ -71,8 +71,8 @@ describe('VariableEngine', () => {
         baseUrl: 'http://localhost:3000',
         paths: {
           api: '/api/localhost',
-          health: '/health'
-        }
+          health: '/health',
+        },
       });
     });
 
@@ -91,18 +91,18 @@ describe('VariableEngine', () => {
       const input = {
         level1: {
           level2: {
-            level3: ['{{value}}', { deep: '{{value}}' }]
-          }
-        }
+            level3: ['{{value}}', { deep: '{{value}}' }],
+          },
+        },
       };
 
       const result = engine.substitute(input);
       expect(result).toEqual({
         level1: {
           level2: {
-            level3: ['test', { deep: 'test' }]
-          }
-        }
+            level3: ['test', { deep: 'test' }],
+          },
+        },
       });
     });
 
@@ -111,14 +111,14 @@ describe('VariableEngine', () => {
         str: 'text',
         num: 42,
         bool: true,
-        obj: { key: 'value' }
+        obj: { key: 'value' },
       });
 
       const input = {
         string: '{{str}}',
         number: '{{num}}',
         boolean: '{{bool}}',
-        object: '{{obj}}'
+        object: '{{obj}}',
       };
 
       const result = engine.substitute(input);
@@ -126,7 +126,7 @@ describe('VariableEngine', () => {
         string: 'text',
         number: '42',
         boolean: 'true',
-        object: '{"key":"value"}'
+        object: '{"key":"value"}',
       });
     });
   });
@@ -138,8 +138,8 @@ describe('VariableEngine', () => {
         name: 'Test Scenario',
         variables: [
           { name: 'apiKey', value: 'abc123', type: VariableType.TEXT },
-          { name: 'baseUrl', value: 'https://api.test.com', type: VariableType.TEXT }
-        ]
+          { name: 'baseUrl', value: 'https://api.test.com', type: VariableType.TEXT },
+        ],
       };
 
       engine.setScenario(scenario);
@@ -152,8 +152,8 @@ describe('VariableEngine', () => {
         id: 'test-scenario',
         name: 'Test Scenario',
         variables: [
-          { name: 'config', value: '{"timeout": 5000, "retry": true}', type: VariableType.JSON }
-        ]
+          { name: 'config', value: '{"timeout": 5000, "retry": true}', type: VariableType.JSON },
+        ],
       };
 
       engine.setScenario(scenario);
@@ -165,9 +165,7 @@ describe('VariableEngine', () => {
       const scenario: Scenario = {
         id: 'test-scenario',
         name: 'Test Scenario',
-        variables: [
-          { name: 'invalid', value: '{invalid json}', type: VariableType.JSON }
-        ]
+        variables: [{ name: 'invalid', value: '{invalid json}', type: VariableType.JSON }],
       };
 
       engine.setScenario(scenario);
@@ -182,8 +180,8 @@ describe('VariableEngine', () => {
         name: 'Test Scenario',
         variables: [
           { name: 'enabled', value: 'active', type: VariableType.TEXT },
-          { name: 'disabled', value: 'inactive', type: VariableType.TEXT, disabled: true }
-        ]
+          { name: 'disabled', value: 'inactive', type: VariableType.TEXT, disabled: true },
+        ],
       };
 
       engine.setScenario(scenario);
@@ -197,8 +195,8 @@ describe('VariableEngine', () => {
         name: 'Test Scenario',
         variables: [
           { name: 'csvFile', value: './data.csv', type: VariableType.FILE_CSV },
-          { name: 'jsonFile', value: './config.json', type: VariableType.FILE_JSON }
-        ]
+          { name: 'jsonFile', value: './config.json', type: VariableType.FILE_JSON },
+        ],
       };
 
       engine.setScenario(scenario);
@@ -207,8 +205,12 @@ describe('VariableEngine', () => {
 
       expect(result1).toBe('CSV: ./data.csv');
       expect(result2).toBe('JSON: ./config.json');
-      expect(engine.getWarnings()).toContain('File variable csvFile requires external data loading');
-      expect(engine.getWarnings()).toContain('File variable jsonFile requires external data loading');
+      expect(engine.getWarnings()).toContain(
+        'File variable csvFile requires external data loading'
+      );
+      expect(engine.getWarnings()).toContain(
+        'File variable jsonFile requires external data loading'
+      );
     });
   });
 
@@ -225,9 +227,7 @@ describe('VariableEngine', () => {
       const scenario: Scenario = {
         id: 'test-scenario',
         name: 'Test Scenario',
-        variables: [
-          { name: 'value', value: 'scenario', type: VariableType.TEXT }
-        ]
+        variables: [{ name: 'value', value: 'scenario', type: VariableType.TEXT }],
       };
 
       engine.setScenario(scenario);
@@ -243,7 +243,7 @@ describe('VariableEngine', () => {
       const csvData = [
         { username: 'user1', password: 'pass1', expected: '200' },
         { username: 'user2', password: 'pass2', expected: '401' },
-        { username: 'admin', password: 'admin123', expected: '200' }
+        { username: 'admin', password: 'admin123', expected: '200' },
       ];
 
       engine.setCsvData(csvData, 0);
@@ -258,7 +258,7 @@ describe('VariableEngine', () => {
     it('should handle CSV row creation helper', () => {
       const csvData = [
         { name: 'Alice', age: '25' },
-        { name: 'Bob', age: '30' }
+        { name: 'Bob', age: '30' },
       ];
 
       engine.setCsvData(csvData, 0);
@@ -277,7 +277,7 @@ describe('VariableEngine', () => {
       const jsonData = {
         apiUrl: 'https://api.example.com',
         version: 'v1',
-        features: { debug: true }
+        features: { debug: true },
       };
 
       engine.setJsonData(jsonData);
@@ -319,7 +319,7 @@ describe('VariableEngine', () => {
       const scenario: Scenario = {
         id: 'test',
         name: 'Test',
-        variables: [{ name: 'SHARED_VAR', value: 'scenario-value', type: VariableType.TEXT }]
+        variables: [{ name: 'SHARED_VAR', value: 'scenario-value', type: VariableType.TEXT }],
       };
 
       const csvData = [{ SHARED_VAR: 'csv-value' }];
@@ -357,7 +357,9 @@ describe('VariableEngine', () => {
     });
 
     it('should extract variable names from string', () => {
-      const names = engine.extractVariableNames('{{name}} lives in {{city}} and works at {{company}}');
+      const names = engine.extractVariableNames(
+        '{{name}} lives in {{city}} and works at {{company}}'
+      );
       expect(names).toEqual(['name', 'city', 'company']);
 
       const empty = engine.extractVariableNames('No variables here');
@@ -373,7 +375,7 @@ describe('VariableEngine', () => {
       const scenario: Scenario = {
         id: 'test',
         name: 'Test',
-        variables: [{ name: 'scenarioVar', value: 'scenario-value', type: VariableType.TEXT }]
+        variables: [{ name: 'scenarioVar', value: 'scenario-value', type: VariableType.TEXT }],
       };
       engine.setScenario(scenario);
 
@@ -446,7 +448,7 @@ describe('VariableEngine', () => {
   describe('Context Management', () => {
     it('should update context', () => {
       const initialContext: VariableContext = {
-        outputs: { initial: 'value' }
+        outputs: { initial: 'value' },
       };
 
       engine.updateContext(initialContext);
@@ -481,7 +483,7 @@ describe('VariableEngine', () => {
         number: 42,
         boolean: true,
         zero: 0,
-        false: false
+        false: false,
       });
 
       expect(engine.substituteString('{{number}}')).toBe('42');
@@ -493,7 +495,7 @@ describe('VariableEngine', () => {
     it('should convert objects to JSON strings', () => {
       engine.setOutputs({
         object: { key: 'value', nested: { deep: true } },
-        array: [1, 2, 3]
+        array: [1, 2, 3],
       });
 
       expect(engine.substituteString('{{object}}')).toBe('{"key":"value","nested":{"deep":true}}');

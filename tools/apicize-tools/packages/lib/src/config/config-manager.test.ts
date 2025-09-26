@@ -48,10 +48,7 @@ describe('ConfigManager', () => {
         },
       };
 
-      fs.writeFileSync(
-        path.join(tempDir, 'apicize.config.json'),
-        JSON.stringify(config, null, 2)
-      );
+      fs.writeFileSync(path.join(tempDir, 'apicize.config.json'), JSON.stringify(config, null, 2));
 
       const loadedConfig = await configManager.loadBaseConfig();
       expect(loadedConfig).toEqual(config);
@@ -59,16 +56,11 @@ describe('ConfigManager', () => {
     });
 
     it('should throw error for missing config file', async () => {
-      await expect(configManager.loadBaseConfig()).rejects.toThrow(
-        'Configuration file not found'
-      );
+      await expect(configManager.loadBaseConfig()).rejects.toThrow('Configuration file not found');
     });
 
     it('should throw error for invalid JSON', async () => {
-      fs.writeFileSync(
-        path.join(tempDir, 'apicize.config.json'),
-        '{ invalid json }'
-      );
+      fs.writeFileSync(path.join(tempDir, 'apicize.config.json'), '{ invalid json }');
 
       await expect(configManager.loadBaseConfig()).rejects.toThrow(
         'Invalid JSON in configuration file'
@@ -261,10 +253,7 @@ describe('ConfigManager', () => {
         },
       };
 
-      fs.writeFileSync(
-        path.join(tempDir, 'apicize.config.json'),
-        JSON.stringify(config, null, 2)
-      );
+      fs.writeFileSync(path.join(tempDir, 'apicize.config.json'), JSON.stringify(config, null, 2));
 
       const loadedConfig = await configManager.loadBaseConfig();
       expect((loadedConfig as any).testUrl).toBe('https://auth.example.com/api');
@@ -286,10 +275,7 @@ describe('ConfigManager', () => {
         reportsPath: './reports',
       };
 
-      fs.writeFileSync(
-        path.join(tempDir, 'apicize.config.json'),
-        JSON.stringify(config, null, 2)
-      );
+      fs.writeFileSync(path.join(tempDir, 'apicize.config.json'), JSON.stringify(config, null, 2));
 
       const loadedConfig = await configManager.loadBaseConfig();
       expect((loadedConfig as any).testValue).toBe('${env.MISSING_VAR}'); // Should remain unchanged

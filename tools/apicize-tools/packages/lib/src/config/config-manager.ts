@@ -1,10 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-  ApicizeConfig,
-  EnvironmentConfig,
-  AuthProvidersConfig,
-} from '../types';
+import { ApicizeConfig, EnvironmentConfig, AuthProvidersConfig } from '../types';
 
 /**
  * Configuration Manager for Apicize tools
@@ -109,7 +105,9 @@ export class ConfigManager {
       return this.authProvidersConfig;
     } catch (error) {
       if (error instanceof SyntaxError) {
-        throw new Error(`Invalid JSON in auth providers config: ${authConfigFile}\n${error.message}`);
+        throw new Error(
+          `Invalid JSON in auth providers config: ${authConfigFile}\n${error.message}`
+        );
       }
       throw error;
     }
@@ -232,7 +230,10 @@ export class ConfigManager {
   /**
    * Merge environment configuration into base configuration
    */
-  private mergeConfigs(base: ApicizeConfig, env: EnvironmentConfig): ApicizeConfig & { _environment: EnvironmentConfig } {
+  private mergeConfigs(
+    base: ApicizeConfig,
+    env: EnvironmentConfig
+  ): ApicizeConfig & { _environment: EnvironmentConfig } {
     return {
       ...base,
       // Add environment-specific headers to settings if they exist
