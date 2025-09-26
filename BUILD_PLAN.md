@@ -135,25 +135,30 @@ tools/
 ---
 
 ### Step 2.3: HTTP Client
-**Goal**: Create HTTP client for executing API requests.
+**Goal**: Create HTTP client for executing API requests using native fetch.
 
 **Tasks**:
-1. Create `ApicizeClient` class using axios/fetch
+1. Create `ApicizeClient` class using native Node.js fetch (Node 18+)
 2. Implement all HTTP methods (GET, POST, PUT, DELETE, etc.)
-3. Add timeout, retry, and redirect handling
-4. Support all body types (JSON, XML, Form, Raw)
-5. Handle authentication integration
+3. Add timeout, retry, and redirect handling with AbortController
+4. Support all body types (JSON, XML, Form, Raw) with proper serialization
+5. Handle authentication integration and header management
+6. Implement response timing and redirect tracking
+7. Add comprehensive error handling for network issues
 
 **Success Criteria**:
-- [ ] Can make HTTP requests to real endpoints
-- [ ] All body types serialize correctly
-- [ ] Timeouts and redirects work as configured
-- [ ] Response includes status, headers, body, timing
-- [ ] Network errors handled gracefully
+- [ ] Can make HTTP requests to real endpoints using native fetch
+- [ ] All body types serialize correctly (JSON, XML, Form, Raw)
+- [ ] Timeouts work using AbortController and signal
+- [ ] Redirects tracked and handled as configured
+- [ ] Response includes status, headers, body, timing, redirects
+- [ ] Network errors handled gracefully with detailed messages
+- [ ] No external HTTP client dependencies (uses native fetch only)
 
 **Test Command**: `npm run test:client`
 **Workbook Validation**: `npm run step-test` (ensures changes don't break workbook compatibility)
 **Test Target**: Use httpbin.org for testing
+**Node.js Requirement**: Requires Node.js 18+ for native fetch support
 
 ---
 
