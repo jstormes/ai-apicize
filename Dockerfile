@@ -36,6 +36,11 @@ RUN useradd -m user \
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get install -y nodejs
 
+############################################################################
+# Install Typescript
+############################################################################
+RUN npm install -g typescript
+
 USER user
 WORKDIR /project
 CMD ["/bin/bash"]
@@ -82,7 +87,7 @@ RUN echo "# Check for Claude system configuration and copy if exists" >> /home/u
     && echo "if [ -d /home/user/.gemini.system ]; then" >> /home/user/.bashrc \
     && echo "    mkdir -p /home/user/.gemini" >> /home/user/.bashrc \
     && echo "    cp /home/user/.gemini.system/installation_id /home/user/.gemini/installation_id" >> /home/user/.bashrc \
-    && echo "    cp /home/user/.gemini.system/credentials.json /home/user/.gemini/credentials.json" >> /home/user/.bashrc \
+#    && echo "    cp /home/user/.gemini.system/credentials.json /home/user/.gemini/credentials.json" >> /home/user/.bashrc \
     && echo "    cp /home/user/.gemini.system/google_accounts.json /home/user/.gemini/google_accounts.json" >> /home/user/.bashrc \
     && echo "    cp /home/user/.gemini.system/oauth_creds.json /home/user/.gemini/oauth_creds.json" >> /home/user/.bashrc \
     && echo "    cp /home/user/.gemini.system/settings.json /home/user/.gemini/settings.json" >> /home/user/.bashrc \
