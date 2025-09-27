@@ -28,5 +28,14 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 10000,
-  verbose: true
+  verbose: true,
+  // Force exit to prevent hanging processes
+  forceExit: true,
+  // Detect open handles
+  detectOpenHandles: true,
+  // Clear mocks and timers after each test
+  clearMocks: true,
+  restoreMocks: true,
+  // Limit number of workers to reduce resource contention
+  maxWorkers: 1
 };

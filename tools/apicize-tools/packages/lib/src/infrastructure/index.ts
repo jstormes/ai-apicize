@@ -28,6 +28,11 @@ export * from './result';
 // Debug Utilities
 export * from './debug';
 
+// Phase 4: Performance & Reliability improvements
+export * from './async-utilities';
+export * from './caching';
+export * from './performance-monitoring';
+
 // Re-export legacy error types for compatibility
 export {
   ApicizeRequestError,
