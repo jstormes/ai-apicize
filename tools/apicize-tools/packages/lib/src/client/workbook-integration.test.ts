@@ -93,6 +93,8 @@ describe('Workbook Integration Tests', () => {
 
   afterEach(() => {
     restoreFetch();
+    // Clear any lingering warnings from variable engine
+    variableEngine.clearWarnings();
   });
 
   describe('Demo Workbook Integration', () => {
@@ -101,11 +103,28 @@ describe('Workbook Integration Tests', () => {
     beforeEach(() => {
       // Load the demo workbook
       const workbookPath = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
-      const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
-      demoWorkbook = JSON.parse(workbookContent);
 
-      // Validate the workbook
+      // Check if file exists first
+      if (!fs.existsSync(workbookPath)) {
+        throw new Error(`Demo workbook not found at: ${workbookPath}`);
+      }
+
+      const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
+
+      // Parse JSON with error handling
+      try {
+        demoWorkbook = JSON.parse(workbookContent);
+      } catch (error) {
+        throw new Error(`Failed to parse demo workbook JSON: ${error}`);
+      }
+
+      // Validate the workbook structure
       expect(() => validateApicizeFile(demoWorkbook)).not.toThrow();
+
+      // Ensure workbook has expected structure
+      expect(demoWorkbook).toHaveProperty('version');
+      expect(demoWorkbook).toHaveProperty('requests');
+      expect(Array.isArray(demoWorkbook.requests)).toBe(true);
     });
 
     it('should load and validate demo workbook', () => {
@@ -117,22 +136,45 @@ describe('Workbook Integration Tests', () => {
 
     it('should extract individual request from nested structure', () => {
       // Navigate the hierarchical structure to find the "Create quote" request
+      expect(demoWorkbook.requests.length).toBeGreaterThan(0);
+
       const crudGroup = demoWorkbook.requests[0] as RequestGroup;
+      expect(crudGroup).toBeDefined();
       expect(crudGroup.name).toBe('CRUD Operations');
       expect(crudGroup.children).toBeDefined();
+      expect(Array.isArray(crudGroup.children)).toBe(true);
+      expect(crudGroup.children!.length).toBeGreaterThan(0);
 
       const authorGroup = crudGroup.children![0] as RequestGroup;
+      expect(authorGroup).toBeDefined();
       expect(authorGroup.name).toBe('Author #1');
+      expect(authorGroup.children).toBeDefined();
+      expect(Array.isArray(authorGroup.children)).toBe(true);
+      expect(authorGroup.children!.length).toBeGreaterThan(0);
 
       const createRequest = authorGroup.children![0] as Request;
+      expect(createRequest).toBeDefined();
       expect(createRequest.name).toBe('Create quote');
       expect(createRequest.url).toBe('https://sample-api.apicize.com/quote/');
       expect(createRequest.method).toBe('POST');
+
+      // Verify it's actually a request, not a group
+      expect('url' in createRequest).toBe(true);
+      expect('method' in createRequest).toBe(true);
     });
 
     it('should execute request with variable substitution from scenario', async () => {
+      // Verify scenarios exist
+      expect(demoWorkbook.scenarios).toBeDefined();
+      expect(Array.isArray(demoWorkbook.scenarios)).toBe(true);
+      expect(demoWorkbook.scenarios!.length).toBeGreaterThan(0);
+
       // Set up scenario variables
       const scenario = demoWorkbook.scenarios![0];
+      expect(scenario).toBeDefined();
+      expect(scenario.id).toBeDefined();
+      expect(scenario.name).toBeDefined();
+
       variableEngine.setScenario(scenario);
 
       // Extract the "Create quote" request
@@ -214,11 +256,28 @@ describe('Workbook Integration Tests', () => {
         __dirname,
         '../../../examples/workbooks/with-authentication.apicize'
       );
-      const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
-      authWorkbook = JSON.parse(workbookContent);
 
-      // Validate the workbook
+      // Check if file exists first
+      if (!fs.existsSync(workbookPath)) {
+        throw new Error(`Authentication workbook not found at: ${workbookPath}`);
+      }
+
+      const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
+
+      // Parse JSON with error handling
+      try {
+        authWorkbook = JSON.parse(workbookContent);
+      } catch (error) {
+        throw new Error(`Failed to parse authentication workbook JSON: ${error}`);
+      }
+
+      // Validate the workbook structure
       expect(() => validateApicizeFile(authWorkbook)).not.toThrow();
+
+      // Ensure workbook has expected structure
+      expect(authWorkbook).toHaveProperty('version');
+      expect(authWorkbook).toHaveProperty('requests');
+      expect(Array.isArray(authWorkbook.requests)).toBe(true);
     });
 
     it('should load and validate authentication workbook', () => {
@@ -281,11 +340,28 @@ describe('Workbook Integration Tests', () => {
         __dirname,
         '../../../examples/workbooks/request-groups.apicize'
       );
-      const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
-      requestGroupsWorkbook = JSON.parse(workbookContent);
 
-      // Validate the workbook
+      // Check if file exists first
+      if (!fs.existsSync(workbookPath)) {
+        throw new Error(`Request groups workbook not found at: ${workbookPath}`);
+      }
+
+      const workbookContent = fs.readFileSync(workbookPath, 'utf-8');
+
+      // Parse JSON with error handling
+      try {
+        requestGroupsWorkbook = JSON.parse(workbookContent);
+      } catch (error) {
+        throw new Error(`Failed to parse request groups workbook JSON: ${error}`);
+      }
+
+      // Validate the workbook structure
       expect(() => validateApicizeFile(requestGroupsWorkbook)).not.toThrow();
+
+      // Ensure workbook has expected structure
+      expect(requestGroupsWorkbook).toHaveProperty('version');
+      expect(requestGroupsWorkbook).toHaveProperty('requests');
+      expect(Array.isArray(requestGroupsWorkbook.requests)).toBe(true);
     });
 
     it('should handle nested request group structures', () => {

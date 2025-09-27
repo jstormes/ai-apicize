@@ -360,6 +360,40 @@ Tests must have access to:
 3. **Handle missing variables gracefully**
 4. **Maintain variable scope (scenario-level)**
 
+### Code Formatting and Linting Standards
+
+#### Line Endings
+**IMPORTANT**: This project uses Unix-style line endings (LF) to maintain consistency across different operating systems and development environments.
+
+**Configuration:**
+- Prettier is configured with `"endOfLine": "lf"` in `.prettierrc.json`
+- All files must use LF (`\n`) line endings, not CRLF (`\r\n`)
+- ESLint will automatically fix line ending issues when running `npm run lint -- --fix`
+
+**Why LF?**
+- Consistency across Windows, macOS, and Linux development environments
+- Standard in most open-source projects
+- Prevents unnecessary git diffs caused by line ending differences
+- Required for proper Prettier formatting
+
+**For Developers:**
+- Configure your editor to use LF line endings for this project
+- Git is configured to automatically handle line ending conversions
+- If you encounter line ending linting errors, run: `npm run lint -- --fix`
+
+#### ESLint Configuration
+- Unused variables prefixed with `_` are ignored (e.g., `_error`, `_context`)
+- Prettier integration ensures consistent code formatting
+- TypeScript-specific rules for better code quality
+- No console statements are allowed in production code (except where explicitly needed)
+
+#### Code Quality Rules
+1. **Prefer const over let** when variables don't change
+2. **Use proper TypeScript types** instead of `any` when possible
+3. **Handle unused parameters** by prefixing with underscore (`_param`)
+4. **Use Object.prototype.hasOwnProperty.call()** instead of direct `.hasOwnProperty()`
+5. **Avoid useless try/catch blocks** that just re-throw errors
+
 ## Test Scaffolding Folder Structure
 
 ### Exported Test Project Structure

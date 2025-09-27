@@ -142,7 +142,7 @@ expect.extend({
       actualValue = headers[name];
     }
 
-    const pass = value === undefined ? found : (found && actualValue === value);
+    const pass = value === undefined ? found : found && actualValue === value;
 
     return {
       pass,
@@ -185,7 +185,8 @@ expect.extend({
     if (!received?.id) issues.push('missing id');
     if (!received?.name) issues.push('missing name');
     if (!received?.url && !received?.children) issues.push('missing url (required for requests)');
-    if (!received?.method && !received?.children) issues.push('missing method (required for requests)');
+    if (!received?.method && !received?.children)
+      issues.push('missing method (required for requests)');
 
     const pass = issues.length === 0;
 

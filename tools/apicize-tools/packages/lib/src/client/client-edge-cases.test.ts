@@ -6,11 +6,7 @@ import {
   ApicizeAbortError,
 } from './apicize-client';
 import { HttpMethod } from '../types';
-import {
-  FetchMockBuilder,
-  FetchMockManager,
-  createAbortableFetch,
-} from '../test-utils/index';
+import { FetchMockBuilder, FetchMockManager, createAbortableFetch } from '../test-utils/index';
 
 describe('ApicizeClient - Edge Cases', () => {
   let client: ApicizeClient;
@@ -114,7 +110,7 @@ describe('ApicizeClient - Edge Cases', () => {
       // Create a mock abort controller factory that we can inspect
       const mockController = new AbortController();
       const mockAbortControllerFactory = {
-        create: jest.fn().mockReturnValue(mockController)
+        create: jest.fn().mockReturnValue(mockController),
       };
 
       // Create client with mock factory
@@ -166,12 +162,10 @@ describe('ApicizeClient - Edge Cases', () => {
         } as any;
       });
 
-      const response = await client
-        .withConfig({ maxRedirects: 10 })
-        .execute({
-          url: 'https://api.example.com/start',
-          method: HttpMethod.GET,
-        });
+      const response = await client.withConfig({ maxRedirects: 10 }).execute({
+        url: 'https://api.example.com/start',
+        method: HttpMethod.GET,
+      });
 
       expect(response.status).toBe(200);
     });
@@ -265,9 +259,7 @@ describe('ApicizeClient - Edge Cases', () => {
 
   describe('Concurrent Request Handling', () => {
     it('should handle multiple concurrent requests', async () => {
-      fetchBuilder
-        .mockJsonResponse(/.*\/user\/\d+/, { id: 1, name: 'User' })
-        .getMock();
+      fetchBuilder.mockJsonResponse(/.*\/user\/\d+/, { id: 1, name: 'User' }).getMock();
 
       const requests = Array.from({ length: 10 }, (_, i) =>
         client.execute({
@@ -279,7 +271,7 @@ describe('ApicizeClient - Edge Cases', () => {
       const responses = await Promise.all(requests);
 
       expect(responses).toHaveLength(10);
-      responses.forEach((response) => {
+      responses.forEach(response => {
         expect(response.status).toBe(200);
       });
     });
@@ -321,12 +313,15 @@ describe('ApicizeClient - Edge Cases', () => {
       const controller = new AbortController();
       fetchManager.mock({ delay: 1000 });
 
-      const promise = client.execute({
-        url: 'https://api.example.com/cancelable',
-        method: HttpMethod.GET,
-      }, {
-        signal: controller.signal,
-      });
+      const promise = client.execute(
+        {
+          url: 'https://api.example.com/cancelable',
+          method: HttpMethod.GET,
+        },
+        {
+          signal: controller.signal,
+        }
+      );
 
       // Cancel after 100ms
       setTimeout(() => controller.abort(), 100);
@@ -341,12 +336,15 @@ describe('ApicizeClient - Edge Cases', () => {
       fetchManager.mock();
 
       await expect(
-        client.execute({
-          url: 'https://api.example.com/test',
-          method: HttpMethod.GET,
-        }, {
-          signal: controller.signal,
-        })
+        client.execute(
+          {
+            url: 'https://api.example.com/test',
+            method: HttpMethod.GET,
+          },
+          {
+            signal: controller.signal,
+          }
+        )
       ).rejects.toThrow(ApicizeAbortError);
     });
   });
@@ -384,12 +382,15 @@ describe('ApicizeClient - Edge Cases', () => {
         const controller = new AbortController();
         controllers.push(controller);
 
-        const promise = client.execute({
-          url: `https://api.example.com/rapid/${i}`,
-          method: HttpMethod.GET,
-        }, {
-          signal: controller.signal,
-        });
+        const promise = client.execute(
+          {
+            url: `https://api.example.com/rapid/${i}`,
+            method: HttpMethod.GET,
+          },
+          {
+            signal: controller.signal,
+          }
+        );
 
         requests.push(promise);
 
@@ -403,7 +404,7 @@ describe('ApicizeClient - Edge Cases', () => {
 
       // At least half should be cancelled
       const cancelled = results.filter(
-        (r) => r.status === 'rejected' && r.reason?.name === 'ApicizeAbortError'
+        r => r.status === 'rejected' && r.reason?.name === 'ApicizeAbortError'
       );
       expect(cancelled.length).toBeGreaterThanOrEqual(45);
     });

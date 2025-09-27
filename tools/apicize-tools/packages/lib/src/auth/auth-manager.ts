@@ -81,7 +81,11 @@ export class AuthManager {
       this.tokenCache.delete(authId);
       // Also clear the provider's internal cache
       const provider = this.providers.get(authId);
-      if (provider && 'clearToken' in provider && typeof (provider as any).clearToken === 'function') {
+      if (
+        provider &&
+        'clearToken' in provider &&
+        typeof (provider as any).clearToken === 'function'
+      ) {
         (provider as any).clearToken();
       }
     } else {

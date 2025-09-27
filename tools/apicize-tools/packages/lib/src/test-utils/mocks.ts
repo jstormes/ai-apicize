@@ -225,9 +225,8 @@ export class FetchMockBuilder {
 
       // Find matching pattern
       for (const [pattern, options] of this.responses) {
-        const matches = typeof pattern === 'string'
-          ? urlString === pattern
-          : pattern.test(urlString);
+        const matches =
+          typeof pattern === 'string' ? urlString === pattern : pattern.test(urlString);
 
         if (matches) {
           const mergedOptions = { ...this.defaultOptions, ...options };

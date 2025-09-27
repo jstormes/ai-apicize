@@ -107,7 +107,7 @@ export class ConsoleManager {
     if (errorCalls.length > 0) {
       throw new Error(
         `Expected no console errors but found ${errorCalls.length}:\n` +
-        errorCalls.map(args => args.join(' ')).join('\n')
+          errorCalls.map(args => args.join(' ')).join('\n')
       );
     }
   }
@@ -120,7 +120,7 @@ export class ConsoleManager {
     if (warnCalls.length > 0) {
       throw new Error(
         `Expected no console warnings but found ${warnCalls.length}:\n` +
-        warnCalls.map(args => args.join(' ')).join('\n')
+          warnCalls.map(args => args.join(' ')).join('\n')
       );
     }
   }
@@ -142,7 +142,7 @@ export class ConsoleManager {
     if (!found) {
       throw new Error(
         `Expected console.${method} to be called with "${expectedOutput}" but it was not found.\n` +
-        `Actual calls: ${JSON.stringify(calls)}`
+          `Actual calls: ${JSON.stringify(calls)}`
       );
     }
   }

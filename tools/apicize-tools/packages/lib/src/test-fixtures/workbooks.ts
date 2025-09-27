@@ -1,13 +1,11 @@
 import {
   ApicizeWorkbook,
-  Request,
-  RequestGroup,
   HttpMethod,
   BodyType,
   ExecutionMode,
   VariableType,
   AuthorizationType,
-  DataType
+  DataType,
 } from '../types';
 
 /**
@@ -29,12 +27,10 @@ export const BASIC_REQUEST_WORKBOOK: ApicizeWorkbook = {
       name: 'Get Users',
       url: 'https://api.example.com/users',
       method: HttpMethod.GET,
-      headers: [
-        { name: 'Accept', value: 'application/json' }
-      ],
+      headers: [{ name: 'Accept', value: 'application/json' }],
       timeout: 30000,
       runs: 1,
-    }
+    },
   ],
 };
 
@@ -63,14 +59,14 @@ export const NESTED_GROUPS_WORKBOOK: ApicizeWorkbook = {
               name: 'Delete User',
               url: 'https://api.example.com/users/{{userId}}',
               method: HttpMethod.DELETE,
-            }
+            },
           ],
           execution: ExecutionMode.SEQUENTIAL,
-        }
+        },
       ],
       execution: ExecutionMode.CONCURRENT,
       runs: 1,
-    }
+    },
   ],
 };
 
@@ -137,7 +133,7 @@ export const SCENARIOS_WORKBOOK: ApicizeWorkbook = {
       name: 'API Request',
       url: '{{baseUrl}}/api/{{endpoint}}',
       method: HttpMethod.GET,
-    }
+    },
   ],
   scenarios: [
     {
@@ -158,7 +154,7 @@ export const SCENARIOS_WORKBOOK: ApicizeWorkbook = {
           name: 'config',
           value: '{"timeout": 5000}',
           type: VariableType.JSON,
-        }
+        },
       ],
     },
     {
@@ -180,9 +176,9 @@ export const SCENARIOS_WORKBOOK: ApicizeWorkbook = {
           value: 'should-not-be-used',
           type: VariableType.TEXT,
           disabled: true,
-        }
+        },
       ],
-    }
+    },
   ],
 };
 
@@ -327,7 +323,7 @@ export const COMPLETE_WORKBOOK: ApicizeWorkbook = {
         id: 'scenario-dev',
         name: 'Development',
       },
-    }
+    },
   ],
   scenarios: [
     {
@@ -343,9 +339,9 @@ export const COMPLETE_WORKBOOK: ApicizeWorkbook = {
           name: 'resourceName',
           value: 'Test Resource',
           type: VariableType.TEXT,
-        }
+        },
       ],
-    }
+    },
   ],
   authorizations: [
     {
@@ -354,7 +350,7 @@ export const COMPLETE_WORKBOOK: ApicizeWorkbook = {
       type: AuthorizationType.ApiKey,
       header: 'X-API-Key',
       value: 'test-key',
-    }
+    },
   ],
   defaults: {
     selectedAuthorization: {

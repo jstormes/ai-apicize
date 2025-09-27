@@ -36,7 +36,7 @@ export const INVALID_HTTP_METHOD = {
       name: 'Invalid Method',
       url: 'https://api.example.com',
       method: 'INVALID',
-    }
+    },
   ],
 };
 
@@ -50,7 +50,7 @@ export const MISSING_REQUEST_FIELDS = {
       id: 'req-1',
       name: 'Missing URL and Method',
       // Missing: url and method
-    }
+    },
   ],
 };
 
@@ -68,8 +68,8 @@ export const INVALID_BODY_TYPE = {
       body: {
         type: 'InvalidType',
         data: 'test',
-      }
-    }
+      },
+    },
   ],
 };
 
@@ -88,9 +88,9 @@ export const INVALID_VARIABLE_TYPE = {
           name: 'test',
           value: 'value',
           type: 'INVALID_TYPE',
-        }
+        },
       ],
-    }
+    },
   ],
 };
 
@@ -105,7 +105,7 @@ export const INVALID_AUTH_TYPE = {
       id: 'auth-1',
       name: 'Invalid Auth',
       type: 'InvalidAuth',
-    }
+    },
   ],
 };
 
@@ -133,7 +133,7 @@ export const MISSING_AUTH_FIELDS = {
       name: 'Incomplete OAuth',
       type: 'OAuth2Client',
       // Missing: accessTokenUrl, clientId, clientSecret
-    }
+    },
   ],
 };
 
@@ -154,7 +154,7 @@ export const DUPLICATE_IDS = {
       name: 'Request 2',
       url: 'https://api.example.com/2',
       method: 'GET',
-    }
+    },
   ],
 };
 
@@ -170,9 +170,9 @@ export const INVALID_NESTED_STRUCTURE = {
       children: [
         {
           // Missing all required fields
-        }
+        },
       ],
-    }
+    },
   ],
 };
 
@@ -198,7 +198,7 @@ export const INVALID_EXECUTION_MODE = {
       name: 'Invalid Execution',
       children: [],
       execution: 'INVALID_MODE',
-    }
+    },
   ],
 };
 
@@ -214,7 +214,7 @@ export const INVALID_DATA_TYPE = {
       name: 'Invalid Data Type',
       type: 'INVALID_TYPE',
       source: './data.json',
-    }
+    },
   ],
 };
 
@@ -233,9 +233,9 @@ export const CIRCULAR_REFERENCE = {
           name: 'Group 2',
           // This would create a circular reference if group-2 contained group-1
           children: [],
-        }
+        },
       ],
-    }
+    },
   ],
 };
 
@@ -250,7 +250,7 @@ export const INVALID_URL_FORMAT = {
       name: 'Invalid URL',
       url: 'not-a-valid-url',
       method: 'GET',
-    }
+    },
   ],
 };
 
@@ -266,7 +266,7 @@ export const INVALID_TIMEOUT = {
       url: 'https://api.example.com',
       method: 'GET',
       timeout: -1000, // Negative timeout
-    }
+    },
   ],
 };
 
@@ -282,6 +282,6 @@ export const INVALID_RUNS = {
       url: 'https://api.example.com',
       method: 'GET',
       runs: 0, // Zero runs
-    }
+    },
   ],
 };

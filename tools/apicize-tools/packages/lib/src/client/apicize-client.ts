@@ -192,7 +192,6 @@ export class ApicizeClient {
     redirectCount: number = 0,
     started: number = Date.now()
   ): Promise<ApicizeResponse> {
-
     // Create abort controller - use factory for testability
     const controller = this.abortControllerFactory.create();
     let timeoutId: NodeJS.Timeout | undefined;
@@ -242,7 +241,11 @@ export class ApicizeClient {
         const location = fetchResponse.headers.get('location');
 
         if (!location) {
-          throw new ApicizeNetworkError('Redirect response missing location header', undefined, url);
+          throw new ApicizeNetworkError(
+            'Redirect response missing location header',
+            undefined,
+            url
+          );
         }
 
         // Track the redirect
@@ -253,14 +256,21 @@ export class ApicizeClient {
 
         // Check redirect limit
         if (redirectCount >= finalOptions.maxRedirects!) {
-          throw new ApicizeNetworkError(`Too many redirects (limit: ${finalOptions.maxRedirects})`, undefined, url);
+          throw new ApicizeNetworkError(
+            `Too many redirects (limit: ${finalOptions.maxRedirects})`,
+            undefined,
+            url
+          );
         }
 
         // Follow the redirect
         const redirectUrl = new URL(location, url).toString();
         return this.executeWithRedirects(
           redirectUrl,
-          { ...fetchOptions, method: this.getRedirectMethod(fetchOptions.method as string, fetchResponse.status) },
+          {
+            ...fetchOptions,
+            method: this.getRedirectMethod(fetchOptions.method as string, fetchResponse.status),
+          },
           finalOptions,
           requestConfig,
           redirects,
@@ -295,7 +305,11 @@ export class ApicizeClient {
         if (error.name === 'AbortError') {
           // Check if it was a timeout abort or manual abort
           if (isTimeoutAbort) {
-            throw new ApicizeTimeoutError(finalOptions.timeout!, requestConfig.method, requestConfig.url);
+            throw new ApicizeTimeoutError(
+              finalOptions.timeout!,
+              requestConfig.method,
+              requestConfig.url
+            );
           } else {
             throw new ApicizeAbortError('Request was cancelled');
           }
@@ -324,8 +338,10 @@ export class ApicizeClient {
     }
 
     // For POST/PUT/PATCH on 301/302, browsers typically change to GET
-    if ((status === 301 || status === 302) &&
-        (originalMethod === 'POST' || originalMethod === 'PUT' || originalMethod === 'PATCH')) {
+    if (
+      (status === 301 || status === 302) &&
+      (originalMethod === 'POST' || originalMethod === 'PUT' || originalMethod === 'PATCH')
+    ) {
       return 'GET';
     }
 
@@ -585,7 +601,11 @@ export class ApicizeClient {
    * Create a new client with different configuration
    */
   withConfig(config: Partial<ClientConfig>): ApicizeClient {
-    return new ApicizeClient({ ...this.config, ...config }, this.httpClient, this.abortControllerFactory);
+    return new ApicizeClient(
+      { ...this.config, ...config },
+      this.httpClient,
+      this.abortControllerFactory
+    );
   }
 
   /**
@@ -603,12 +623,7 @@ export class ApicizeClient {
     options: RequestOptions = {}
   ): Promise<{ response: ApicizeResponse; controller: AbortController }> {
     const controller = this.abortControllerFactory.create();
-
-    try {
-      const response = await this.execute(requestConfig, { ...options, signal: controller.signal });
-      return { response, controller };
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.execute(requestConfig, { ...options, signal: controller.signal });
+    return { response, controller };
   }
 }
