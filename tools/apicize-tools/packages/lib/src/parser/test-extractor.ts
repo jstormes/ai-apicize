@@ -152,12 +152,7 @@ export class TestExtractor {
 
     try {
       // Create TypeScript source file
-      const sourceFile = ts.createSourceFile(
-        'temp.ts',
-        content,
-        ts.ScriptTarget.Latest,
-        true
-      );
+      const sourceFile = ts.createSourceFile('temp.ts', content, ts.ScriptTarget.Latest, true);
 
       // Extract different components
       const imports = this.extractImports(sourceFile, content);
@@ -250,10 +245,7 @@ export class TestExtractor {
    * @param namePattern Pattern to match against test names
    * @returns Matching test blocks
    */
-  findTestBlocks(
-    extracted: ExtractedTestCode,
-    namePattern: string | RegExp
-  ): ExtractedTestBlock[] {
+  findTestBlocks(extracted: ExtractedTestCode, namePattern: string | RegExp): ExtractedTestBlock[] {
     const allBlocks = this.flattenTestBlocks(extracted.testBlocks);
     const pattern = typeof namePattern === 'string' ? new RegExp(namePattern, 'i') : namePattern;
 
@@ -292,7 +284,7 @@ export class TestExtractor {
         if (ts.isStringLiteral(moduleSpecifier)) {
           const source = moduleSpecifier.text;
           const importClause = node.importClause;
-          const isTypeImport = !!(node.importClause?.isTypeOnly);
+          const isTypeImport = !!node.importClause?.isTypeOnly;
           const fullStatement = content.substring(node.getStart(), node.getEnd());
 
           const importNames: string[] = [];
@@ -337,7 +329,7 @@ export class TestExtractor {
   /**
    * Extract global variable declarations
    */
-  private extractGlobalVariables(sourceFile: ts.SourceFile, content: string): ExtractedVariable[] {
+  private extractGlobalVariables(sourceFile: ts.SourceFile, _content: string): ExtractedVariable[] {
     const variables: ExtractedVariable[] = [];
 
     // Visit only top-level statements
@@ -348,12 +340,9 @@ export class TestExtractor {
             const name = declaration.name.text;
             const isConst = statement.declarationList.flags === ts.NodeFlags.Const;
             const type = declaration.type ? declaration.type.getText() : 'any';
-            const value = declaration.initializer
-              ? declaration.initializer.getText()
-              : undefined;
-            const lineNumber = sourceFile.getLineAndCharacterOfPosition(
-              declaration.getStart()
-            ).line + 1;
+            const value = declaration.initializer ? declaration.initializer.getText() : undefined;
+            const lineNumber =
+              sourceFile.getLineAndCharacterOfPosition(declaration.getStart()).line + 1;
 
             variables.push({
               name,
@@ -380,7 +369,7 @@ export class TestExtractor {
     for (const statement of sourceFile.statements) {
       if (ts.isFunctionDeclaration(statement) && statement.name) {
         const name = statement.name.text;
-        const isAsync = !!(statement.modifiers?.some(mod => mod.kind === ts.SyntaxKind.AsyncKeyword));
+        const isAsync = !!statement.modifiers?.some(mod => mod.kind === ts.SyntaxKind.AsyncKeyword);
         const parameters = statement.parameters.map(param => param.getText());
         const returnType = statement.type ? statement.type.getText() : 'void';
         const code = content.substring(statement.getStart(), statement.getEnd());
@@ -420,7 +409,10 @@ export class TestExtractor {
         if (ts.isIdentifier(expression)) {
           const functionName = expression.text;
 
-          if ((functionName === 'describe' || functionName === 'it') && node.arguments.length >= 2) {
+          if (
+            (functionName === 'describe' || functionName === 'it') &&
+            node.arguments.length >= 2
+          ) {
             const nameArg = node.arguments[0];
             const callbackArg = node.arguments[1];
 
@@ -432,21 +424,20 @@ export class TestExtractor {
 
               // Extract the callback function body
               let code = '';
-              let fullCode = content.substring(startPosition, endPosition);
+              const fullCode = content.substring(startPosition, endPosition);
 
               if (ts.isArrowFunction(callbackArg) || ts.isFunctionExpression(callbackArg)) {
                 const body = (callbackArg as ts.ArrowFunction | ts.FunctionExpression).body;
                 if (body) {
                   if (ts.isBlock(body)) {
-                    code = content.substring(
-                      body.getStart() + 1, // Skip opening brace
-                      body.getEnd() - 1     // Skip closing brace
-                    ).trim();
+                    code = content
+                      .substring(
+                        body.getStart() + 1, // Skip opening brace
+                        body.getEnd() - 1 // Skip closing brace
+                      )
+                      .trim();
                   } else {
-                    code = content.substring(
-                      body.getStart(),
-                      body.getEnd()
-                    );
+                    code = content.substring(body.getStart(), body.getEnd());
                   }
                 }
               }
@@ -501,10 +492,12 @@ export class TestExtractor {
 
       for (let i = allBlocks.length - 1; i >= 0; i--) {
         const candidate = allBlocks[i];
-        if (candidate !== block &&
-            candidate.type === 'describe' &&
-            candidate.startPosition < block.startPosition &&
-            candidate.endPosition > block.endPosition) {
+        if (
+          candidate !== block &&
+          candidate.type === 'describe' &&
+          candidate.startPosition < block.startPosition &&
+          candidate.endPosition > block.endPosition
+        ) {
           if (!parent || candidate.startPosition > parent.startPosition) {
             parent = candidate;
           }

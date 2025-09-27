@@ -6,7 +6,6 @@
  */
 
 import { RequestConfig, ApicizeResponse, BodyType } from '../types';
-import { TypedResponse, TypedError } from '../types/enhanced-types';
 
 /**
  * Debug mode configuration
@@ -65,7 +64,7 @@ export class ConsoleDebugLogger implements DebugLogger {
 export class DebugUtilities {
   private static instance?: DebugUtilities;
   private config: DebugConfig;
-  private logger: DebugLogger;
+  public logger: DebugLogger;
   private requestCounter = 0;
 
   private constructor(config: Partial<DebugConfig> = {}) {
@@ -76,7 +75,7 @@ export class DebugUtilities {
       includeHeaders: true,
       includeTiming: true,
       maxBodySize: 10000,
-      ...config
+      ...config,
     };
     this.logger = this.config.logger || new ConsoleDebugLogger();
   }
@@ -130,19 +129,34 @@ export class DebugUtilities {
     this.logger.info(`🚀 Starting request ${id}`, {
       method: request.method,
       url: request.url,
-      timeout: request.timeout
+      timeout: request.timeout,
     });
 
-    if (this.config.includeHeaders && request.headers?.length) {
-      this.logger.debug(`📋 Request headers for ${id}`, this.formatHeaders(request.headers));
+    if (this.config.includeHeaders && request.headers) {
+      if (Array.isArray(request.headers)) {
+        this.logger.debug(`📋 Request headers for ${id}`, this.formatHeaders(request.headers));
+      } else {
+        this.logger.debug(`📋 Request headers for ${id}`, request.headers);
+      }
     }
 
-    if (this.config.includeBody && request.body && request.body.type !== BodyType.None) {
-      this.logger.debug(`📦 Request body for ${id}`, this.formatBody(request.body));
+    if (this.config.includeBody && request.body) {
+      if (
+        typeof request.body === 'object' &&
+        'type' in request.body &&
+        request.body.type !== BodyType.None
+      ) {
+        this.logger.debug(`📦 Request body for ${id}`, this.formatBody(request.body));
+      } else if (typeof request.body === 'string' || Buffer.isBuffer(request.body)) {
+        this.logger.debug(`📦 Request body for ${id}`, request.body);
+      }
     }
 
     if (request.queryStringParams?.length) {
-      this.logger.debug(`🔍 Query parameters for ${id}`, this.formatHeaders(request.queryStringParams));
+      this.logger.debug(
+        `🔍 Query parameters for ${id}`,
+        this.formatHeaders(request.queryStringParams)
+      );
     }
 
     return id;
@@ -157,14 +171,15 @@ export class DebugUtilities {
     this.logger.info(`✅ Response received for ${requestId}`, {
       status: response.status,
       statusText: response.statusText,
-      url: response.url
     });
 
     if (this.config.includeTiming && response.timing) {
       this.logger.debug(`⏱️  Timing for ${requestId}`, {
-        duration: `${response.timing.duration}ms`,
-        start: new Date(response.timing.start).toISOString(),
-        end: new Date(response.timing.end).toISOString()
+        total: `${response.timing.total}ms`,
+        started: new Date(response.timing.started).toISOString(),
+        dns: response.timing.dns ? `${response.timing.dns}ms` : 'N/A',
+        tcp: response.timing.tcp ? `${response.timing.tcp}ms` : 'N/A',
+        request: response.timing.request ? `${response.timing.request}ms` : 'N/A',
       });
     }
 
@@ -201,7 +216,7 @@ export class DebugUtilities {
   /**
    * Inspects and formats an object for debugging
    */
-  inspect(obj: any, depth = 3): string {
+  inspect(obj: any, _depth = 3): string {
     if (!this.config.enabled) return '';
 
     try {
@@ -215,10 +230,13 @@ export class DebugUtilities {
    * Formats headers for logging
    */
   private formatHeaders(headers: Array<{ name: string; value: string }>): Record<string, string> {
-    return headers.reduce((acc, header) => {
-      acc[header.name] = header.value;
-      return acc;
-    }, {} as Record<string, string>);
+    return headers.reduce(
+      (acc, header) => {
+        acc[header.name] = header.value;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
   }
 
   /**
@@ -283,7 +301,7 @@ export class OperationTrace {
       name,
       timestamp,
       duration,
-      data
+      data,
     });
 
     this.debug.logger.debug(`  📍 ${name} (+${duration}ms)`, data);
@@ -308,7 +326,7 @@ export class OperationTrace {
       operation: this.operation,
       totalDuration,
       steps: [...this.steps],
-      completed: true
+      completed: true,
     };
   }
 
@@ -325,7 +343,7 @@ export class OperationTrace {
       totalDuration,
       steps: [...this.steps],
       completed: false,
-      abortReason: reason
+      abortReason: reason,
     };
   }
 }
@@ -407,7 +425,7 @@ export class PerformanceProfiler {
     return {
       marks: Object.fromEntries(this.marks),
       measures: Object.fromEntries(this.measures),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 }
@@ -437,7 +455,7 @@ export class MemoryTracker {
       heapUsed: process.memoryUsage().heapUsed,
       heapTotal: process.memoryUsage().heapTotal,
       external: process.memoryUsage().external,
-      rss: process.memoryUsage().rss
+      rss: process.memoryUsage().rss,
     };
 
     this.snapshots.push(snapshot);
@@ -453,7 +471,7 @@ export class MemoryTracker {
       heapTotalDiff: snapshot2.heapTotal - snapshot1.heapTotal,
       externalDiff: snapshot2.external - snapshot1.external,
       rssDiff: snapshot2.rss - snapshot1.rss,
-      timeDiff: snapshot2.timestamp - snapshot1.timestamp
+      timeDiff: snapshot2.timestamp - snapshot1.timestamp,
     };
   }
 
@@ -533,7 +551,7 @@ export class ValidationHelpers {
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 

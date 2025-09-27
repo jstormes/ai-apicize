@@ -5,7 +5,7 @@
  * and type-safe configuration.
  */
 
-import { RequestConfig, HttpMethod, BodyType, NameValuePair } from '../types';
+import { RequestConfig, HttpMethod, BodyType, NameValuePair, ExecutionMode } from '../types';
 import { ApicizeClient } from '../client/apicize-client';
 
 export interface IFluentRequestBuilder {
@@ -189,7 +189,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
   body(content: string): RequestBuilder {
     this.config.body = {
       type: BodyType.Text,
-      data: content
+      data: content,
     };
     return this;
   }
@@ -200,7 +200,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
   json(data: object): RequestBuilder {
     this.config.body = {
       type: BodyType.JSON,
-      data: data
+      data: data,
     };
     return this;
   }
@@ -211,7 +211,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
   xml(content: string): RequestBuilder {
     this.config.body = {
       type: BodyType.XML,
-      data: content
+      data: content,
     };
     return this;
   }
@@ -226,7 +226,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
 
     this.config.body = {
       type: BodyType.Form,
-      data: formData
+      data: formData,
     };
     return this;
   }
@@ -237,7 +237,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
   raw(data: Uint8Array): RequestBuilder {
     this.config.body = {
       type: BodyType.Raw,
-      data: data
+      data: data,
     };
     return this;
   }
@@ -260,7 +260,10 @@ export class RequestBuilder implements IFluentRequestBuilder {
     if (Array.isArray(params)) {
       this.config.queryStringParams = [...params];
     } else {
-      this.config.queryStringParams = Object.entries(params).map(([name, value]) => ({ name, value }));
+      this.config.queryStringParams = Object.entries(params).map(([name, value]) => ({
+        name,
+        value,
+      }));
     }
     return this;
   }
@@ -325,7 +328,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
    * Sets execution mode to concurrent for multiple runs
    */
   concurrent(): RequestBuilder {
-    this.config.multiRunExecution = 'CONCURRENT';
+    this.config.multiRunExecution = ExecutionMode.CONCURRENT;
     return this;
   }
 
@@ -333,7 +336,7 @@ export class RequestBuilder implements IFluentRequestBuilder {
    * Sets execution mode to sequential for multiple runs
    */
   sequential(): RequestBuilder {
-    this.config.multiRunExecution = 'SEQUENTIAL';
+    this.config.multiRunExecution = ExecutionMode.SEQUENTIAL;
     return this;
   }
 
@@ -343,7 +346,9 @@ export class RequestBuilder implements IFluentRequestBuilder {
    */
   async execute(): Promise<any> {
     if (!this.client) {
-      throw new Error('No ApicizeClient provided. Use RequestBuilder.create(client) or call build() instead.');
+      throw new Error(
+        'No ApicizeClient provided. Use RequestBuilder.create(client) or call build() instead.'
+      );
     }
 
     const request = this.build();
@@ -360,7 +365,9 @@ export class RequestBuilder implements IFluentRequestBuilder {
     }
 
     if (!this.config.method) {
-      throw new Error('HTTP method is required. Call method() or a method shortcut (get(), post(), etc.) before building.');
+      throw new Error(
+        'HTTP method is required. Call method() or a method shortcut (get(), post(), etc.) before building.'
+      );
     }
 
     // Set defaults
@@ -373,13 +380,13 @@ export class RequestBuilder implements IFluentRequestBuilder {
       timeout: this.config.timeout || 30000,
       numberOfRedirects: this.config.numberOfRedirects || 10,
       runs: this.config.runs || 1,
-      multiRunExecution: this.config.multiRunExecution || 'SEQUENTIAL',
+      multiRunExecution: this.config.multiRunExecution || ExecutionMode.SEQUENTIAL,
       keepAlive: this.config.keepAlive || false,
       acceptInvalidCerts: this.config.acceptInvalidCerts || false,
       mode: this.config.mode,
       referrer: this.config.referrer,
       referrerPolicy: this.config.referrerPolicy,
-      duplex: this.config.duplex
+      duplex: this.config.duplex,
     };
 
     return request;

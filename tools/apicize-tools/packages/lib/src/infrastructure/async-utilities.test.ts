@@ -44,12 +44,13 @@ describe('AsyncOperations', () => {
     });
 
     it('should timeout when operation takes too long', async () => {
-      let operationResolve: (value: string) => void;
-      const operation = () => new Promise<string>(resolve => {
-        operationResolve = resolve;
-        // Schedule the operation to complete after 2000ms using the mock timer
-        mockTimer.setTimeout(() => resolve('success'), 2000);
-      });
+      let _operationResolve: (value: string) => void;
+      const operation = () =>
+        new Promise<string>(resolve => {
+          _operationResolve = resolve;
+          // Schedule the operation to complete after 2000ms using the mock timer
+          mockTimer.setTimeout(() => resolve('success'), 2000);
+        });
 
       const resultPromise = asyncOperations.withTimeout(operation, { timeout: 1000 });
 
@@ -78,16 +79,17 @@ describe('AsyncOperations', () => {
       const controller = mockAbortControllerFactory.create();
 
       // Create an operation that would normally take a long time
-      const operation = () => new Promise<string>((resolve, reject) => {
-        mockTimer.setTimeout(() => resolve('success'), 5000);
+      const operation = () =>
+        new Promise<string>((resolve, reject) => {
+          mockTimer.setTimeout(() => resolve('success'), 5000);
 
-        // Listen for abort signal and reject with AbortError
-        controller.signal.addEventListener('abort', () => {
-          const error = new Error('Operation was aborted');
-          error.name = 'AbortError';
-          reject(error);
+          // Listen for abort signal and reject with AbortError
+          controller.signal.addEventListener('abort', () => {
+            const error = new Error('Operation was aborted');
+            error.name = 'AbortError';
+            reject(error);
+          });
         });
-      });
 
       const resultPromise = asyncOperations.withTimeout(operation, {
         timeout: 10000, // Long timeout so abort signal fires first

@@ -53,7 +53,10 @@ export class RealTimer implements Timer {
  * Mock timer for testing
  */
 export class MockTimer implements Timer {
-  private timeouts: Map<NodeJS.Timeout, { callback: () => void; delay: number; startTime: number }> = new Map();
+  private timeouts: Map<
+    NodeJS.Timeout,
+    { callback: () => void; delay: number; startTime: number }
+  > = new Map();
   private nextId = 1;
   private currentTime = 0;
 

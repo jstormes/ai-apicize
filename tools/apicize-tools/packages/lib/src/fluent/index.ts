@@ -5,17 +5,14 @@
  */
 
 // Request Builder
-export {
-  RequestBuilder,
-  IFluentRequestBuilder
-} from './request-builder';
+export { RequestBuilder, IFluentRequestBuilder } from './request-builder';
 
 // Configuration Builders
 export {
   ClientConfigBuilder,
   EnvironmentConfigBuilder,
   IConfigBuilder,
-  IEnvironmentConfigBuilder
+  IEnvironmentConfigBuilder,
 } from './config-builder';
 
 // Re-export for convenience

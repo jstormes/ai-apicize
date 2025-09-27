@@ -9,16 +9,16 @@ import {
   RequestBuilder,
   ClientConfigBuilder,
   EnvironmentConfigBuilder,
-  debugUtils,
   enableDebugMode,
   trace,
   inspect,
   PerformanceProfiler,
   MemoryTracker,
-  ValidationHelpers
+  ValidationHelpers,
 } from '../index';
+import { TypedResponse } from '../types/enhanced-types';
 import { ApicizeClient } from '../client/apicize-client';
-import { HttpMethod } from '../types';
+import { HttpMethod, ExecutionMode, RequestConfig } from '../types';
 
 /**
  * Example 1: Fluent Request Builder
@@ -29,11 +29,7 @@ import { HttpMethod } from '../types';
 export async function fluentRequestExample(): Promise<void> {
   // Create a client with fluent configuration
   const client = new ApicizeClient(
-    ClientConfigBuilder.development()
-      .timeout(10000)
-      .maxRedirects(5)
-      .retryAttempts(3)
-      .build()
+    ClientConfigBuilder.development().defaultTimeout(10000).maxRedirects(5).build()
   );
 
   // Build and execute a request using fluent API
@@ -43,7 +39,7 @@ export async function fluentRequestExample(): Promise<void> {
     .json({
       name: 'John Doe',
       email: 'john@example.com',
-      role: 'admin'
+      role: 'admin',
     })
     .header('Authorization', 'Bearer token123')
     .header('Content-Type', 'application/json')
@@ -63,9 +59,9 @@ export async function fluentRequestExample(): Promise<void> {
 export function configurationBuilderExample(): void {
   // Create a production client configuration
   const prodConfig = ClientConfigBuilder.production()
-    .timeout(30000)
+    .defaultTimeout(30000)
     .maxRedirects(10)
-    .validateCertificates(true)
+    .acceptInvalidCerts(false)
     .build();
 
   // Create a development environment configuration
@@ -97,12 +93,9 @@ export function configurationBuilderExample(): void {
  * Demonstrates the new generic types and type guards for better type safety.
  */
 export async function enhancedTypesExample(): Promise<void> {
-  import('../types/enhanced-types').then(async ({
-    TypedResponse,
-    isJsonResponse,
-    isTextResponse,
-    ResultHelpers
-  }) => {
+  const { isJsonResponse, isTextResponse, ResultHelpers } = await import('../types/enhanced-types');
+
+  {
     // Simulate a typed API response
     const response: TypedResponse<{ id: number; name: string }> = {
       status: 200,
@@ -110,25 +103,26 @@ export async function enhancedTypesExample(): Promise<void> {
       headers: { 'content-type': 'application/json' },
       body: {
         type: 'JSON' as any,
-        data: { id: 1, name: 'John Doe' }
+        data: { id: 1, name: 'John Doe' },
       },
       url: 'https://api.example.com/users/1',
       redirected: false,
       timing: {
         start: Date.now() - 1000,
         end: Date.now(),
-        duration: 1000
-      }
+        duration: 1000,
+      },
     };
 
     // Type-safe response handling
     if (isJsonResponse(response)) {
       // TypeScript knows response.body.data is the expected type
-      console.log(`User ID: ${response.body.data.id}`);
-      console.log(`User Name: ${response.body.data.name}`);
+      const data = response.body.data as { id: number; name: string };
+      console.log(`User ID: ${data.id}`);
+      console.log(`User Name: ${data.name}`);
     } else if (isTextResponse(response)) {
       // TypeScript knows response.body.data is string
-      console.log(`Text Response: ${response.body.data}`);
+      console.log(`Text Response: ${response.body.data as string}`);
     }
 
     // Result type example
@@ -139,7 +133,7 @@ export async function enhancedTypesExample(): Promise<void> {
     } else {
       console.log('Operation failed:', result.error);
     }
-  });
+  }
 }
 
 /**
@@ -154,7 +148,7 @@ export async function debugUtilitiesExample(): Promise<void> {
     level: 'debug',
     includeBody: true,
     includeHeaders: true,
-    includeTiming: true
+    includeTiming: true,
   });
 
   // Create a performance profiler
@@ -181,9 +175,9 @@ export async function debugUtilitiesExample(): Promise<void> {
       queryStringParams: [],
       numberOfRedirects: 10,
       runs: 1,
-      multiRunExecution: 'SEQUENTIAL',
+      multiRunExecution: ExecutionMode.SEQUENTIAL,
       keepAlive: false,
-      acceptInvalidCerts: false
+      acceptInvalidCerts: false,
     });
 
     if (!validation.isValid) {
@@ -209,8 +203,8 @@ export async function debugUtilitiesExample(): Promise<void> {
     const traceResult = operationTrace.complete();
 
     // Get performance measurements
-    const workDuration = profiler.measure('work-duration', 'work-start', 'work-end');
-    const totalDuration = profiler.measure('total-duration', 'start');
+    const _workDuration = profiler.measure('work-duration', 'work-start', 'work-end');
+    const _totalDuration = profiler.measure('total-duration', 'start');
 
     // Take final memory snapshot
     const endMemory = memTracker.snapshot('operation-end');
@@ -222,9 +216,8 @@ export async function debugUtilitiesExample(): Promise<void> {
     console.log('Performance Report:', profiler.getReport());
     console.log('Memory Usage:', {
       heapUsedDiff: `${(memoryDiff.heapUsedDiff / 1024 / 1024).toFixed(2)} MB`,
-      duration: `${memoryDiff.timeDiff}ms`
+      duration: `${memoryDiff.timeDiff}ms`,
     });
-
   } catch (error) {
     operationTrace.error('Unexpected error', error as Error);
     operationTrace.abort('Operation failed due to unexpected error');
@@ -256,28 +249,33 @@ export async function methodChainingExample(): Promise<void> {
       .form({
         name: 'John Doe',
         email: 'john@example.com',
-        message: 'Hello World'
+        message: 'Hello World',
       })
-      .timeout(10000)
       .build(),
 
     // PUT request with XML body
     RequestBuilder.create()
       .url('https://api.example.com/config')
       .put()
-      .xml(`<?xml version="1.0"?>
+      .xml(
+        `<?xml version="1.0"?>
         <config>
           <setting name="debug" value="true" />
-        </config>`)
+        </config>`
+      )
       .header('Content-Type', 'application/xml')
-      .build()
+      .build(),
   ]);
 
-  console.log('Built requests:', requests.map(req => ({
-    method: req.method,
-    url: req.url,
-    bodyType: req.body?.type
-  })));
+  console.log(
+    'Built requests:',
+    requests.map((req: RequestConfig) => ({
+      method: req.method,
+      url: req.url,
+      bodyType:
+        req.body && typeof req.body === 'object' && 'type' in req.body ? req.body.type : 'unknown',
+    }))
+  );
 }
 
 /**
@@ -298,14 +296,14 @@ export async function errorHandlingExample(): Promise<void> {
       return ResultHelpers.ok({
         id: 1,
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       });
     } catch (error) {
       return ResultHelpers.err({
         code: 'API_ERROR',
         message: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date(),
-        context: { shouldFail }
+        context: { shouldFail },
       } as any);
     }
   }
@@ -323,11 +321,11 @@ export async function errorHandlingExample(): Promise<void> {
   }
 
   // Chain operations with Result type
-  const chainedResult = ResultHelpers.chain(successResult, (data) => {
+  const chainedResult = ResultHelpers.chain(successResult, data => {
     return ResultHelpers.ok({
       ...data,
       processed: true,
-      processedAt: new Date()
+      processedAt: new Date(),
     });
   });
 
@@ -369,5 +367,5 @@ export default {
   debugUtilitiesExample,
   methodChainingExample,
   errorHandlingExample,
-  runAllExamples
+  runAllExamples,
 };

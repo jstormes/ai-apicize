@@ -10,7 +10,10 @@ import { RequestConfig, BodyType, HttpMethod, NameValuePair } from '../types';
 /**
  * Generic Response Type with better type inference
  */
-export interface TypedResponse<TBody = unknown, THeaders extends Record<string, string> = Record<string, string>> {
+export interface TypedResponse<
+  TBody = unknown,
+  THeaders extends Record<string, string> = Record<string, string>,
+> {
   status: number;
   statusText: string;
   headers: THeaders;
@@ -79,15 +82,21 @@ export interface TypedApiClient {
  * Advanced conditional types for HTTP methods
  */
 export type HttpMethodWithBody = HttpMethod.POST | HttpMethod.PUT | HttpMethod.PATCH;
-export type HttpMethodWithoutBody = HttpMethod.GET | HttpMethod.DELETE | HttpMethod.HEAD | HttpMethod.OPTIONS;
+export type HttpMethodWithoutBody =
+  | HttpMethod.GET
+  | HttpMethod.DELETE
+  | HttpMethod.HEAD
+  | HttpMethod.OPTIONS;
 
 /**
  * Conditional request config based on HTTP method
  */
-export type ConditionalRequestConfig<TMethod extends HttpMethod, TBody = unknown> =
-  TMethod extends HttpMethodWithBody
-    ? TypedRequestConfig<TBody> & { method: TMethod }
-    : TypedRequestConfig<never> & { method: TMethod; body?: { type: BodyType.None } };
+export type ConditionalRequestConfig<
+  TMethod extends HttpMethod,
+  TBody = unknown,
+> = TMethod extends HttpMethodWithBody
+  ? TypedRequestConfig<TBody> & { method: TMethod }
+  : TypedRequestConfig<never> & { method: TMethod; body?: { type: BodyType.None } };
 
 /**
  * Type guard for checking if a method requires a body
@@ -99,42 +108,56 @@ export function requiresBody(method: HttpMethod): method is HttpMethodWithBody {
 /**
  * Type guard for JSON response bodies
  */
-export function isJsonResponse<T>(response: TypedResponse): response is TypedResponse<T> & { body: { type: BodyType.JSON; data: T } } {
+export function isJsonResponse<T>(
+  response: TypedResponse
+): response is TypedResponse<T> & { body: { type: BodyType.JSON; data: T } } {
   return response.body.type === BodyType.JSON;
 }
 
 /**
  * Type guard for text response bodies
  */
-export function isTextResponse(response: TypedResponse): response is TypedResponse<string> & { body: { type: BodyType.Text; data: string } } {
+export function isTextResponse(
+  response: TypedResponse
+): response is TypedResponse<string> & { body: { type: BodyType.Text; data: string } } {
   return response.body.type === BodyType.Text;
 }
 
 /**
  * Type guard for XML response bodies
  */
-export function isXmlResponse(response: TypedResponse): response is TypedResponse<string> & { body: { type: BodyType.XML; data: string } } {
+export function isXmlResponse(
+  response: TypedResponse
+): response is TypedResponse<string> & { body: { type: BodyType.XML; data: string } } {
   return response.body.type === BodyType.XML;
 }
 
 /**
  * Type guard for form response bodies
  */
-export function isFormResponse(response: TypedResponse): response is TypedResponse<NameValuePair[]> & { body: { type: BodyType.Form; data: NameValuePair[] } } {
+export function isFormResponse(response: TypedResponse): response is TypedResponse<
+  NameValuePair[]
+> & {
+  body: { type: BodyType.Form; data: NameValuePair[] };
+} {
   return response.body.type === BodyType.Form;
 }
 
 /**
  * Type guard for raw response bodies
  */
-export function isRawResponse(response: TypedResponse): response is TypedResponse<Uint8Array> & { body: { type: BodyType.Raw; data: Uint8Array } } {
+export function isRawResponse(
+  response: TypedResponse
+): response is TypedResponse<Uint8Array> & { body: { type: BodyType.Raw; data: Uint8Array } } {
   return response.body.type === BodyType.Raw;
 }
 
 /**
  * Type guard for empty response bodies
  */
-export function isEmptyResponse(response: TypedResponse): response is TypedResponse<undefined> & { body: { type: BodyType.None; data: undefined } } {
+export function isEmptyResponse(
+  response: TypedResponse
+): response is TypedResponse<undefined> & { body: { type: BodyType.None; data: undefined } } {
   return response.body.type === BodyType.None;
 }
 
@@ -184,7 +207,10 @@ export namespace ResultHelpers {
     return isErr(result) ? err(fn(result.error)) : result;
   }
 
-  export function chain<T, U, E>(result: Result<T, E>, fn: (data: T) => Result<U, E>): Result<U, E> {
+  export function chain<T, U, E>(
+    result: Result<T, E>,
+    fn: (data: T) => Result<U, E>
+  ): Result<U, E> {
     return isOk(result) ? fn(result.data) : result;
   }
 }
@@ -336,7 +362,7 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 /**
  * Utility type for making specific properties required
  */
-export type Required<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export type RequiredFields<T, K extends keyof T> = T & globalThis.Required<Pick<T, K>>;
 
 /**
  * Deep readonly utility type
@@ -345,8 +371,8 @@ export type DeepReadonly<T> = {
   readonly [P in keyof T]: T[P] extends (infer U)[]
     ? readonly DeepReadonly<U>[]
     : T[P] extends object
-    ? DeepReadonly<T[P]>
-    : T[P];
+      ? DeepReadonly<T[P]>
+      : T[P];
 };
 
 /**
@@ -357,9 +383,13 @@ export type Awaited<T> = T extends Promise<infer U> ? U : T;
 /**
  * Extract function parameters
  */
-export type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
+export type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any
+  ? P
+  : never;
 
 /**
  * Extract function return type
  */
-export type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
+export type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R
+  ? R
+  : any;

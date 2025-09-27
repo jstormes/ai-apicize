@@ -1,9 +1,63 @@
 // @apicize/lib - Core library for Apicize tools
 // This file will export all public interfaces and utilities
 
-// Type definitions
-export * from './types';
-export * from './types/enhanced-types';
+// Type definitions - Core types
+export {
+  HttpMethod,
+  BodyType,
+  ExecutionMode,
+  RequestMode,
+  NameValuePair,
+  SelectedItem,
+  RequestBody,
+  RequestBodyBase,
+  RequestBodyNone,
+  RequestBodyText,
+  RequestBodyJSON,
+  RequestBodyXML,
+  RequestBodyForm,
+  RequestBodyRaw,
+  Request,
+  RequestGroup,
+  Variable,
+  Scenario,
+  Authorization,
+  BasicAuthorization,
+  OAuth2ClientAuthorization,
+  OAuth2PkceAuthorization,
+  ApiKeyAuthorization,
+  Certificate,
+  Proxy,
+  ExternalData,
+  ApicizeWorkbook,
+  ApicizeResponseHeaders,
+  ApicizeResponseBody,
+  ApicizeResponse,
+  ApicizeContext,
+  RequestConfig,
+  TestHelper,
+  ApicizeMetadata,
+} from './types';
+
+// Enhanced types
+export {
+  TypedResponse,
+  ExtractBodyType,
+  ConfigSchema,
+  Result,
+  TimingInfo,
+  ValidationError,
+  Optional,
+  RequiredFields,
+  DeepReadonly,
+  isJsonResponse,
+  isTextResponse,
+  isXmlResponse,
+  isFormResponse,
+  isRawResponse,
+  isEmptyResponse,
+  ResultHelpers,
+} from './types/enhanced-types';
 
 // Infrastructure (Phase 1 refactoring)
 export * from './infrastructure';
@@ -58,7 +112,14 @@ export {
 // Phase 5: Developer Experience Enhancements
 
 // Fluent interfaces and builders
-export * from './fluent';
+export {
+  RequestBuilder,
+  IFluentRequestBuilder,
+  ClientConfigBuilder,
+  EnvironmentConfigBuilder,
+  IConfigBuilder,
+  IEnvironmentConfigBuilder,
+} from './fluent';
 
 // Enhanced debugging utilities
 export {
@@ -71,7 +132,7 @@ export {
   enableDebugMode,
   disableDebugMode,
   trace,
-  inspect
+  inspect,
 } from './debugging/debug-utilities';
 
 // Version information

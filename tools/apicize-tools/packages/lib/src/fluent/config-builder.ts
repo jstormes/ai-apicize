@@ -6,16 +6,12 @@
  */
 
 import { ClientConfig } from '../client/apicize-client';
-import { ConfigData } from '../config/config-manager';
 
 export interface IConfigBuilder {
-  timeout(milliseconds: number): IConfigBuilder;
+  defaultTimeout(milliseconds: number): IConfigBuilder;
   maxRedirects(count: number): IConfigBuilder;
-  retryAttempts(count: number): IConfigBuilder;
-  retryDelay(milliseconds: number): IConfigBuilder;
   userAgent(agent: string): IConfigBuilder;
-  validateCertificates(enabled?: boolean): IConfigBuilder;
-  followRedirects(enabled?: boolean): IConfigBuilder;
+  acceptInvalidCerts(enabled?: boolean): IConfigBuilder;
   keepAlive(enabled?: boolean): IConfigBuilder;
   build(): ClientConfig;
 }
@@ -52,12 +48,9 @@ export class ClientConfigBuilder implements IConfigBuilder {
    */
   static production(): ClientConfigBuilder {
     return new ClientConfigBuilder()
-      .timeout(30000)
+      .defaultTimeout(30000)
       .maxRedirects(10)
-      .retryAttempts(3)
-      .retryDelay(1000)
-      .validateCertificates(true)
-      .followRedirects(true)
+      .acceptInvalidCerts(false)
       .keepAlive(true);
   }
 
@@ -66,12 +59,9 @@ export class ClientConfigBuilder implements IConfigBuilder {
    */
   static development(): ClientConfigBuilder {
     return new ClientConfigBuilder()
-      .timeout(60000)
+      .defaultTimeout(60000)
       .maxRedirects(20)
-      .retryAttempts(1)
-      .retryDelay(500)
-      .validateCertificates(false)
-      .followRedirects(true)
+      .acceptInvalidCerts(true)
       .keepAlive(false);
   }
 
@@ -80,19 +70,16 @@ export class ClientConfigBuilder implements IConfigBuilder {
    */
   static testing(): ClientConfigBuilder {
     return new ClientConfigBuilder()
-      .timeout(5000)
+      .defaultTimeout(5000)
       .maxRedirects(5)
-      .retryAttempts(0)
-      .retryDelay(0)
-      .validateCertificates(false)
-      .followRedirects(true)
+      .acceptInvalidCerts(true)
       .keepAlive(false);
   }
 
   /**
    * Sets the default timeout for requests
    */
-  timeout(milliseconds: number): ClientConfigBuilder {
+  defaultTimeout(milliseconds: number): ClientConfigBuilder {
     this.config.defaultTimeout = milliseconds;
     return this;
   }
@@ -106,22 +93,6 @@ export class ClientConfigBuilder implements IConfigBuilder {
   }
 
   /**
-   * Sets the number of retry attempts for failed requests
-   */
-  retryAttempts(count: number): ClientConfigBuilder {
-    this.config.retryAttempts = count;
-    return this;
-  }
-
-  /**
-   * Sets the delay between retry attempts
-   */
-  retryDelay(milliseconds: number): ClientConfigBuilder {
-    this.config.retryDelay = milliseconds;
-    return this;
-  }
-
-  /**
    * Sets the user agent string
    */
   userAgent(agent: string): ClientConfigBuilder {
@@ -130,18 +101,10 @@ export class ClientConfigBuilder implements IConfigBuilder {
   }
 
   /**
-   * Enables or disables certificate validation
+   * Enables or disables accepting invalid certificates
    */
-  validateCertificates(enabled = true): ClientConfigBuilder {
-    this.config.validateCertificates = enabled;
-    return this;
-  }
-
-  /**
-   * Enables or disables following redirects
-   */
-  followRedirects(enabled = true): ClientConfigBuilder {
-    this.config.followRedirects = enabled;
+  acceptInvalidCerts(enabled = true): ClientConfigBuilder {
+    this.config.acceptInvalidCerts = enabled;
     return this;
   }
 
@@ -158,14 +121,11 @@ export class ClientConfigBuilder implements IConfigBuilder {
    */
   build(): ClientConfig {
     return {
-      defaultTimeout: this.config.defaultTimeout || 30000,
-      maxRedirects: this.config.maxRedirects || 10,
-      retryAttempts: this.config.retryAttempts || 0,
-      retryDelay: this.config.retryDelay || 1000,
-      userAgent: this.config.userAgent || 'Apicize-Client/1.0',
-      validateCertificates: this.config.validateCertificates !== false,
-      followRedirects: this.config.followRedirects !== false,
-      keepAlive: this.config.keepAlive || false
+      defaultTimeout: this.config.defaultTimeout,
+      maxRedirects: this.config.maxRedirects,
+      userAgent: this.config.userAgent,
+      acceptInvalidCerts: this.config.acceptInvalidCerts,
+      keepAlive: this.config.keepAlive,
     };
   }
 
@@ -204,7 +164,7 @@ export interface IEnvironmentConfigBuilder {
   timeout(type: 'default' | 'long', milliseconds: number): IEnvironmentConfigBuilder;
   feature(name: string, enabled: boolean): IEnvironmentConfigBuilder;
   features(features: Record<string, boolean>): IEnvironmentConfigBuilder;
-  build(): ConfigData;
+  build(): Record<string, any>;
 }
 
 /**
@@ -223,11 +183,11 @@ export interface IEnvironmentConfigBuilder {
  * ```
  */
 export class EnvironmentConfigBuilder implements IEnvironmentConfigBuilder {
-  private config: Partial<ConfigData> = {
+  private config: Partial<Record<string, any>> = {
     baseUrls: {},
     headers: {},
     timeouts: {},
-    features: {}
+    features: {},
   };
 
   private constructor() {}
@@ -367,20 +327,20 @@ export class EnvironmentConfigBuilder implements IEnvironmentConfigBuilder {
   /**
    * Builds and returns the environment configuration
    */
-  build(): ConfigData {
+  build(): Record<string, any> {
     return {
       name: this.config.name || 'default',
       baseUrls: this.config.baseUrls || {},
       headers: this.config.headers || {},
       timeouts: this.config.timeouts || { default: 30000 },
-      features: this.config.features || {}
+      features: this.config.features || {},
     };
   }
 
   /**
    * Merges another configuration into this builder
    */
-  merge(other: Partial<ConfigData>): EnvironmentConfigBuilder {
+  merge(other: Partial<Record<string, any>>): EnvironmentConfigBuilder {
     if (other.baseUrls) {
       this.config.baseUrls = { ...this.config.baseUrls, ...other.baseUrls };
     }
@@ -416,10 +376,8 @@ export class EnvironmentConfigBuilder implements IEnvironmentConfigBuilder {
       baseUrls: {},
       headers: {},
       timeouts: {},
-      features: {}
+      features: {},
     };
     return this;
   }
 }
-
-export { ClientConfigBuilder, EnvironmentConfigBuilder };

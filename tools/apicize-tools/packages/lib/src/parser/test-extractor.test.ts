@@ -1,7 +1,6 @@
 import {
   TestExtractor,
   ExtractedTestCode,
-  ExtractedTestBlock,
   TestExtractionError,
   extractTestCodeFromContent,
   extractTestCodeFromFile,
@@ -393,7 +392,9 @@ describe('General Test', () => {
       it('should find blocks by name pattern', () => {
         const requestBlocks = extractor.findTestBlocks(sampleResult, /request/i);
         expect(requestBlocks.length).toBeGreaterThan(0);
-        expect(requestBlocks.some(block => block.name.toLowerCase().includes('request'))).toBe(true);
+        expect(requestBlocks.some(block => block.name.toLowerCase().includes('request'))).toBe(
+          true
+        );
       });
 
       it('should find blocks by string pattern', () => {

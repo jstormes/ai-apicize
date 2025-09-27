@@ -11,7 +11,6 @@ import {
   defaultTimer,
   AbortControllerFactory,
   defaultAbortControllerFactory,
-  AbortControllerLike
 } from './timer';
 
 /**
@@ -271,24 +270,27 @@ export class AsyncOperations {
     const timeoutPromise = new Promise<T>((_, reject) => {
       const timeoutId = this.timer.setTimeout(() => {
         controller.abort();
-        reject(new ApicizeError(
-          ApicizeErrorCode.TIMEOUT,
-          config.message || `Operation timed out after ${config.timeout}ms`
-        ));
+        reject(
+          new ApicizeError(
+            ApicizeErrorCode.TIMEOUT,
+            config.message || `Operation timed out after ${config.timeout}ms`
+          )
+        );
       }, config.timeout);
 
       // Clear timeout if operation completes or is aborted
-      finalSignal.addEventListener('abort', () => {
-        this.timer.clearTimeout(timeoutId);
-      }, { once: true });
+      finalSignal.addEventListener(
+        'abort',
+        () => {
+          this.timer.clearTimeout(timeoutId);
+        },
+        { once: true }
+      );
     });
 
     // Race the operation against the timeout
     try {
-      const result = await Promise.race([
-        operation(),
-        timeoutPromise
-      ]);
+      const result = await Promise.race([operation(), timeoutPromise]);
 
       return success(result);
     } catch (error) {
@@ -307,9 +309,7 @@ export class AsyncOperations {
         );
       }
 
-      return failure(
-        new ApicizeError(ApicizeErrorCode.EXECUTION_ERROR, String(error))
-      );
+      return failure(new ApicizeError(ApicizeErrorCode.EXECUTION_ERROR, String(error)));
     }
   }
 
@@ -569,10 +569,14 @@ export class AsyncOperations {
       }, ms);
 
       if (signal) {
-        signal.addEventListener('abort', () => {
-          this.timer.clearTimeout(timeoutId);
-          reject(new Error('Aborted'));
-        }, { once: true });
+        signal.addEventListener(
+          'abort',
+          () => {
+            this.timer.clearTimeout(timeoutId);
+            reject(new Error('Aborted'));
+          },
+          { once: true }
+        );
       }
     });
   }

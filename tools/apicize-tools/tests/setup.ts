@@ -78,7 +78,11 @@ afterEach(() => {
 
   // Only restore fetch if it hasn't been mocked by the test
   // Check if fetch is a Jest mock function, if so, leave it alone
-  if (global.fetch && typeof global.fetch === 'function' && !(global.fetch as any)._isMockFunction) {
+  if (
+    global.fetch &&
+    typeof global.fetch === 'function' &&
+    !(global.fetch as any)._isMockFunction
+  ) {
     global.fetch = originalFetch;
   }
 

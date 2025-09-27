@@ -312,6 +312,16 @@ export interface RequestConfig {
   headers?: NameValuePair[] | Record<string, string>;
   body?: RequestBody | string | Buffer | Record<string, unknown>;
   timeout?: number;
+  numberOfRedirects?: number;
+  runs?: number;
+  multiRunExecution?: ExecutionMode;
+  keepAlive?: boolean;
+  acceptInvalidCerts?: boolean;
+  mode?: RequestMode;
+  referrer?: string;
+  referrerPolicy?: string;
+  duplex?: string;
+  queryStringParams?: NameValuePair[];
   auth?: string;
   service?: string;
   endpoint?: string;
