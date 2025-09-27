@@ -3,6 +3,7 @@
 
 // Type definitions
 export * from './types';
+export * from './types/enhanced-types';
 
 // Infrastructure (Phase 1 refactoring)
 export * from './infrastructure';
@@ -43,6 +44,25 @@ export {
   extractMetadataFromFile,
   extractMetadataFromContent,
 } from './parser';
+
+// Phase 5: Developer Experience Enhancements
+
+// Fluent interfaces and builders
+export * from './fluent';
+
+// Enhanced debugging utilities
+export {
+  DebugUtilities,
+  OperationTrace,
+  PerformanceProfiler,
+  MemoryTracker,
+  ValidationHelpers,
+  debugUtils,
+  enableDebugMode,
+  disableDebugMode,
+  trace,
+  inspect
+} from './debugging/debug-utilities';
 
 // Version information
 export const version = '1.0.0';

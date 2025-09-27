@@ -16,32 +16,81 @@ import {
 // RequestInit is available globally via @types/node in Node.js 18+
 
 /**
- * Abstraction for fetch-like HTTP client
+ * Abstraction for fetch-like HTTP client to enable dependency injection and testing
+ *
+ * @interface HttpClient
+ * @example
+ * ```typescript
+ * class CustomHttpClient implements HttpClient {
+ *   async fetch(url: string, init?: RequestInit): Promise<Response> {
+ *     // Custom implementation with logging, retries, etc.
+ *     return fetch(url, init);
+ *   }
+ * }
+ * ```
  */
 export interface HttpClient {
+  /**
+   * Performs an HTTP request
+   * @param url - The URL to request
+   * @param init - Optional request configuration
+   * @returns Promise resolving to the HTTP response
+   */
   fetch(url: string, init?: RequestInit): Promise<Response>;
 }
 
 /**
- * Default HTTP client using native fetch
+ * Default HTTP client implementation using the native fetch API
+ *
+ * @class DefaultHttpClient
+ * @implements {HttpClient}
  */
 export class DefaultHttpClient implements HttpClient {
+  /**
+   * Performs an HTTP request using the native fetch API
+   * @param url - The URL to request
+   * @param init - Optional request configuration
+   * @returns Promise resolving to the HTTP response
+   */
   async fetch(url: string, init?: RequestInit): Promise<Response> {
     return fetch(url, init);
   }
 }
 
 /**
- * Abstraction for abort controller creation
+ * Abstraction for creating AbortController instances to enable dependency injection
+ *
+ * @interface AbortControllerFactory
+ * @example
+ * ```typescript
+ * class TestAbortControllerFactory implements AbortControllerFactory {
+ *   create(): AbortController {
+ *     const controller = new AbortController();
+ *     // Add test-specific behavior
+ *     return controller;
+ *   }
+ * }
+ * ```
  */
 export interface AbortControllerFactory {
+  /**
+   * Creates a new AbortController instance
+   * @returns A new AbortController for request cancellation
+   */
   create(): AbortController;
 }
 
 /**
- * Default abort controller factory
+ * Default AbortController factory using the native AbortController
+ *
+ * @class DefaultAbortControllerFactory
+ * @implements {AbortControllerFactory}
  */
 export class DefaultAbortControllerFactory implements AbortControllerFactory {
+  /**
+   * Creates a new AbortController instance
+   * @returns A new AbortController for request cancellation
+   */
   create(): AbortController {
     return new AbortController();
   }
