@@ -17,3 +17,16 @@ export {
   extractMetadataFromFile,
   extractMetadataFromContent,
 } from './metadata-extractor';
+
+export {
+  TestExtractor,
+  TestExtractionError,
+  ExtractedTestCode,
+  ExtractedRequestTest,
+  ExtractedItBlock,
+  ExtractedSharedCode,
+  ExtractedImport,
+  TestExtractionOptions,
+  extractTestCodeFromFile,
+  extractTestCodeFromContent,
+} from './test-extractor';
