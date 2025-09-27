@@ -43,6 +43,16 @@ export {
   MetadataExtractionOptions,
   extractMetadataFromFile,
   extractMetadataFromContent,
+  TestExtractor,
+  TestExtractionError,
+  ExtractedTestCode,
+  ExtractedTestBlock,
+  ExtractedImport,
+  ExtractedVariable,
+  ExtractedFunction,
+  TestExtractionOptions,
+  extractTestCodeFromFile,
+  extractTestCodeFromContent,
 } from './parser';
 
 // Phase 5: Developer Experience Enhancements
