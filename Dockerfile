@@ -17,7 +17,6 @@ RUN apt-get -y update \
        gawk \
        sed
 
-
 ############################################################################
 # Create proper security higene for enviornemnt.
 # Manage SSH keys https://medium.com/trabe/use-your-local-ssh-keys-inside-a-docker-contaieragener-ea1d117515dc
@@ -56,6 +55,11 @@ RUN cd /home/user \
     && mkdir "/home/user/.npm-packages" \
     && echo "prefix=/home/user/.npm-packages" >> /home/user/.npmrc \
     && npm install -g @anthropic-ai/claude-code
+
+############################################################################
+# Fix Github permissions issues
+############################################################################
+RUN git config --global --add safe.directory /project
 
 ############################################################################
 # Inside Docker Let Claude Run Free...
