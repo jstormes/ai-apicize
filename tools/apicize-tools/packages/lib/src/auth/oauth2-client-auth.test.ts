@@ -1,20 +1,10 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { OAuth2ClientAuthProvider, OAuth2TokenResponse } from './oauth2-client-auth';
 import { OAuth2ClientAuthorization, AuthorizationType } from '../types';
+import { createMockResponse, FetchMockManager } from '../test-utils/index';
 
-// Mock fetch globally
-global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
-
-// Helper function to create properly typed mock responses
-const createMockResponse = <T>(data: T, ok: boolean = true): Partial<Response> => ({
-  ok,
-  json: jest.fn<() => Promise<T>>().mockResolvedValue(data),
-  text: jest
-    .fn<() => Promise<string>>()
-    .mockResolvedValue(typeof data === 'string' ? data : JSON.stringify(data)),
-  status: ok ? 200 : 401,
-  statusText: ok ? 'OK' : 'Unauthorized',
-});
+// Fetch mock manager for this test suite
+const fetchManager = new FetchMockManager();
 
 describe('OAuth2ClientAuthProvider', () => {
   const createValidAuth = (): OAuth2ClientAuthorization => ({
@@ -29,10 +19,12 @@ describe('OAuth2ClientAuthProvider', () => {
   });
 
   beforeEach(() => {
+    fetchManager.save();
     jest.clearAllMocks();
   });
 
   afterEach(() => {
+    fetchManager.restore();
     jest.restoreAllMocks();
   });
 
@@ -47,9 +39,7 @@ describe('OAuth2ClientAuthProvider', () => {
         expires_in: 3600,
       };
 
-      const mockResponse = createMockResponse(mockTokenResponse);
-
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(createMockResponse(mockTokenResponse) as any);
 
       const result = await provider.getHeaders();
 
@@ -76,9 +66,7 @@ describe('OAuth2ClientAuthProvider', () => {
         expires_in: 3600,
       };
 
-      const mockResponse = createMockResponse(mockTokenResponse);
-
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(createMockResponse(mockTokenResponse) as any);
 
       // First call should fetch token
       const result1 = await provider.getHeaders();
@@ -112,9 +100,10 @@ describe('OAuth2ClientAuthProvider', () => {
       const mockResponse1 = createMockResponse(mockTokenResponse);
       const mockResponse2 = createMockResponse(mockNewTokenResponse);
 
-      (global.fetch as any)
-        .mockResolvedValueOnce(mockResponse1)
-        .mockResolvedValueOnce(mockResponse2);
+      const mockFetch = fetchManager.mock();
+      mockFetch
+        .mockResolvedValueOnce(mockResponse1 as any)
+        .mockResolvedValueOnce(mockResponse2 as any);
 
       // First call
       const result1 = await provider.getHeaders();
@@ -141,7 +130,7 @@ describe('OAuth2ClientAuthProvider', () => {
         text: jest.fn<() => Promise<string>>().mockResolvedValue('Invalid credentials'),
       } as Partial<Response>;
 
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(mockResponse as any);
 
       const result = await provider.getHeaders();
 
@@ -161,9 +150,7 @@ describe('OAuth2ClientAuthProvider', () => {
         // Missing access_token
       };
 
-      const mockResponse = createMockResponse(mockTokenResponse);
-
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(createMockResponse(mockTokenResponse) as any);
 
       const result = await provider.getHeaders();
 
@@ -176,7 +163,7 @@ describe('OAuth2ClientAuthProvider', () => {
       const auth = createValidAuth();
       const provider = new OAuth2ClientAuthProvider(auth);
 
-      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+      fetchManager.mock().mockRejectedValue(new Error('Network error'));
 
       const result = await provider.getHeaders();
 
@@ -208,9 +195,7 @@ describe('OAuth2ClientAuthProvider', () => {
         token_type: 'Bearer',
       };
 
-      const mockResponse = createMockResponse(mockTokenResponse);
-
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(createMockResponse(mockTokenResponse) as any);
 
       await provider.getHeaders();
 
@@ -301,9 +286,7 @@ describe('OAuth2ClientAuthProvider', () => {
         expires_in: 3600,
       };
 
-      const mockResponse = createMockResponse(mockTokenResponse);
-
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(createMockResponse(mockTokenResponse) as any);
 
       await provider.getHeaders();
       expect(fetch).toHaveBeenCalledTimes(1);
@@ -327,9 +310,7 @@ describe('OAuth2ClientAuthProvider', () => {
         expires_in: 3600,
       };
 
-      const mockResponse = createMockResponse(mockTokenResponse);
-
-      (global.fetch as any).mockResolvedValue(mockResponse);
+      fetchManager.mock().mockResolvedValue(createMockResponse(mockTokenResponse) as any);
 
       await provider.getHeaders();
 

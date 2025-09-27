@@ -11,15 +11,19 @@ import {
   OAuth2ClientAuthorization,
   OAuth2PkceAuthorization,
 } from '../types';
+import { FetchMockManager, createMockResponse } from '../test-utils';
 
 describe('AuthManager', () => {
   let authManager: AuthManager;
+  const fetchManager = new FetchMockManager();
 
   beforeEach(() => {
     authManager = new AuthManager();
+    fetchManager.save();
   });
 
   afterEach(() => {
+    fetchManager.restore();
     jest.restoreAllMocks();
   });
 
@@ -197,16 +201,109 @@ describe('AuthManager', () => {
   });
 
   describe('token cache management', () => {
-    it('should clear all tokens when no ID provided', () => {
+    it('should clear all tokens when no ID provided', async () => {
+      // Create OAuth2 provider that caches tokens
+      const auth: OAuth2ClientAuthorization = {
+        id: 'oauth-1',
+        name: 'OAuth Test',
+        type: AuthorizationType.OAuth2Client,
+        accessTokenUrl: 'https://auth.example.com/token',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+      };
+
+      // Create single mock and configure responses
+      const mockFetch = fetchManager.mock();
+      const mockResponse = createMockResponse(
+        { access_token: 'token1', token_type: 'Bearer', expires_in: 3600 },
+        true
+      );
+      const mockResponse2 = createMockResponse(
+        { access_token: 'token2', token_type: 'Bearer', expires_in: 3600 },
+        true
+      );
+
+      mockFetch
+        .mockResolvedValueOnce(mockResponse as any)
+        .mockResolvedValueOnce(mockResponse2 as any);
+
+      await authManager.createAndRegisterProvider('oauth-test', auth);
+
+      // First call should fetch token
+      const result1 = await authManager.getAuthHeaders('oauth-test');
+      expect(result1.success).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      // Clear all tokens
       authManager.clearTokenCache();
-      // Since cache is protected, we test this indirectly through OAuth2 provider behavior
-      expect(true).toBe(true); // No direct way to test private cache
+
+      // Next call should fetch new token (cache was cleared)
+      const result2 = await authManager.getAuthHeaders('oauth-test');
+      expect(result2.success).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(result2.headers[0].value).toBe('Bearer token2');
     });
 
-    it('should clear specific token when ID provided', () => {
-      authManager.clearTokenCache('specific-auth');
-      // Since cache is protected, we test this indirectly through OAuth2 provider behavior
-      expect(true).toBe(true); // No direct way to test private cache
+    it('should clear specific token when ID provided', async () => {
+      // Create two OAuth2 providers
+      const auth1: OAuth2ClientAuthorization = {
+        id: 'oauth-1',
+        name: 'OAuth Test 1',
+        type: AuthorizationType.OAuth2Client,
+        accessTokenUrl: 'https://auth1.example.com/token',
+        clientId: 'client-1',
+        clientSecret: 'secret-1',
+      };
+
+      const auth2: OAuth2ClientAuthorization = {
+        id: 'oauth-2',
+        name: 'OAuth Test 2',
+        type: AuthorizationType.OAuth2Client,
+        accessTokenUrl: 'https://auth2.example.com/token',
+        clientId: 'client-2',
+        clientSecret: 'secret-2',
+      };
+
+      // Create single mock and configure all responses
+      const mockFetch = fetchManager.mock();
+      const mockResponse1 = createMockResponse(
+        { access_token: 'token1', token_type: 'Bearer', expires_in: 3600 },
+        true
+      );
+      const mockResponse2 = createMockResponse(
+        { access_token: 'token2', token_type: 'Bearer', expires_in: 3600 },
+        true
+      );
+      const mockResponse3 = createMockResponse(
+        { access_token: 'token1-new', token_type: 'Bearer', expires_in: 3600 },
+        true
+      );
+
+      mockFetch
+        .mockResolvedValueOnce(mockResponse1 as any)
+        .mockResolvedValueOnce(mockResponse2 as any)
+        .mockResolvedValueOnce(mockResponse3 as any);
+
+      await authManager.createAndRegisterProvider('oauth-1', auth1);
+      await authManager.createAndRegisterProvider('oauth-2', auth2);
+
+      // Fetch tokens for both providers
+      await authManager.getAuthHeaders('oauth-1');
+      await authManager.getAuthHeaders('oauth-2');
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+
+      // Clear only oauth-1's cache
+      authManager.clearTokenCache('oauth-1');
+
+      // oauth-1 should fetch new token
+      const result1 = await authManager.getAuthHeaders('oauth-1');
+      expect(result1.headers[0].value).toBe('Bearer token1-new');
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+
+      // oauth-2 should still use cached token
+      const result2 = await authManager.getAuthHeaders('oauth-2');
+      expect(result2.headers[0].value).toBe('Bearer token2');
+      expect(mockFetch).toHaveBeenCalledTimes(3); // No new fetch
     });
   });
 });

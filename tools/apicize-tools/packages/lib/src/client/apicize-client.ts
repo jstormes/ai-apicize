@@ -16,6 +16,38 @@ import {
 // RequestInit is available globally via @types/node in Node.js 18+
 
 /**
+ * Abstraction for fetch-like HTTP client
+ */
+export interface HttpClient {
+  fetch(url: string, init?: RequestInit): Promise<Response>;
+}
+
+/**
+ * Default HTTP client using native fetch
+ */
+export class DefaultHttpClient implements HttpClient {
+  async fetch(url: string, init?: RequestInit): Promise<Response> {
+    return fetch(url, init);
+  }
+}
+
+/**
+ * Abstraction for abort controller creation
+ */
+export interface AbortControllerFactory {
+  create(): AbortController;
+}
+
+/**
+ * Default abort controller factory
+ */
+export class DefaultAbortControllerFactory implements AbortControllerFactory {
+  create(): AbortController {
+    return new AbortController();
+  }
+}
+
+/**
  * HTTP Client configuration options
  */
 export interface ClientConfig {
@@ -37,6 +69,7 @@ export interface RequestOptions {
   mode?: RequestInit['mode'] | undefined;
   referrer?: string | undefined;
   referrerPolicy?: string | undefined;
+  signal?: AbortSignal | undefined;
 }
 
 /**
@@ -54,16 +87,26 @@ export class ApicizeRequestError extends Error {
 }
 
 export class ApicizeTimeoutError extends ApicizeRequestError {
-  constructor(timeout: number) {
-    super(`Request timed out after ${timeout}ms`, undefined, 'TIMEOUT');
+  constructor(timeout: number, method?: string, url?: string) {
+    const methodPart = method ? ` ${method}` : '';
+    const urlPart = url ? ` to ${url}` : '';
+    super(`Request${methodPart}${urlPart} timed out after ${timeout}ms`, undefined, 'TIMEOUT');
     this.name = 'ApicizeTimeoutError';
   }
 }
 
 export class ApicizeNetworkError extends ApicizeRequestError {
-  constructor(message: string, cause?: Error) {
-    super(`Network error: ${message}`, cause, 'NETWORK_ERROR');
+  constructor(message: string, cause?: Error, url?: string) {
+    const urlPart = url ? ` (${url})` : '';
+    super(`Network error: ${message}${urlPart}`, cause, 'NETWORK_ERROR');
     this.name = 'ApicizeNetworkError';
+  }
+}
+
+export class ApicizeAbortError extends ApicizeRequestError {
+  constructor(reason: string = 'Request was aborted') {
+    super(reason, undefined, 'ABORT_ERROR');
+    this.name = 'ApicizeAbortError';
   }
 }
 
@@ -72,8 +115,14 @@ export class ApicizeNetworkError extends ApicizeRequestError {
  */
 export class ApicizeClient {
   private config: ClientConfig;
+  private httpClient: HttpClient;
+  private abortControllerFactory: AbortControllerFactory;
 
-  constructor(config: ClientConfig = {}) {
+  constructor(
+    config: ClientConfig = {},
+    httpClient: HttpClient = new DefaultHttpClient(),
+    abortControllerFactory: AbortControllerFactory = new DefaultAbortControllerFactory()
+  ) {
     this.config = {
       defaultTimeout: 30000,
       maxRedirects: 10,
@@ -82,6 +131,8 @@ export class ApicizeClient {
       keepAlive: true,
       ...config,
     };
+    this.httpClient = httpClient;
+    this.abortControllerFactory = abortControllerFactory;
   }
 
   /**
@@ -91,73 +142,194 @@ export class ApicizeClient {
     requestConfig: RequestConfig,
     options: RequestOptions = {}
   ): Promise<ApicizeResponse> {
-    const started = Date.now();
     const redirects: Array<{ url: string; status: number }> = [];
 
     try {
-      // Merge options with client defaults
+      // Merge options with client defaults, prioritizing requestConfig values
       const finalOptions: RequestOptions = {
-        timeout: options.timeout ?? this.config.defaultTimeout!,
+        timeout: requestConfig.timeout ?? options.timeout ?? this.config.defaultTimeout!,
         maxRedirects: options.maxRedirects ?? this.config.maxRedirects!,
         acceptInvalidCerts: options.acceptInvalidCerts ?? this.config.acceptInvalidCerts!,
         keepAlive: options.keepAlive ?? this.config.keepAlive!,
         mode: options.mode,
         referrer: options.referrer,
         referrerPolicy: options.referrerPolicy,
+        signal: options.signal,
       };
 
       // Build the request
       const { url, fetchOptions } = await this.buildRequest(requestConfig, finalOptions);
 
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-      }, finalOptions.timeout);
+      // Execute with manual redirect handling and proper abort management
+      const response = await this.executeWithRedirects(
+        url,
+        fetchOptions,
+        finalOptions,
+        requestConfig,
+        redirects,
+        0,
+        Date.now()
+      );
 
-      try {
-        // Execute the request
-        const fetchResponse = await fetch(url, {
-          ...fetchOptions,
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        // Track redirects
-        if (fetchResponse.redirected) {
-          // Note: fetch API doesn't provide redirect chain details
-          // This is a limitation of the native fetch API
-          redirects.push({
-            url: fetchResponse.url,
-            status: fetchResponse.status,
-          });
-        }
-
-        // Process the response
-        const response = await this.processResponse(fetchResponse, started);
-        if (redirects.length > 0) {
-          response.redirects = redirects;
-        }
-
-        return response;
-      } catch (error) {
-        clearTimeout(timeoutId);
-
-        if (error instanceof Error) {
-          if (error.name === 'AbortError') {
-            throw new ApicizeTimeoutError(finalOptions.timeout!);
-          }
-          throw new ApicizeNetworkError(error.message, error);
-        }
-        throw new ApicizeRequestError('Unknown error occurred', error as Error);
-      }
+      return response;
     } catch (error) {
       if (error instanceof ApicizeRequestError) {
         throw error;
       }
       throw new ApicizeRequestError('Failed to execute request', error as Error);
     }
+  }
+
+  /**
+   * Execute request with manual redirect handling and proper abort management
+   */
+  private async executeWithRedirects(
+    url: string,
+    fetchOptions: RequestInit,
+    finalOptions: RequestOptions,
+    requestConfig: RequestConfig,
+    redirects: Array<{ url: string; status: number }>,
+    redirectCount: number = 0,
+    started: number = Date.now()
+  ): Promise<ApicizeResponse> {
+
+    // Create abort controller - use factory for testability
+    const controller = this.abortControllerFactory.create();
+    let timeoutId: NodeJS.Timeout | undefined;
+    let isTimeoutAbort = false;
+
+    // Handle existing aborted signal
+    if (finalOptions.signal && finalOptions.signal.aborted) {
+      throw new ApicizeAbortError('Request was aborted before execution');
+    }
+
+    // Set up timeout
+    if (finalOptions.timeout && finalOptions.timeout > 0) {
+      timeoutId = setTimeout(() => {
+        isTimeoutAbort = true;
+        controller.abort();
+      }, finalOptions.timeout);
+    }
+
+    try {
+      // Combine signals if one was passed in
+      let signal = controller.signal;
+      if (finalOptions.signal) {
+        // Create a combined signal that aborts if either aborts
+        const combinedController = this.abortControllerFactory.create();
+        const originalSignal = finalOptions.signal;
+
+        const abortHandler = () => combinedController.abort();
+        controller.signal.addEventListener('abort', abortHandler, { once: true });
+        originalSignal.addEventListener('abort', abortHandler, { once: true });
+
+        signal = combinedController.signal;
+      }
+
+      // Execute the request with manual redirect=false to handle redirects ourselves
+      const fetchResponse = await this.httpClient.fetch(url, {
+        ...fetchOptions,
+        signal,
+        redirect: 'manual', // Handle redirects manually
+      });
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Handle redirects manually for 3xx status codes
+      if (this.isRedirectStatus(fetchResponse.status)) {
+        const location = fetchResponse.headers.get('location');
+
+        if (!location) {
+          throw new ApicizeNetworkError('Redirect response missing location header', undefined, url);
+        }
+
+        // Track the redirect
+        redirects.push({
+          url: location,
+          status: fetchResponse.status,
+        });
+
+        // Check redirect limit
+        if (redirectCount >= finalOptions.maxRedirects!) {
+          throw new ApicizeNetworkError(`Too many redirects (limit: ${finalOptions.maxRedirects})`, undefined, url);
+        }
+
+        // Follow the redirect
+        const redirectUrl = new URL(location, url).toString();
+        return this.executeWithRedirects(
+          redirectUrl,
+          { ...fetchOptions, method: this.getRedirectMethod(fetchOptions.method as string, fetchResponse.status) },
+          finalOptions,
+          requestConfig,
+          redirects,
+          redirectCount + 1,
+          started
+        );
+      }
+
+      // Handle legacy fetch behavior where native redirects occurred
+      if (fetchResponse.redirected && redirects.length === 0) {
+        // This happens when fetch automatically handled redirects (shouldn't happen with redirect: 'manual')
+        // but we support it for backward compatibility
+        redirects.push({
+          url: fetchResponse.url,
+          status: fetchResponse.status,
+        });
+      }
+
+      // Process the final response
+      const response = await this.processResponse(fetchResponse, started);
+      if (redirects.length > 0) {
+        response.redirects = redirects;
+      }
+
+      return response;
+    } catch (error) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          // Check if it was a timeout abort or manual abort
+          if (isTimeoutAbort) {
+            throw new ApicizeTimeoutError(finalOptions.timeout!, requestConfig.method, requestConfig.url);
+          } else {
+            throw new ApicizeAbortError('Request was cancelled');
+          }
+        }
+        throw new ApicizeNetworkError(error.message, error, requestConfig.url);
+      }
+      throw new ApicizeRequestError('Unknown error occurred', error as Error);
+    }
+  }
+
+  /**
+   * Check if status code indicates a redirect
+   */
+  private isRedirectStatus(status: number): boolean {
+    return status >= 300 && status < 400 && status !== 304;
+  }
+
+  /**
+   * Get appropriate HTTP method for redirect
+   */
+  private getRedirectMethod(originalMethod: string, status: number): string {
+    // For 303, always use GET
+    // For 301, 302, 307, 308 preserve original method (with some exceptions)
+    if (status === 303) {
+      return 'GET';
+    }
+
+    // For POST/PUT/PATCH on 301/302, browsers typically change to GET
+    if ((status === 301 || status === 302) &&
+        (originalMethod === 'POST' || originalMethod === 'PUT' || originalMethod === 'PATCH')) {
+      return 'GET';
+    }
+
+    return originalMethod;
   }
 
   /**
@@ -361,6 +533,16 @@ export class ApicizeClient {
       // Get response text first
       text = await fetchResponse.text();
 
+      // Check for empty body or 204 No Content status
+      if (!text || text.length === 0 || fetchResponse.status === 204) {
+        return {
+          type: BodyType.None,
+          data: undefined,
+          text: '',
+          size: 0,
+        };
+      }
+
       // Determine body type based on content-type
       if (contentType.includes('application/json')) {
         bodyType = BodyType.JSON;
@@ -403,7 +585,7 @@ export class ApicizeClient {
    * Create a new client with different configuration
    */
   withConfig(config: Partial<ClientConfig>): ApicizeClient {
-    return new ApicizeClient({ ...this.config, ...config });
+    return new ApicizeClient({ ...this.config, ...config }, this.httpClient, this.abortControllerFactory);
   }
 
   /**
@@ -411,5 +593,22 @@ export class ApicizeClient {
    */
   getConfig(): ClientConfig {
     return { ...this.config };
+  }
+
+  /**
+   * Execute a request and return the abort controller for testing purposes
+   */
+  async executeWithController(
+    requestConfig: RequestConfig,
+    options: RequestOptions = {}
+  ): Promise<{ response: ApicizeResponse; controller: AbortController }> {
+    const controller = this.abortControllerFactory.create();
+
+    try {
+      const response = await this.execute(requestConfig, { ...options, signal: controller.signal });
+      return { response, controller };
+    } catch (error) {
+      throw error;
+    }
   }
 }
