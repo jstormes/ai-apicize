@@ -1,10 +1,15 @@
 // @apicize/tools - CLI tools entry point
-// This file will export public APIs for programmatic use
+// This file exports public APIs for programmatic use
 
-// CLI functionality (placeholders for future implementation)
-// export * from './commands';
-// export * from './export';
-// export * from './import';
+// CLI utilities
+export * from './utils/cli-utils';
+
+// Command implementations (for programmatic use)
+export { exportCommand } from './commands/export';
+export { importCommand } from './commands/import';
+export { validateCommand } from './commands/validate';
+export { createCommand } from './commands/create';
+export { runCommand } from './commands/run';
 
 // Version information
 export const version = '1.0.0';

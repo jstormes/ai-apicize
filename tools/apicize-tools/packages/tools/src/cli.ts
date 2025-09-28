@@ -1,28 +1,59 @@
 #!/usr/bin/env node
-// CLI entry point - placeholder for Phase 6 implementation
+// CLI entry point for Apicize tools
 
 import { Command } from 'commander';
+import chalk from 'chalk';
+import { version } from '@apicize/lib';
+import { exportCommand } from './commands/export';
+import { importCommand } from './commands/import';
+import { validateCommand } from './commands/validate';
+import { createCommand } from './commands/create';
+import { runCommand } from './commands/run';
 
 const program = new Command();
 
+// Configure main program
 program
   .name('apicize')
   .description('CLI tools for working with .apicize API test files')
-  .version('1.0.0');
-
-// Placeholder commands - will be implemented in Phase 6
-program
-  .command('export')
-  .description('Export .apicize file to TypeScript tests')
-  .action(() => {
-    console.log('Export command - to be implemented in Phase 4');
+  .version(version)
+  .option('-v, --verbose', 'enable verbose output')
+  .option('--no-color', 'disable colored output')
+  .hook('preAction', (thisCommand) => {
+    // Set up global options
+    const opts = thisCommand.opts();
+    if (opts.noColor) {
+      chalk.level = 0;
+    }
+    if (opts.verbose) {
+      process.env.APICIZE_VERBOSE = 'true';
+    }
   });
 
-program
-  .command('import')
-  .description('Import TypeScript tests back to .apicize file')
-  .action(() => {
-    console.log('Import command - to be implemented in Phase 5');
-  });
+// Register commands
+exportCommand(program);
+importCommand(program);
+validateCommand(program);
+createCommand(program);
+runCommand(program);
 
+// Error handling
+program.configureOutput({
+  writeErr: (str) => process.stderr.write(chalk.red(str)),
+  writeOut: (str) => process.stdout.write(str)
+});
+
+// Handle unknown commands
+program.on('command:*', (operands) => {
+  console.error(chalk.red(`Unknown command: ${operands[0]}`));
+  console.log(chalk.yellow('Use "apicize --help" to see available commands'));
+  process.exit(1);
+});
+
+// Parse command line arguments
 program.parse();
+
+// Show help if no command provided
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
