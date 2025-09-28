@@ -320,7 +320,7 @@ export interface RequestConfig {
 
 // ============= Test Helper Types =============
 
-export interface TestHelper {
+export interface ITestHelper {
   setupTest(testName: string): Promise<ApicizeContext>;
   loadScenario(scenarioId: string): Promise<Scenario>;
   loadData(dataId: string): Promise<unknown>;

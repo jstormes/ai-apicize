@@ -13,6 +13,7 @@
   "exclude": [
     "**/*.test.ts",
     "**/*.spec.ts",
+    "src/parser/test-samples/**/*",
     "dist"
   ]
 }

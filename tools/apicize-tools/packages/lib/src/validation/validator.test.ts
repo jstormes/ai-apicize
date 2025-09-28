@@ -8,7 +8,7 @@ import {
   AuthorizationType,
   DataType,
 } from '../types';
-import { WORKBOOK_EXAMPLES, loadExampleAsJson } from '@apicize/examples';
+import { WORKBOOK_EXAMPLES, loadExampleAsJson } from '../../../examples/src/index';
 
 describe('ApicizeValidator', () => {
   let validator: ApicizeValidator;

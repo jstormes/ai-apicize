@@ -24,7 +24,8 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@apicize/lib(.*)$': '<rootDir>/packages/lib/src$1',
-    '^@apicize/tools(.*)$': '<rootDir>/packages/tools/src$1'
+    '^@apicize/tools(.*)$': '<rootDir>/packages/tools/src$1',
+    '^@apicize/examples(.*)$': '<rootDir>/packages/examples/src$1'
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 10000,
