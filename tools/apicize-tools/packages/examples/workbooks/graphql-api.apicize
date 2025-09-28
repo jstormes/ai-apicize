@@ -1,0 +1,296 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "graphql-operations",
+      "name": "GraphQL API Operations",
+      "children": [
+        {
+          "id": "get-user-query",
+          "name": "Get User Query",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('Get User Query', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return user data', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('user');\n    expect(data.data.user).to.have.property('id');\n    expect(data.data.user).to.have.property('email');\n    expect(data.data.user).to.have.property('name');\n  });\n\n  it('should not have errors', () => {\n    const data = response.body.data;\n    expect(data.errors).to.be.undefined;\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "query GetUser($id: ID!) {\n  user(id: $id) {\n    id\n    email\n    name\n    profile {\n      firstName\n      lastName\n      avatar\n    }\n    createdAt\n    updatedAt\n  }\n}",
+              "variables": {
+                "id": "{{userId}}"
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "create-user-mutation",
+          "name": "Create User Mutation",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('Create User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should create user successfully', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('createUser');\n    \n    const createdUser = data.data.createUser;\n    expect(createdUser).to.have.property('id');\n    expect(createdUser.email).to.equal('newuser@example.com');\n    expect(createdUser.name).to.equal('New User');\n    \n    output('newUserId', createdUser.id);\n  });\n\n  it('should not have validation errors', () => {\n    const data = response.body.data;\n    expect(data.errors).to.be.undefined;\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "mutation CreateUser($input: CreateUserInput!) {\n  createUser(input: $input) {\n    id\n    email\n    name\n    profile {\n      firstName\n      lastName\n    }\n    createdAt\n  }\n}",
+              "variables": {
+                "input": {
+                  "email": "newuser@example.com",
+                  "name": "New User",
+                  "profile": {
+                    "firstName": "New",
+                    "lastName": "User"
+                  }
+                }
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "list-users-query",
+          "name": "List Users Query",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('List Users Query', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return paginated users', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('users');\n    \n    const usersData = data.data.users;\n    expect(usersData).to.have.property('nodes');\n    expect(usersData).to.have.property('pageInfo');\n    expect(usersData).to.have.property('totalCount');\n    \n    expect(usersData.nodes).to.be.an('array');\n    expect(usersData.pageInfo).to.have.property('hasNextPage');\n    expect(usersData.pageInfo).to.have.property('hasPreviousPage');\n  });\n\n  it('should include created user in results', () => {\n    const data = response.body.data;\n    const users = data.data.users.nodes;\n    const createdUser = users.find(user => user.id === $.newUserId);\n    expect(createdUser).to.exist;\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "query ListUsers($first: Int, $after: String, $filter: UserFilter) {\n  users(first: $first, after: $after, filter: $filter) {\n    nodes {\n      id\n      email\n      name\n      profile {\n        firstName\n        lastName\n      }\n      createdAt\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n    totalCount\n  }\n}",
+              "variables": {
+                "first": 10,
+                "filter": {
+                  "isActive": true
+                }
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "update-user-mutation",
+          "name": "Update User Mutation",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('Update User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should update user successfully', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('updateUser');\n    \n    const updatedUser = data.data.updateUser;\n    expect(updatedUser.id).to.equal($.newUserId);\n    expect(updatedUser.name).to.equal('Updated User');\n    expect(updatedUser.profile.firstName).to.equal('Updated');\n  });\n\n  it('should preserve unchanged fields', () => {\n    const data = response.body.data;\n    const updatedUser = data.data.updateUser;\n    expect(updatedUser.email).to.equal('newuser@example.com');\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {\n  updateUser(id: $id, input: $input) {\n    id\n    email\n    name\n    profile {\n      firstName\n      lastName\n    }\n    updatedAt\n  }\n}",
+              "variables": {
+                "id": "{{newUserId}}",
+                "input": {
+                  "name": "Updated User",
+                  "profile": {
+                    "firstName": "Updated",
+                    "lastName": "User"
+                  }
+                }
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "delete-user-mutation",
+          "name": "Delete User Mutation",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('Delete User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should delete user successfully', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('deleteUser');\n    expect(data.data.deleteUser).to.be.true;\n  });\n\n  it('should not have errors', () => {\n    const data = response.body.data;\n    expect(data.errors).to.be.undefined;\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "mutation DeleteUser($id: ID!) {\n  deleteUser(id: $id)\n}",
+              "variables": {
+                "id": "{{newUserId}}"
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        }
+      ],
+      "execution": "SEQUENTIAL",
+      "runs": 1
+    },
+    {
+      "id": "error-handling",
+      "name": "GraphQL Error Handling",
+      "children": [
+        {
+          "id": "invalid-query",
+          "name": "Invalid Query Syntax",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('Invalid Query Syntax', () => {\n  it('should return 400 status', () => {\n    expect(response.status).to.equal(400);\n  });\n\n  it('should return syntax error', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('errors');\n    expect(data.errors).to.be.an('array');\n    expect(data.errors[0]).to.have.property('message');\n    expect(data.errors[0].message).to.contain('Syntax Error');\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "query InvalidSyntax {\n  user(\n    id: \"invalid\"\n  # Missing closing brace"
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "unauthorized-query",
+          "name": "Unauthorized Query",
+          "url": "{{baseUrl}}/graphql",
+          "method": "POST",
+          "test": "describe('Unauthorized Query', () => {\n  it('should return 401 status', () => {\n    expect(response.status).to.equal(401);\n  });\n\n  it('should return authentication error', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('errors');\n    expect(data.errors[0].message).to.contain('Unauthorized');\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "query": "query GetUser($id: ID!) {\n  user(id: $id) {\n    id\n    email\n    name\n  }\n}",
+              "variables": {
+                "id": "user-123"
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        }
+      ],
+      "execution": "SEQUENTIAL",
+      "runs": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "development",
+      "name": "Development",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "https://graphql-dev.example.com",
+          "type": "TEXT"
+        },
+        {
+          "name": "authToken",
+          "value": "dev-graphql-token",
+          "type": "TEXT"
+        },
+        {
+          "name": "userId",
+          "value": "dev-user-123",
+          "type": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": "production",
+      "name": "Production",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "https://api.example.com",
+          "type": "TEXT"
+        },
+        {
+          "name": "authToken",
+          "value": "{{GRAPHQL_AUTH_TOKEN}}",
+          "type": "TEXT"
+        },
+        {
+          "name": "userId",
+          "value": "{{PROD_USER_ID}}",
+          "type": "TEXT"
+        }
+      ]
+    }
+  ],
+  "authorizations": [
+    {
+      "id": "bearer-token",
+      "name": "Bearer Token",
+      "type": "ApiKey",
+      "header": "Authorization",
+      "value": "Bearer {{authToken}}"
+    }
+  ],
+  "certificates": [],
+  "proxies": [],
+  "data": [],
+  "defaults": {
+    "selectedScenario": {
+      "id": "development",
+      "name": "Development"
+    },
+    "selectedAuthorization": {
+      "id": "bearer-token",
+      "name": "Bearer Token"
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "user-crud",
+      "name": "User CRUD Operations",
+      "children": [
+        {
+          "id": "create-user",
+          "name": "Create User",
+          "url": "{{baseUrl}}/api/users",
+          "method": "POST",
+          "test": "describe('Create User', () => {\n  it('should return 201 status', () => {\n    expect(response.status).to.equal(201);\n  });\n\n  it('should return user with ID', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('id');\n    expect(data.email).to.equal('john.doe@example.com');\n    output('userId', data.id);\n  });\n\n  it('should include creation timestamp', () => {\n    const data = response.body.data;\n    expect(data).to.have.property('createdAt');\n    expect(new Date(data.createdAt)).to.be.a('date');\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "role": "user",
+              "profile": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "department": "Engineering"
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "get-user",
+          "name": "Get User by ID",
+          "url": "{{baseUrl}}/api/users/{{userId}}",
+          "method": "GET",
+          "test": "describe('Get User by ID', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return correct user data', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data.id).to.equal($.userId);\n    expect(data.email).to.equal('john.doe@example.com');\n    expect(data.name).to.equal('John Doe');\n  });\n\n  it('should include profile information', () => {\n    const data = response.body.data;\n    expect(data.profile).to.have.property('firstName', 'John');\n    expect(data.profile).to.have.property('lastName', 'Doe');\n  });\n});",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "update-user",
+          "name": "Update User",
+          "url": "{{baseUrl}}/api/users/{{userId}}",
+          "method": "PUT",
+          "test": "describe('Update User', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should update user data', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data.name).to.equal('John Smith');\n    expect(data.profile.department).to.equal('Product');\n  });\n\n  it('should preserve unchanged fields', () => {\n    const data = response.body.data;\n    expect(data.email).to.equal('john.doe@example.com');\n    expect(data.role).to.equal('user');\n  });\n});",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "body": {
+            "type": "JSON",
+            "data": {
+              "name": "John Smith",
+              "profile": {
+                "firstName": "John",
+                "lastName": "Smith",
+                "department": "Product"
+              }
+            }
+          },
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "list-users",
+          "name": "List Users",
+          "url": "{{baseUrl}}/api/users",
+          "method": "GET",
+          "test": "describe('List Users', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return paginated results', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('items');\n    expect(data).to.have.property('total');\n    expect(data).to.have.property('page');\n    expect(data).to.have.property('limit');\n    expect(data.items).to.be.an('array');\n  });\n\n  it('should include created user in results', () => {\n    const data = response.body.data;\n    const createdUser = data.items.find(user => user.id === $.userId);\n    expect(createdUser).to.exist;\n    expect(createdUser.name).to.equal('John Smith');\n  });\n});",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "queryStringParams": [
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "10"
+            },
+            {
+              "name": "sort",
+              "value": "name"
+            }
+          ],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "delete-user",
+          "name": "Delete User",
+          "url": "{{baseUrl}}/api/users/{{userId}}",
+          "method": "DELETE",
+          "test": "describe('Delete User', () => {\n  it('should return 204 status', () => {\n    expect(response.status).to.equal(204);\n  });\n\n  it('should have empty response body', () => {\n    expect(response.body.type).to.equal(BodyType.None);\n  });\n});",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        },
+        {
+          "id": "verify-deletion",
+          "name": "Verify User Deletion",
+          "url": "{{baseUrl}}/api/users/{{userId}}",
+          "method": "GET",
+          "test": "describe('Verify User Deletion', () => {\n  it('should return 404 status', () => {\n    expect(response.status).to.equal(404);\n  });\n\n  it('should return error message', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('error');\n    expect(data.error.message).to.contain('User not found');\n  });\n});",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{authToken}}"
+            }
+          ],
+          "queryStringParams": [],
+          "timeout": 30000,
+          "runs": 1
+        }
+      ],
+      "execution": "SEQUENTIAL",
+      "runs": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "development",
+      "name": "Development",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "https://api-dev.example.com",
+          "type": "TEXT"
+        },
+        {
+          "name": "authToken",
+          "value": "dev-token-12345",
+          "type": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": "staging",
+      "name": "Staging",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "https://api-staging.example.com",
+          "type": "TEXT"
+        },
+        {
+          "name": "authToken",
+          "value": "staging-token-67890",
+          "type": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": "production",
+      "name": "Production",
+      "variables": [
+        {
+          "name": "baseUrl",
+          "value": "https://api.example.com",
+          "type": "TEXT"
+        },
+        {
+          "name": "authToken",
+          "value": "{{PROD_AUTH_TOKEN}}",
+          "type": "TEXT"
+        }
+      ]
+    }
+  ],
+  "authorizations": [
+    {
+      "id": "bearer-token",
+      "name": "Bearer Token",
+      "type": "ApiKey",
+      "header": "Authorization",
+      "value": "Bearer {{authToken}}"
+    }
+  ],
+  "certificates": [],
+  "proxies": [],
+  "data": [],
+  "defaults": {
+    "selectedScenario": {
+      "id": "development",
+      "name": "Development"
+    },
+    "selectedAuthorization": {
+      "id": "bearer-token",
+      "name": "Bearer Token"
+    }
+  }
+}
