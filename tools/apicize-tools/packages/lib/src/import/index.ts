@@ -12,6 +12,14 @@ export {
   reconstructFromFiles,
 } from './request-reconstructor';
 
+export {
+  ImportPipeline,
+  ImportPipelineError,
+  importProject,
+  importFromFiles,
+  importAndSave,
+} from './import-pipeline';
+
 export type {
   ScannedFile,
   ProjectMap,
@@ -24,3 +32,12 @@ export type {
   ReconstructionResult,
   RequestReconstructorOptions,
 } from './request-reconstructor';
+
+export type {
+  ImportPipelineOptions,
+  ImportResult,
+  ImportStatistics,
+  ImportWarning,
+  ImportError,
+  RoundTripAccuracy,
+} from './import-pipeline';
