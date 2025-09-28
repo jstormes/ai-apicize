@@ -84,6 +84,25 @@ describe('ImportPipeline', () => {
 
       expect(result.workbook).toBeDefined();
       expect(result.workbook.version).toBe(1.0);
+
+      // Debug: Let's see what's happening
+      if (result.workbook.requests.length === 0) {
+        console.log('No requests found. Warnings:', result.warnings);
+        console.log('Statistics:', result.statistics);
+
+        // Check if files were actually scanned
+        const files = await fs.readdir(testProjectDir);
+        console.log('Files in test project:', files);
+
+        // Check if test file exists and has content
+        const testFilePath = join(testProjectDir, 'test.spec.ts');
+        if (await fs.stat(testFilePath).catch(() => false)) {
+          const content = await fs.readFile(testFilePath, 'utf-8');
+          console.log('Test file content length:', content.length);
+          console.log('Contains @apicize-request-metadata:', content.includes('@apicize-request-metadata'));
+        }
+      }
+
       expect(result.workbook.requests).toHaveLength(1);
       expect(result.statistics.requestsReconstructed).toBe(1);
     });
@@ -96,6 +115,12 @@ describe('ImportPipeline', () => {
 
       const pipeline = new ImportPipeline();
       const result = await pipeline.importFromFiles([testFile]);
+
+      // Debug output
+      if (result.workbook.requests.length === 0) {
+        console.log('ImportFromFiles - No requests found. Warnings:', result.warnings);
+        console.log('Statistics:', result.statistics);
+      }
 
       expect(result.workbook.requests).toHaveLength(1);
       expect(result.statistics.filesScanned).toBe(1);
@@ -127,7 +152,15 @@ describe('ImportPipeline', () => {
 
   async function createBasicTestProject(dir: string): Promise<void> {
     await createEmptyProject(dir);
-    await createTestFile(join(dir, 'test.spec.ts'));
+    // Make sure file is created in the correct location with .spec.ts extension
+    const testFilePath = join(dir, 'test.spec.ts');
+    await createTestFile(testFilePath);
+
+    // Verify the file was created
+    const exists = await fs.stat(testFilePath).then(() => true).catch(() => false);
+    if (!exists) {
+      throw new Error(`Test file was not created at ${testFilePath}`);
+    }
   }
 
   async function createTestFile(filePath: string, requestId = 'request-1'): Promise<void> {
@@ -157,5 +190,11 @@ describe('Test Request', () => {
 });`;
 
     await fs.writeFile(filePath, content);
+
+    // Verify the file was written with content
+    const writtenContent = await fs.readFile(filePath, 'utf-8');
+    if (!writtenContent.includes('@apicize-request-metadata')) {
+      throw new Error('Test file content was not written correctly');
+    }
   }
 });
