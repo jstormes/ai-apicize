@@ -3,6 +3,12 @@
  * Provides all dependency injection, error handling, and debugging utilities
  */
 
+// Phase 2: Hexagonal Architecture - Parsing Infrastructure
+export * from './parsing';
+
+// Phase 2: Dependency Injection Container
+export * from './container';
+
 // Interfaces
 export * from './interfaces';
 

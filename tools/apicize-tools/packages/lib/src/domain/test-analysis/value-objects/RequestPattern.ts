@@ -38,9 +38,13 @@ export class RequestPattern {
 
     if (!description || typeof description !== 'string' || description.trim().length === 0) {
       return Result.fail(
-        new ValidationError('INVALID_PATTERN_DESCRIPTION', 'Pattern description must be a non-empty string', {
-          description,
-        })
+        new ValidationError(
+          'INVALID_PATTERN_DESCRIPTION',
+          'Pattern description must be a non-empty string',
+          {
+            description,
+          }
+        )
       );
     }
 
@@ -163,12 +167,7 @@ export class RequestPattern {
    * Creates a new pattern with additional flags
    */
   withFlags(flags: string): Result<RequestPattern, ValidationError> {
-    return RequestPattern.fromString(
-      this._pattern.source,
-      flags,
-      this._name,
-      this._description
-    );
+    return RequestPattern.fromString(this._pattern.source, flags, this._name, this._description);
   }
 
   /**
@@ -183,7 +182,9 @@ export class RequestPattern {
    * Creates a new pattern with case-insensitive matching
    */
   caseInsensitive(): Result<RequestPattern, ValidationError> {
-    const newFlags = this._pattern.flags.includes('i') ? this._pattern.flags : this._pattern.flags + 'i';
+    const newFlags = this._pattern.flags.includes('i')
+      ? this._pattern.flags
+      : this._pattern.flags + 'i';
     return this.withFlags(newFlags);
   }
 
@@ -196,7 +197,12 @@ export class RequestPattern {
     const combinedName = `${this._name}-or-${other._name}`;
     const combinedDescription = `${this._description} OR ${other._description}`;
 
-    return RequestPattern.fromString(combinedPattern, combinedFlags, combinedName, combinedDescription);
+    return RequestPattern.fromString(
+      combinedPattern,
+      combinedFlags,
+      combinedName,
+      combinedDescription
+    );
   }
 
   /**
@@ -208,7 +214,12 @@ export class RequestPattern {
     const combinedName = `${this._name}-and-${other._name}`;
     const combinedDescription = `${this._description} AND ${other._description}`;
 
-    return RequestPattern.fromString(combinedPattern, combinedFlags, combinedName, combinedDescription);
+    return RequestPattern.fromString(
+      combinedPattern,
+      combinedFlags,
+      combinedName,
+      combinedDescription
+    );
   }
 
   /**
@@ -219,7 +230,12 @@ export class RequestPattern {
     const negatedName = `not-${this._name}`;
     const negatedDescription = `NOT ${this._description}`;
 
-    return RequestPattern.fromString(negatedPattern, this._pattern.flags, negatedName, negatedDescription);
+    return RequestPattern.fromString(
+      negatedPattern,
+      this._pattern.flags,
+      negatedName,
+      negatedDescription
+    );
   }
 
   /**

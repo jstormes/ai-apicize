@@ -1,6 +1,11 @@
 // @apicize/lib - Core library for Apicize tools
 // This file will export all public interfaces and utilities
 
+// Phase 2: Hexagonal Architecture - Domain & Application Layers
+export * from './domain';
+export * from './application';
+export * from './presentation';
+
 // Type definitions - Core types
 export {
   HttpMethod,

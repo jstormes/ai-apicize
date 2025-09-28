@@ -62,20 +62,32 @@ export class TestBlock {
     // Validate depth relationship with parent
     if (props.parent && props.depth !== props.parent._depth + 1) {
       return Result.fail(
-        new ValidationError('INVALID_DEPTH_RELATIONSHIP', 'Depth must be exactly one more than parent depth', {
-          depth: props.depth,
-          parentDepth: props.parent._depth,
-        })
+        new ValidationError(
+          'INVALID_DEPTH_RELATIONSHIP',
+          'Depth must be exactly one more than parent depth',
+          {
+            depth: props.depth,
+            parentDepth: props.parent._depth,
+          }
+        )
       );
     }
 
     // Validate test block type rules
-    if (props.type === TestBlockType.It && props.parent && props.parent._type === TestBlockType.It) {
+    if (
+      props.type === TestBlockType.It &&
+      props.parent &&
+      props.parent._type === TestBlockType.It
+    ) {
       return Result.fail(
-        new ValidationError('INVALID_NESTING', 'It blocks cannot be nested inside other it blocks', {
-          type: props.type,
-          parentType: props.parent._type,
-        })
+        new ValidationError(
+          'INVALID_NESTING',
+          'It blocks cannot be nested inside other it blocks',
+          {
+            type: props.type,
+            parentType: props.parent._type,
+          }
+        )
       );
     }
 
@@ -234,7 +246,10 @@ export class TestBlock {
   classifyAsRequestSpecific(patterns: RequestPattern[]): Result<void, BusinessRuleError> {
     if (patterns.length === 0) {
       return Result.fail(
-        new BusinessRuleError('NO_PATTERNS_PROVIDED', 'At least one pattern must be provided for classification')
+        new BusinessRuleError(
+          'NO_PATTERNS_PROVIDED',
+          'At least one pattern must be provided for classification'
+        )
       );
     }
 
@@ -273,7 +288,9 @@ export class TestBlock {
   setMetadata(key: string, value: unknown): Result<void, ValidationError> {
     if (!key || typeof key !== 'string') {
       return Result.fail(
-        new ValidationError('INVALID_METADATA_KEY', 'Metadata key must be a non-empty string', { key })
+        new ValidationError('INVALID_METADATA_KEY', 'Metadata key must be a non-empty string', {
+          key,
+        })
       );
     }
 
@@ -301,10 +318,14 @@ export class TestBlock {
 
     if (child._depth !== this._depth + 1) {
       return Result.fail(
-        new BusinessRuleError('INVALID_CHILD_DEPTH', 'Child depth must be exactly one more than parent', {
-          parentDepth: this._depth,
-          childDepth: child._depth,
-        })
+        new BusinessRuleError(
+          'INVALID_CHILD_DEPTH',
+          'Child depth must be exactly one more than parent',
+          {
+            parentDepth: this._depth,
+            childDepth: child._depth,
+          }
+        )
       );
     }
 

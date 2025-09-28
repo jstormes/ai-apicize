@@ -13,6 +13,12 @@
   "exclude": [
     "**/*.test.ts",
     "**/*.spec.ts",
-    "dist"
+    "dist",
+    "src/domain/test-analysis/services/strategies/*Strategy.ts",
+    "src/domain/test-analysis/services/strategies/I*.ts",
+    "src/infrastructure/builders/ArchitectureBuilder.ts",
+    "src/infrastructure/factories/ParserFactory.ts",
+    "src/infrastructure/parsing/TypeScriptParser.ts",
+    "src/test-utils/**/*"
   ]
 }

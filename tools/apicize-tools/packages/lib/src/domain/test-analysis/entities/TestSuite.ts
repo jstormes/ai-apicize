@@ -6,6 +6,13 @@ import { SourceCode } from '../value-objects/SourceCode';
 import { RequestPattern } from '../value-objects/RequestPattern';
 
 /**
+ * Value object for TestSuite ID
+ */
+export class TestSuiteId {
+  constructor(public readonly value: string) {}
+}
+
+/**
  * Aggregate root representing a complete test suite
  * Manages the collection of test blocks and enforces business rules
  */
@@ -16,10 +23,10 @@ export class TestSuite {
   private _helperFunctions: HelperFunction[] = [];
   private _metadata: Map<string, unknown> = new Map();
 
-  private constructor(
-    private readonly _id: string,
-    private readonly _name: string,
-    private readonly _sourceCode: SourceCode
+  public constructor(
+    private readonly _id: TestSuiteId,
+    private readonly _name: TestName,
+    private readonly _sourceCode?: SourceCode
   ) {}
 
   /**
@@ -28,7 +35,7 @@ export class TestSuite {
   static create(props: {
     id: string;
     name: string;
-    sourceCode: SourceCode;
+    sourceCode?: SourceCode;
   }): Result<TestSuite, ValidationError> {
     // Validate ID
     if (!props.id || typeof props.id !== 'string' || props.id.trim().length === 0) {
@@ -42,34 +49,52 @@ export class TestSuite {
     // Validate name
     if (!props.name || typeof props.name !== 'string' || props.name.trim().length === 0) {
       return Result.fail(
-        new ValidationError('INVALID_TEST_SUITE_NAME', 'Test suite name must be a non-empty string', {
-          name: props.name,
-        })
+        new ValidationError(
+          'INVALID_TEST_SUITE_NAME',
+          'Test suite name must be a non-empty string',
+          {
+            name: props.name,
+          }
+        )
       );
     }
 
-    return Result.ok(new TestSuite(props.id.trim(), props.name.trim(), props.sourceCode));
+    const idResult = new TestSuiteId(props.id.trim());
+    const nameResult = TestName.create(props.name.trim());
+
+    if (Result.isFail(nameResult)) {
+      return nameResult;
+    }
+
+    return Result.ok(new TestSuite(idResult, nameResult.data, props.sourceCode));
   }
 
   /**
    * Gets the suite ID
    */
-  get id(): string {
+  get id(): TestSuiteId {
     return this._id;
   }
 
   /**
    * Gets the suite name
    */
-  get name(): string {
+  get name(): TestName {
     return this._name;
   }
 
   /**
    * Gets the source code
    */
-  get sourceCode(): SourceCode {
+  get sourceCode(): SourceCode | undefined {
     return this._sourceCode;
+  }
+
+  /**
+   * Gets all test blocks (alias for getAllBlocks for compatibility)
+   */
+  get testBlocks(): TestBlock[] {
+    return this.getAllBlocks();
   }
 
   /**
@@ -171,7 +196,9 @@ export class TestSuite {
         return rootBlock;
       }
 
-      const found = rootBlock.findChild(blockId) || rootBlock.findAllDescendants().find(block => block.id === blockId);
+      const found =
+        rootBlock.findChild(blockId) ||
+        rootBlock.findAllDescendants().find(block => block.id === blockId);
       if (found) {
         return found;
       }
@@ -285,8 +312,9 @@ export class TestSuite {
   addImport(importStatement: ImportStatement): Result<void, ValidationError> {
     // Check for duplicate imports
     const isDuplicate = this._imports.some(
-      existing => existing.module === importStatement.module &&
-      JSON.stringify(existing.namedImports) === JSON.stringify(importStatement.namedImports)
+      existing =>
+        existing.module === importStatement.module &&
+        JSON.stringify(existing.namedImports) === JSON.stringify(importStatement.namedImports)
     );
 
     if (isDuplicate) {
@@ -325,7 +353,9 @@ export class TestSuite {
    */
   addHelperFunction(helperFunction: HelperFunction): Result<void, ValidationError> {
     // Check for duplicate function names
-    const isDuplicate = this._helperFunctions.some(existing => existing.name === helperFunction.name);
+    const isDuplicate = this._helperFunctions.some(
+      existing => existing.name === helperFunction.name
+    );
 
     if (isDuplicate) {
       return Result.fail(
@@ -345,7 +375,9 @@ export class TestSuite {
   setMetadata(key: string, value: unknown): Result<void, ValidationError> {
     if (!key || typeof key !== 'string') {
       return Result.fail(
-        new ValidationError('INVALID_METADATA_KEY', 'Metadata key must be a non-empty string', { key })
+        new ValidationError('INVALID_METADATA_KEY', 'Metadata key must be a non-empty string', {
+          key,
+        })
       );
     }
 
@@ -377,8 +409,8 @@ export class TestSuite {
       importsCount: this._imports.length,
       globalVariablesCount: this._globalVariables.length,
       helperFunctionsCount: this._helperFunctions.length,
-      sourceCodeLines: this._sourceCode.lineCount,
-      sourceCodeCharacters: this._sourceCode.characterCount,
+      sourceCodeLines: this._sourceCode?.lineCount ?? 0,
+      sourceCodeCharacters: this._sourceCode?.characterCount ?? 0,
     };
   }
 
@@ -402,15 +434,15 @@ export class TestSuite {
 
     // Check for orphaned variables (variables not used in any test)
     for (const variable of this._globalVariables) {
-      const isUsed = this._sourceCode.contains(variable.name);
+      const isUsed = this._sourceCode?.contains(variable.name) ?? false;
       if (!isUsed) {
         warnings.push(`Global variable '${variable.name}' is declared but not used`);
       }
     }
 
     // Check for missing required imports for test frameworks
-    const hasTestFrameworkImports = this._imports.some(imp =>
-      imp.module === 'mocha' || imp.module === 'jest' || imp.module === '@jest/globals'
+    const hasTestFrameworkImports = this._imports.some(
+      imp => imp.module === 'mocha' || imp.module === 'jest' || imp.module === '@jest/globals'
     );
     if (hasExecutableTests && !hasTestFrameworkImports) {
       warnings.push('Test suite appears to have executable tests but no test framework imports');
@@ -470,7 +502,7 @@ export class TestSuite {
     return {
       id: this._id,
       name: this._name,
-      sourceCode: this._sourceCode.toJSON(),
+      sourceCode: this._sourceCode?.toJSON(),
       rootBlocks: this._rootBlocks.map(block => block.toJSON()),
       imports: this._imports,
       globalVariables: this._globalVariables,

@@ -19,10 +19,7 @@ export class CodeMetadata {
   /**
    * Creates a new CodeMetadata instance
    */
-  static create(props: {
-    id: string;
-    sourceFile: string;
-  }): Result<CodeMetadata, ValidationError> {
+  static create(props: { id: string; sourceFile: string }): Result<CodeMetadata, ValidationError> {
     if (!props.id || typeof props.id !== 'string' || props.id.trim().length === 0) {
       return Result.fail(
         new ValidationError('INVALID_METADATA_ID', 'Metadata ID must be a non-empty string', {
@@ -31,7 +28,11 @@ export class CodeMetadata {
       );
     }
 
-    if (!props.sourceFile || typeof props.sourceFile !== 'string' || props.sourceFile.trim().length === 0) {
+    if (
+      !props.sourceFile ||
+      typeof props.sourceFile !== 'string' ||
+      props.sourceFile.trim().length === 0
+    ) {
       return Result.fail(
         new ValidationError('INVALID_SOURCE_FILE', 'Source file must be a non-empty string', {
           sourceFile: props.sourceFile,
@@ -98,9 +99,13 @@ export class CodeMetadata {
     // Validate required fields
     if (!metadata.id || typeof metadata.id !== 'string') {
       return Result.fail(
-        new ValidationError('INVALID_REQUEST_METADATA_ID', 'Request metadata ID must be a non-empty string', {
-          id: metadata.id,
-        })
+        new ValidationError(
+          'INVALID_REQUEST_METADATA_ID',
+          'Request metadata ID must be a non-empty string',
+          {
+            id: metadata.id,
+          }
+        )
       );
     }
 
@@ -116,9 +121,13 @@ export class CodeMetadata {
     const isDuplicate = this._requestMetadata.some(existing => existing.id === metadata.id);
     if (isDuplicate) {
       return Result.fail(
-        new ValidationError('DUPLICATE_REQUEST_METADATA', 'Request metadata with this ID already exists', {
-          id: metadata.id,
-        })
+        new ValidationError(
+          'DUPLICATE_REQUEST_METADATA',
+          'Request metadata with this ID already exists',
+          {
+            id: metadata.id,
+          }
+        )
       );
     }
 
@@ -133,9 +142,13 @@ export class CodeMetadata {
     // Validate required fields
     if (!metadata.id || typeof metadata.id !== 'string') {
       return Result.fail(
-        new ValidationError('INVALID_GROUP_METADATA_ID', 'Group metadata ID must be a non-empty string', {
-          id: metadata.id,
-        })
+        new ValidationError(
+          'INVALID_GROUP_METADATA_ID',
+          'Group metadata ID must be a non-empty string',
+          {
+            id: metadata.id,
+          }
+        )
       );
     }
 
@@ -151,9 +164,13 @@ export class CodeMetadata {
     const isDuplicate = this._groupMetadata.some(existing => existing.id === metadata.id);
     if (isDuplicate) {
       return Result.fail(
-        new ValidationError('DUPLICATE_GROUP_METADATA', 'Group metadata with this ID already exists', {
-          id: metadata.id,
-        })
+        new ValidationError(
+          'DUPLICATE_GROUP_METADATA',
+          'Group metadata with this ID already exists',
+          {
+            id: metadata.id,
+          }
+        )
       );
     }
 
@@ -168,9 +185,13 @@ export class CodeMetadata {
     // Validate required fields
     if (!metadata.testId || typeof metadata.testId !== 'string') {
       return Result.fail(
-        new ValidationError('INVALID_TEST_METADATA_ID', 'Test metadata ID must be a non-empty string', {
-          testId: metadata.testId,
-        })
+        new ValidationError(
+          'INVALID_TEST_METADATA_ID',
+          'Test metadata ID must be a non-empty string',
+          {
+            testId: metadata.testId,
+          }
+        )
       );
     }
 
@@ -178,9 +199,13 @@ export class CodeMetadata {
     const isDuplicate = this._testMetadata.some(existing => existing.testId === metadata.testId);
     if (isDuplicate) {
       return Result.fail(
-        new ValidationError('DUPLICATE_TEST_METADATA', 'Test metadata with this ID already exists', {
-          testId: metadata.testId,
-        })
+        new ValidationError(
+          'DUPLICATE_TEST_METADATA',
+          'Test metadata with this ID already exists',
+          {
+            testId: metadata.testId,
+          }
+        )
       );
     }
 
@@ -194,7 +219,9 @@ export class CodeMetadata {
   setCustomMetadata(key: string, value: unknown): Result<void, ValidationError> {
     if (!key || typeof key !== 'string') {
       return Result.fail(
-        new ValidationError('INVALID_METADATA_KEY', 'Metadata key must be a non-empty string', { key })
+        new ValidationError('INVALID_METADATA_KEY', 'Metadata key must be a non-empty string', {
+          key,
+        })
       );
     }
 
@@ -267,6 +294,18 @@ export class CodeMetadata {
   }
 
   /**
+   * Checks if this metadata has any content
+   */
+  get hasMetadata(): boolean {
+    return (
+      this._requestMetadata.length > 0 ||
+      this._groupMetadata.length > 0 ||
+      this._testMetadata.length > 0 ||
+      this._customMetadata.size > 0
+    );
+  }
+
+  /**
    * Gets statistics about the metadata
    */
   getStatistics(): MetadataStatistics {
@@ -291,19 +330,21 @@ export class CodeMetadata {
     // Check for orphaned references
     for (const groupMeta of this._groupMetadata) {
       if (groupMeta.selectedScenario && !this.findRequestMetadata(groupMeta.selectedScenario.id)) {
-        warnings.push(`Group ${groupMeta.id} references unknown scenario ${groupMeta.selectedScenario.id}`);
+        warnings.push(
+          `Group ${groupMeta.id} references unknown scenario ${groupMeta.selectedScenario.id}`
+        );
       }
     }
 
     // Check for duplicate positions
-    const positions = this._requestMetadata
-      .filter(m => m.position)
-      .map(m => m.position!);
+    const positions = this._requestMetadata.filter(m => m.position).map(m => m.position!);
 
     for (let i = 0; i < positions.length; i++) {
       for (let j = i + 1; j < positions.length; j++) {
         if (positions[i].overlaps(positions[j])) {
-          warnings.push(`Request metadata positions overlap at ${positions[i].toString()} and ${positions[j].toString()}`);
+          warnings.push(
+            `Request metadata positions overlap at ${positions[i].toString()} and ${positions[j].toString()}`
+          );
         }
       }
     }

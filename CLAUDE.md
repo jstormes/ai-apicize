@@ -889,6 +889,263 @@ admin,admin123,200
 
 Variables accessed as: `{{username}}`, `{{password}}`, `{{expected_status}}`
 
+## Architecture Overview
+
+The Apicize tools are built using a modern, layered architecture that implements several design patterns to ensure maintainability, extensibility, and testability. The architecture follows Domain-Driven Design (DDD) principles and incorporates Hexagonal Architecture (Ports and Adapters) for clean separation of concerns.
+
+### Core Architecture Principles
+
+1. **Hexagonal Architecture**: Clean separation between domain logic, application services, and infrastructure
+2. **Design Patterns**: Strategic use of Factory, Strategy, Repository, and Builder patterns
+3. **Domain-Driven Design**: Rich domain models with clear boundaries and ubiquitous language
+4. **Dependency Injection**: Loose coupling through dependency inversion
+5. **Test-Driven Development**: Comprehensive test coverage with contract testing
+
+### Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Presentation Layer                   │
+│  ┌─────────────────┐  ┌─────────────────┐               │
+│  │ TestExtractor   │  │ CLI Commands    │               │
+│  │ Facade          │  │ & Controllers   │               │
+│  └─────────────────┘  └─────────────────┘               │
+└─────────────────────────────────────────────────────────┘
+│
+└─────────────────────────────────────────────────────────┐
+│                   Application Layer                     │
+│  ┌─────────────────┐  ┌─────────────────┐               │
+│  │ TestExtraction  │  │ TestAnalysis    │               │
+│  │ Service         │  │ Service         │               │
+│  └─────────────────┘  └─────────────────┘               │
+└─────────────────────────────────────────────────────────┘
+│
+└─────────────────────────────────────────────────────────┐
+│                     Domain Layer                        │
+│  ┌─────────────────┐  ┌─────────────────┐               │
+│  │ Entities        │  │ Value Objects   │               │
+│  │ - TestSuite     │  │ - TestName      │               │
+│  │ - TestBlock     │  │ - SourceCode    │               │
+│  │ - CodeMetadata  │  │ - SourcePosition│               │
+│  └─────────────────┘  └─────────────────┘               │
+│  ┌─────────────────┐  ┌─────────────────┐               │
+│  │ Domain Services │  │ Repositories    │               │
+│  │ - ITestClassifier│  │ - ITestRepository│               │
+│  │ - IMetadataAnalyz│  │ - ITestBlockRepo│               │
+│  └─────────────────┘  └─────────────────┘               │
+└─────────────────────────────────────────────────────────┘
+│
+└─────────────────────────────────────────────────────────┐
+│                  Infrastructure Layer                   │
+│  ┌─────────────────┐  ┌─────────────────┐               │
+│  │ Parsing         │  │ Repositories    │               │
+│  │ - TypeScriptParse│ │ - InMemoryRepo  │               │
+│  │ - AstNavigator  │  │ - FileSystemRepo│               │
+│  └─────────────────┘  └─────────────────┘               │
+│  ┌─────────────────┐  ┌─────────────────┐               │
+│  │ Factories       │  │ Strategies      │               │
+│  │ - ParserFactory │  │ - RequestPattern│               │
+│  │ - ExtractorFactory│ │ - MetadataComment│               │
+│  └─────────────────┘  └─────────────────┘               │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Design Patterns Implementation
+
+### 1. Strategy Pattern - Test Classification
+
+The Strategy pattern is used for flexible test classification algorithms that can be combined and configured based on requirements.
+
+#### Core Strategy Interface
+```typescript
+interface IClassificationStrategy {
+  readonly name: string;
+  readonly priority: number;
+  classify(testBlock: TestBlock, context: ClassificationContext): Promise<Result<TestClassificationResult, DomainError>>;
+  canClassify(testBlock: TestBlock, context: ClassificationContext): boolean;
+}
+```
+
+#### Available Strategies
+- **RequestPatternStrategy**: Analyzes test names for request-related patterns
+- **MetadataCommentStrategy**: Examines metadata comments (`@apicize-request-metadata`)
+- **CodeContentStrategy**: Analyzes test code for HTTP method calls and response handling
+- **CompositeClassificationStrategy**: Combines multiple strategies with configurable decision modes
+
+#### Strategy Usage Examples
+```typescript
+// Use default composite strategy
+const classifier = createDefaultClassificationStrategy();
+
+// Use conservative strategy (high precision)
+const conservativeClassifier = createConservativeClassificationStrategy();
+
+// Use aggressive strategy (high recall)
+const aggressiveClassifier = createAggressiveClassificationStrategy();
+
+// Create custom composite strategy
+const customClassifier = new CompositeClassificationStrategy({
+  strategies: [
+    new MetadataCommentStrategy({ trustLevel: 0.95 }),
+    new RequestPatternStrategy({ minConfidence: 0.8 }),
+    new CodeContentStrategy({ minIndicatorCount: 2 })
+  ],
+  decisionMode: 'WEIGHTED_VOTE',
+  minimumConfidence: 0.7
+});
+```
+
+### 2. Factory Pattern - Parser and Extractor Creation
+
+The Factory pattern provides flexible creation of parsers and extractors for different file types and configurations.
+
+#### Parser Factory
+```typescript
+// Create TypeScript parser
+const tsParser = ParserFactory.createTypeScript();
+
+// Create JavaScript parser
+const jsParser = ParserFactory.createJavaScript();
+
+// Create performance-optimized parser
+const fastParser = ParserFactory.createPerformanceOptimized('typescript');
+
+// Create parser from file extension
+const parser = ParserFactory.createFromExtension('.tsx', customOptions);
+
+// Create parser with custom configuration
+const customParser = ParserFactory.create({
+  type: 'typescript',
+  options: { preserveFormatting: true },
+  enableCaching: true,
+  enableValidation: true,
+  enableAnalysis: true
+});
+```
+
+#### Test Extractor Factory
+```typescript
+// Create extractors for different environments
+const devExtractor = TestExtractorFactory.createForDevelopment();
+const prodExtractor = TestExtractorFactory.createConservative();
+const ciExtractor = TestExtractorFactory.createForCI();
+
+// Create extractor for specific file type
+const jsExtractor = TestExtractorFactory.createForFileType('javascript');
+
+// Create extractor with custom classification
+const customExtractor = TestExtractorFactory.createWithClassificationStrategy(
+  customClassifier,
+  'typescript'
+);
+```
+
+### 3. Repository Pattern - Data Access Abstraction
+
+The Repository pattern abstracts data access operations and provides consistent interfaces for different storage mechanisms.
+
+#### Repository Interface
+```typescript
+interface ITestRepository {
+  save(testSuite: TestSuite): Promise<Result<void, InfrastructureError>>;
+  findById(id: string): Promise<Result<TestSuite | undefined, InfrastructureError>>;
+  findByNamePattern(pattern: string): Promise<Result<TestSuite[], InfrastructureError>>;
+  findAll(): Promise<Result<TestSuite[], InfrastructureError>>;
+  delete(id: string): Promise<Result<boolean, InfrastructureError>>;
+  getStatistics(): Promise<Result<RepositoryStatistics, InfrastructureError>>;
+}
+```
+
+#### Repository Implementations
+- **InMemoryTestRepository**: Fast in-memory storage for development and testing
+- **FileSystemTestRepository**: Persistent JSON-based file storage
+- **Custom repositories**: Extensible interface for databases or cloud storage
+
+#### Repository Usage
+```typescript
+// In-memory repository for testing
+const memoryRepo = new InMemoryTestRepository();
+
+// File system repository for persistence
+const fileRepo = new FileSystemTestRepository({
+  basePath: './test-data',
+  backupOnUpdate: true,
+  compressionEnabled: false
+});
+
+// Use repository
+const saveResult = await repository.save(testSuite);
+const foundSuite = await repository.findById('suite-id');
+const stats = await repository.getStatistics();
+```
+
+### 4. Builder Pattern - Complex Object Construction
+
+The Builder pattern simplifies the creation of complex configurations and test objects.
+
+#### Architecture Builder
+```typescript
+// Environment-specific builders
+const devExtractor = ArchitectureBuilder.forDevelopment()
+  .withParser('typescript')
+  .withRepository('memory')
+  .withClassificationStrategy('default')
+  .build();
+
+const prodExtractor = ArchitectureBuilder.forProduction()
+  .withParser('typescript')
+  .withRepository('filesystem')
+  .withClassificationStrategy('conservative')
+  .build();
+
+// Custom configuration
+const customExtractor = new ArchitectureBuilder()
+  .forEnvironment('staging')
+  .withParser('tsx')
+  .withCaching(true)
+  .withAnalysis(true)
+  .withCustomParsingOptions({ preserveFormatting: true })
+  .withCustomRepositoryConfig({ basePath: './custom-data' })
+  .build();
+```
+
+#### Test Data Builders
+```typescript
+// Build test blocks with fluent interface
+const testBlock = new TestBlockBuilder()
+  .asIt('should validate response')
+  .withCode('expect(response.status).to.equal(200);')
+  .asRequestSpecific(true)
+  .withDepth(1)
+  .build();
+
+// Build test suites
+const testSuite = new TestSuiteBuilder()
+  .withName('API Tests')
+  .withTestBlock(testBlock)
+  .withMetadata(metadata)
+  .build();
+```
+
+## Dependency Injection Container
+
+The architecture uses a dependency injection container to manage object lifecycles and dependencies.
+
+```typescript
+// Create container with custom configuration
+const container = createContainer({
+  parser: ParserFactory.createTypeScript(),
+  repository: new FileSystemTestRepository(),
+  classifier: createDefaultClassificationStrategy()
+});
+
+// Get configured facade from container
+const extractor = container.createTestExtractorFacade({
+  enableAnalysis: true,
+  enableValidation: true
+});
+```
+
 ## Architecture Benefits
 
 ### Library-Based Approach

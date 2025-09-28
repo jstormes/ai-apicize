@@ -1,5 +1,5 @@
 // Domain Entities
-export { TestSuite } from './entities/TestSuite';
+export { TestSuite, TestSuiteId } from './entities/TestSuite';
 export { TestBlock, TestBlockType } from './entities/TestBlock';
 export { CodeMetadata } from './entities/CodeMetadata';
 
@@ -24,19 +24,18 @@ export type {
   ClassificationResult,
   TestSuiteStatistics,
   ValidationSummary,
+} from './entities/TestSuite';
+
+export type {
   RequestMetadata,
   GroupMetadata,
   TestMetadata,
   MetadataStatistics,
-} from './entities/TestSuite';
-
-export type {
-  TestBlockStatistics,
-} from './entities/TestBlock';
-
-export type {
-  MetadataValidationResult,
 } from './entities/CodeMetadata';
+
+export type { TestBlockStatistics } from './entities/TestBlock';
+
+export type { MetadataValidationResult } from './entities/CodeMetadata';
 
 export type {
   ImportStatement as SourceCodeImport,

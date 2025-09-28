@@ -14,13 +14,21 @@ export class SourcePosition {
   /**
    * Creates a SourcePosition with validation
    */
-  static create(start: number, end: number, lineNumber?: number): Result<SourcePosition, ValidationError> {
+  static create(
+    start: number,
+    end: number,
+    lineNumber?: number
+  ): Result<SourcePosition, ValidationError> {
     // Validate start position
     if (!Number.isInteger(start) || start < 0) {
       return Result.fail(
-        new ValidationError('INVALID_START_POSITION', 'Start position must be a non-negative integer', {
-          start,
-        })
+        new ValidationError(
+          'INVALID_START_POSITION',
+          'Start position must be a non-negative integer',
+          {
+            start,
+          }
+        )
       );
     }
 
@@ -36,10 +44,14 @@ export class SourcePosition {
     // Validate position relationship
     if (end < start) {
       return Result.fail(
-        new ValidationError('INVALID_POSITION_RANGE', 'End position must be greater than or equal to start position', {
-          start,
-          end,
-        })
+        new ValidationError(
+          'INVALID_POSITION_RANGE',
+          'End position must be greater than or equal to start position',
+          {
+            start,
+            end,
+          }
+        )
       );
     }
 
@@ -59,7 +71,10 @@ export class SourcePosition {
   /**
    * Creates a SourcePosition for a single character
    */
-  static createSingle(position: number, lineNumber?: number): Result<SourcePosition, ValidationError> {
+  static createSingle(
+    position: number,
+    lineNumber?: number
+  ): Result<SourcePosition, ValidationError> {
     return this.create(position, position, lineNumber);
   }
 
@@ -137,10 +152,7 @@ export class SourcePosition {
     if (this.overlaps(other)) {
       return 0;
     }
-    return Math.min(
-      Math.abs(this._start - other._end),
-      Math.abs(this._end - other._start)
-    );
+    return Math.min(Math.abs(this._start - other._end), Math.abs(this._end - other._start));
   }
 
   /**
@@ -158,11 +170,7 @@ export class SourcePosition {
    * Creates a new position offset by the given amount
    */
   offset(amount: number): Result<SourcePosition, ValidationError> {
-    return SourcePosition.create(
-      this._start + amount,
-      this._end + amount,
-      this._lineNumber
-    );
+    return SourcePosition.create(this._start + amount, this._end + amount, this._lineNumber);
   }
 
   /**
@@ -180,7 +188,10 @@ export class SourcePosition {
   /**
    * Gets context around this position from the source content
    */
-  getContext(sourceContent: string, contextLines = 2): {
+  getContext(
+    sourceContent: string,
+    contextLines = 2
+  ): {
     before: string;
     content: string;
     after: string;

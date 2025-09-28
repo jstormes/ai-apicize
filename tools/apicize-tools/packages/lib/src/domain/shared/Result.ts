@@ -77,20 +77,20 @@ export namespace Result {
   /**
    * Combines multiple Results into a single Result
    */
-  export function combine<T extends readonly unknown[], E extends DomainError>(
-    results: { [K in keyof T]: Result<T[K], E> }
-  ): Result<T, E> {
-    const data = [] as unknown as T;
+  export function combine<T extends readonly unknown[], E extends DomainError>(results: {
+    [K in keyof T]: Result<T[K], E>;
+  }): Result<T, E> {
+    const data = [] as unknown[];
 
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       if (isFail(result)) {
         return result;
       }
-      (data as unknown[])[i] = result.data;
+      data[i] = result.data;
     }
 
-    return ok(data);
+    return ok(data as unknown as T);
   }
 
   /**
@@ -120,5 +120,60 @@ export namespace Result {
     } catch (error) {
       return fail(errorMapper(error));
     }
+  }
+
+  /**
+   * Alias for ok() - Creates a successful result
+   */
+  export function success<T>(data: T): Result<T, never> {
+    return ok(data);
+  }
+
+  /**
+   * Alias for fail() - Creates a failed result
+   */
+  export function failure<E extends DomainError>(error: E): Result<never, E> {
+    return fail(error);
+  }
+}
+
+/**
+ * Result class with static methods for compatibility
+ */
+export class ResultStatic {
+  /**
+   * Creates a successful result
+   */
+  static success<T>(value: T): { success: true; value: T; error?: never } {
+    return { success: true, value };
+  }
+
+  /**
+   * Creates a failed result
+   */
+  static failure<E extends DomainError>(error: E): { success: false; value?: never; error: E } {
+    return { success: false, error };
+  }
+
+  /**
+   * Check if result is successful
+   */
+  static isSuccess<T, E extends DomainError>(result: {
+    success: boolean;
+    value?: T;
+    error?: E;
+  }): result is { success: true; value: T } {
+    return result.success === true;
+  }
+
+  /**
+   * Check if result is failure
+   */
+  static isFailure<T, E extends DomainError>(result: {
+    success: boolean;
+    value?: T;
+    error?: E;
+  }): result is { success: false; error: E } {
+    return result.success === false;
   }
 }

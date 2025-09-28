@@ -25,6 +25,14 @@ export interface ITestClassifier {
   ): Result<BatchClassificationResult, BusinessRuleError>;
 
   /**
+   * Legacy method - classifies tests with request patterns (for compatibility)
+   */
+  classifyTests(
+    testBlocks: TestBlock[],
+    patterns: RequestPattern[]
+  ): Result<BatchClassificationResult, BusinessRuleError>;
+
+  /**
    * Adds a new classification strategy
    */
   addStrategy(strategy: IClassificationStrategy): void;
@@ -56,7 +64,10 @@ export interface IClassificationStrategy {
   /**
    * Classifies the test block as request-specific or not
    */
-  classify(testBlock: TestBlock, context: ClassificationContext): Result<boolean, BusinessRuleError>;
+  classify(
+    testBlock: TestBlock,
+    context: ClassificationContext
+  ): Result<boolean, BusinessRuleError>;
 }
 
 /**

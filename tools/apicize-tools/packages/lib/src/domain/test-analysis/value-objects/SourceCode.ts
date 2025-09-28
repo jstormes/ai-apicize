@@ -13,7 +13,10 @@ export class SourceCode {
   /**
    * Creates a SourceCode instance with validation
    */
-  static create(content: string, language: CodeLanguage = CodeLanguage.TypeScript): Result<SourceCode, ValidationError> {
+  static create(
+    content: string,
+    language: CodeLanguage = CodeLanguage.TypeScript
+  ): Result<SourceCode, ValidationError> {
     if (typeof content !== 'string') {
       return Result.fail(
         new ValidationError('INVALID_SOURCE_CONTENT', 'Source code must be a string', {
@@ -23,7 +26,8 @@ export class SourceCode {
     }
 
     // Allow empty content for valid use cases
-    if (content.length > 1000000) { // 1MB limit
+    if (content.length > 1000000) {
+      // 1MB limit
       return Result.fail(
         new ValidationError('SOURCE_CODE_TOO_LARGE', 'Source code exceeds maximum size limit', {
           size: content.length,
@@ -38,7 +42,10 @@ export class SourceCode {
   /**
    * Creates SourceCode from a template with parameters
    */
-  static fromTemplate(template: string, parameters: Record<string, string>): Result<SourceCode, ValidationError> {
+  static fromTemplate(
+    template: string,
+    parameters: Record<string, string>
+  ): Result<SourceCode, ValidationError> {
     let content = template;
 
     for (const [key, value] of Object.entries(parameters)) {
@@ -50,9 +57,13 @@ export class SourceCode {
     const unresolvedPlaceholders = content.match(/\{\{[^}]+\}\}/g);
     if (unresolvedPlaceholders) {
       return Result.fail(
-        new ValidationError('UNRESOLVED_TEMPLATE_PLACEHOLDERS', 'Template contains unresolved placeholders', {
-          placeholders: unresolvedPlaceholders,
-        })
+        new ValidationError(
+          'UNRESOLVED_TEMPLATE_PLACEHOLDERS',
+          'Template contains unresolved placeholders',
+          {
+            placeholders: unresolvedPlaceholders,
+          }
+        )
       );
     }
 
@@ -63,6 +74,13 @@ export class SourceCode {
    * Gets the raw content
    */
   get content(): string {
+    return this._content;
+  }
+
+  /**
+   * Gets the raw content (alias for compatibility)
+   */
+  get value(): string {
     return this._content;
   }
 
@@ -139,7 +157,10 @@ export class SourceCode {
    * Finds all matches of a pattern
    */
   findMatches(pattern: RegExp): RegExpMatchArray[] {
-    const globalPattern = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g');
+    const globalPattern = new RegExp(
+      pattern.source,
+      pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g'
+    );
     return Array.from(this._content.matchAll(globalPattern));
   }
 

@@ -1,6 +1,11 @@
 import { Result } from '../../shared/Result';
 import { ValidationError, BusinessRuleError } from '../../shared/DomainError';
-import { CodeMetadata, RequestMetadata, GroupMetadata, TestMetadata } from '../entities/CodeMetadata';
+import {
+  CodeMetadata,
+  RequestMetadata,
+  GroupMetadata,
+  TestMetadata,
+} from '../entities/CodeMetadata';
 import { SourceCode } from '../value-objects/SourceCode';
 import { SourcePosition } from '../value-objects/SourcePosition';
 
@@ -12,6 +17,11 @@ export interface IMetadataAnalyzer {
    * Analyzes source code and extracts all metadata
    */
   analyze(sourceCode: SourceCode, options?: AnalysisOptions): Result<CodeMetadata, ValidationError>;
+
+  /**
+   * Legacy method - analyzes metadata (for compatibility)
+   */
+  analyzeMetadata(sourceCode: SourceCode): Result<CodeMetadata, ValidationError>;
 
   /**
    * Extracts only request metadata from source code
@@ -92,7 +102,11 @@ export interface MetadataValidationError {
  * Metadata validation warning
  */
 export interface MetadataValidationWarning {
-  readonly type: 'unused_metadata' | 'deprecated_format' | 'inconsistent_naming' | 'missing_optional';
+  readonly type:
+    | 'unused_metadata'
+    | 'deprecated_format'
+    | 'inconsistent_naming'
+    | 'missing_optional';
   readonly message: string;
   readonly position?: SourcePosition;
   readonly context: Record<string, unknown>;

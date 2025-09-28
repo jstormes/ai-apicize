@@ -52,7 +52,9 @@ export interface ITestBlockRepository {
   /**
    * Finds test blocks by criteria
    */
-  findByCriteria(criteria: TestBlockSearchCriteria): Promise<Result<TestBlock[], InfrastructureError>>;
+  findByCriteria(
+    criteria: TestBlockSearchCriteria
+  ): Promise<Result<TestBlock[], InfrastructureError>>;
 
   /**
    * Finds request-specific test blocks
@@ -87,7 +89,9 @@ export interface ICodeMetadataRepository {
   /**
    * Finds metadata by source file
    */
-  findBySourceFile(sourceFile: string): Promise<Result<CodeMetadata | undefined, InfrastructureError>>;
+  findBySourceFile(
+    sourceFile: string
+  ): Promise<Result<CodeMetadata | undefined, InfrastructureError>>;
 
   /**
    * Finds metadata containing specific request IDs
@@ -168,7 +172,9 @@ export interface ITestSuiteQuery {
   /**
    * Finds test suites with specific characteristics
    */
-  findWithCharacteristics(characteristics: SuiteCharacteristics): Promise<Result<TestSuite[], InfrastructureError>>;
+  findWithCharacteristics(
+    characteristics: SuiteCharacteristics
+  ): Promise<Result<TestSuite[], InfrastructureError>>;
 
   /**
    * Finds test suites that contain specific test patterns
@@ -178,12 +184,16 @@ export interface ITestSuiteQuery {
   /**
    * Finds test suites by metadata criteria
    */
-  findByMetadataCriteria(criteria: MetadataCriteria): Promise<Result<TestSuite[], InfrastructureError>>;
+  findByMetadataCriteria(
+    criteria: MetadataCriteria
+  ): Promise<Result<TestSuite[], InfrastructureError>>;
 
   /**
    * Gets aggregated statistics across multiple test suites
    */
-  getAggregatedStatistics(suiteIds: string[]): Promise<Result<AggregatedStatistics, InfrastructureError>>;
+  getAggregatedStatistics(
+    suiteIds: string[]
+  ): Promise<Result<AggregatedStatistics, InfrastructureError>>;
 }
 
 /**
