@@ -58,9 +58,21 @@ RUN cd /home/user \
     && npm install -g @anthropic-ai/claude-code
 
 ############################################################################
+# Fix git permissions issue
+############################################################################
+RUN git config --global --add safe.directory /project
+
+############################################################################
 # Inside Docker Let Claude Run Free...
 ############################################################################
 RUN echo "alias claude='claude --dangerously-skip-permissions'\n" >> /home/user/.bashrc
+
+############################################################################
+# Set Claude Code timeouts to 5 minutes
+############################################################################
+ENV BASH_DEFAULT_TIMEOUT_MS=300000
+ENV BASH_MAX_TIMEOUT_MS=300000
+ENV MCP_TOOL_TIMEOUT=300000
 
 ############################################################################
 # Install Gemini CLI
