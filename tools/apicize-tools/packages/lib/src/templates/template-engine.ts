@@ -26,14 +26,15 @@ export class TemplateEngine {
         const opts = { ...this.defaultOptions, ...options };
         let result = template;
 
-        // Simple template variable substitution {{variable}}
-        result = this.substituteVariables(result, context);
+        // Process control structures first so they can create proper variable contexts
+        // Handle loops {{#each items}}...{{/each}}
+        result = this.handleLoops(result, context);
 
         // Handle conditionals {{#if condition}}...{{/if}}
         result = this.handleConditionals(result, context);
 
-        // Handle loops {{#each items}}...{{/each}}
-        result = this.handleLoops(result, context);
+        // Simple template variable substitution {{variable}} - do this last
+        result = this.substituteVariables(result, context);
 
         // Apply formatting
         result = this.applyFormatting(result, opts);
@@ -53,6 +54,7 @@ export class TemplateEngine {
             hasScenarios: workbook.scenarios && workbook.scenarios.length > 0,
             scenarios: workbook.scenarios || [],
             defaultScenario: workbook.defaults?.selectedScenario,
+            exportDate: new Date().toISOString(),
             ...options
         };
 
@@ -145,11 +147,22 @@ export class TemplateEngine {
             if (trimmedKey.startsWith('JSON.stringify(') && trimmedKey.endsWith(')')) {
                 const property = trimmedKey.substring(15, trimmedKey.length - 1);
                 const value = this.getNestedProperty(context, property);
-                return JSON.stringify(value || null);
+                try {
+                    // Use proper JSON serialization with null replacer to ensure safe formatting
+                    return JSON.stringify(value || null, null, 0);
+                } catch (error) {
+                    console.warn(`Failed to serialize ${property}:`, error);
+                    return 'null';
+                }
             }
 
             const value = this.getNestedProperty(context, trimmedKey);
-            return value !== undefined ? String(value) : match;
+
+            if (value !== undefined) {
+                return String(value);
+            }
+
+            return match;
         });
     }
 
@@ -169,7 +182,13 @@ export class TemplateEngine {
 
             return array.map((item, index) => {
                 const itemContext = { ...context, this: item, index, '@index': index };
-                return this.substituteVariables(content, itemContext);
+
+                // Process nested loops and conditionals first, then variables
+                let processedContent = this.handleLoops(content, itemContext);
+                processedContent = this.handleConditionals(processedContent, itemContext);
+                processedContent = this.substituteVariables(processedContent, itemContext);
+
+                return processedContent;
             }).join('');
         });
     }
