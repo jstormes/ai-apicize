@@ -1,0 +1,22 @@
+{
+  "services": {
+    "users": {
+      "base": "${baseUrls.api}/users",
+      "endpoints": {
+        "list": "/",
+        "get": "/{id}",
+        "create": "/",
+        "update": "/{id}",
+        "delete": "/{id}"
+      }
+    },
+    "products": {
+      "base": "${baseUrls.api}/products",
+      "endpoints": {
+        "list": "/",
+        "search": "/search",
+        "categories": "/categories"
+      }
+    }
+  }
+}

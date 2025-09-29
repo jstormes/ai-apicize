@@ -1,0 +1,9 @@
+{
+  "name": "default",
+  "description": "Default test scenario",
+  "variables": {
+    "baseUrl": "https://api.example.com",
+    "timeout": 30000,
+    "retries": 3
+  }
+}

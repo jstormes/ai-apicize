@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "requests": [
+    {
+      "id": "test-request-1",
+      "name": "Test Request",
+      "url": "https://api.example.com/test",
+      "method": "GET",
+      "test": "expect(response.status).to.equal(200);"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+username,password,expected_status,role
+user1,pass123,200,user
+admin,admin123,200,admin
+guest,guest123,200,guest
+invalid,wrong,401,none
