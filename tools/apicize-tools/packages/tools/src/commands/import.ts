@@ -99,15 +99,15 @@ async function importAction(inputDirectory: string, options: ImportOptions): Pro
     success(`Imported TypeScript tests to "${basename(outputFile)}"`);
     info(`Output file: ${outputFile}`);
     info(`File size: ${formatFileSize(outputStats.size)}`);
-    info(`Files processed: ${result.statistics.filesProcessed}`);
-    info(`Requests imported: ${result.statistics.requestsImported}`);
-    info(`Groups imported: ${result.statistics.groupsImported}`);
+    info(`Files scanned: ${result.statistics.filesScanned}`);
+    info(`Requests imported: ${result.statistics.requestsReconstructed}`);
+    info(`Groups imported: ${result.statistics.groupsReconstructed}`);
 
     if (result.roundTripAccuracy) {
-      const accuracy = (result.roundTripAccuracy.overallAccuracy * 100).toFixed(1);
-      if (result.roundTripAccuracy.overallAccuracy >= 0.99) {
+      const accuracy = (result.roundTripAccuracy.dataPreserved * 100).toFixed(1);
+      if (result.roundTripAccuracy.dataPreserved >= 0.99) {
         success(`Round-trip accuracy: ${accuracy}%`);
-      } else if (result.roundTripAccuracy.overallAccuracy >= 0.95) {
+      } else if (result.roundTripAccuracy.dataPreserved >= 0.95) {
         warn(`Round-trip accuracy: ${accuracy}%`);
       } else {
         warn(`Round-trip accuracy: ${accuracy}% (some data may be lost)`);

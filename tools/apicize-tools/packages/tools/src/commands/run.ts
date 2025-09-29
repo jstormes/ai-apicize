@@ -2,7 +2,6 @@
 
 import { Command } from 'commander';
 import { resolve, basename, extname } from 'path';
-import { existsSync, statSync } from 'fs';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';

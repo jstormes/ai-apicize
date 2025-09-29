@@ -15,6 +15,7 @@
     "test:performance": "jest --selectProjects performance",
     "test:unit": "jest --selectProjects unit",
     "test:all": "jest",
+    "test:package": "npm run pack:test && npm run install:test",
     "benchmark": "node scripts/performance-benchmark.js",
     "lint": "eslint . --ext .ts",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
@@ -22,7 +23,16 @@
     "verify:full": "npm run build && npm run test:all && npm run test:integration && npm run lint",
     "dev": "npm run dev --workspaces --if-present",
     "validate-workbooks": "node scripts/validate-workbooks.js",
-    "step-test": "npm run build && npm run validate-workbooks"
+    "step-test": "npm run build && npm run validate-workbooks",
+    "pack:test": "npm pack --workspaces",
+    "install:test": "npm run install:test:local",
+    "install:test:local": "cd /tmp && npm init -y && npm install file:${PWD}/apicize-tools-1.0.0.tgz file:${PWD}/apicize-lib-1.0.0.tgz && npx apicize --version",
+    "preversion": "npm run verify:full",
+    "version": "npm run build && git add -A",
+    "postversion": "git push && git push --tags",
+    "prepublishOnly": "npm run verify:full",
+    "publish:dry": "npm publish --dry-run --workspaces",
+    "publish:packages": "npm publish --workspaces --access public"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",

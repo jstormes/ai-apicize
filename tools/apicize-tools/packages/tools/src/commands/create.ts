@@ -138,7 +138,7 @@ async function getTemplate(templateType: string, name: string): Promise<any> {
   });
 }
 
-async function buildTemplate(templateType: string, name: string, config: any): Promise<any> {
+async function buildTemplate(templateType: string, _name: string, config: any): Promise<any> {
   const workbook: any = {
     version: 1.0,
     requests: [],
@@ -255,7 +255,7 @@ async function buildTemplate(templateType: string, name: string, config: any): P
   return workbook;
 }
 
-async function buildBasicTemplate(config: any): Promise<any[]> {
+async function buildBasicTemplate(_config: any): Promise<any[]> {
   const groupId = uuidv4();
   const getRequestId = uuidv4();
   const postRequestId = uuidv4();
