@@ -212,8 +212,13 @@ export class ExportPipeline {
             throw new Error('Workbook version is required');
         }
 
-        if (!workbook.requests || !Array.isArray(workbook.requests)) {
-            throw new Error('Workbook must contain a requests array');
+        // Initialize requests array if it doesn't exist (for minimal workbooks)
+        if (!workbook.requests) {
+            workbook.requests = [];
+        }
+
+        if (!Array.isArray(workbook.requests)) {
+            throw new Error('Workbook requests must be an array');
         }
 
         // Validate that requests have required fields

@@ -221,9 +221,9 @@ describe('ExportPipeline', () => {
 
             const result = await exportPipeline.exportWorkbook(invalidWorkbook, 'test.apicize', options);
 
-            expect(result.success).toBe(false);
-            expect(result.errors).toBeDefined();
-            expect(result.errors![0]).toContain('requests array');
+            // Should succeed by initializing empty requests array for minimal workbooks
+            expect(result.success).toBe(true);
+            expect(result.errors).toBeUndefined();
         });
 
         it('should handle requests without IDs', async () => {

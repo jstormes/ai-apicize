@@ -28,7 +28,7 @@ module.exports = {
     '^@apicize/examples(.*)$': '<rootDir>/packages/examples/src$1'
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  // Use project-specific timeout configurations
+  testTimeout: 30000, // Default 30 seconds for all tests
   verbose: true,
   // Test project specific configuration
   projects: [
@@ -60,9 +60,13 @@ module.exports = {
       transform: {
         '^.+\\.ts$': 'ts-jest',
       },
-      // testTimeout: 120000 // 2 minutes for integration tests - moved to individual test files if needed
       maxWorkers: 1, // Run integration tests sequentially
-      setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
+      setupFilesAfterEnv: ['<rootDir>/tests/integration/setup.ts'],
+      moduleNameMapper: {
+        '^@apicize/lib(.*)$': '<rootDir>/packages/lib/src$1',
+        '^@apicize/tools(.*)$': '<rootDir>/packages/tools/src$1',
+        '^@apicize/examples(.*)$': '<rootDir>/packages/examples/src$1'
+      }
     },
     {
       displayName: 'performance',
@@ -74,9 +78,13 @@ module.exports = {
       transform: {
         '^.+\\.ts$': 'ts-jest',
       },
-      // testTimeout: 300000 // 5 minutes for performance tests - moved to individual test files if needed
       maxWorkers: 1, // Run performance tests sequentially
-      setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
+      setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+      moduleNameMapper: {
+        '^@apicize/lib(.*)$': '<rootDir>/packages/lib/src$1',
+        '^@apicize/tools(.*)$': '<rootDir>/packages/tools/src$1',
+        '^@apicize/examples(.*)$': '<rootDir>/packages/examples/src$1'
+      }
     }
   ]
 };

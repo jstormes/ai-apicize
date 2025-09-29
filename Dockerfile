@@ -70,9 +70,9 @@ RUN echo "alias claude='claude --dangerously-skip-permissions'\n" >> /home/user/
 ############################################################################
 # Set Claude Code timeouts to 5 minutes
 ############################################################################
-ENV BASH_DEFAULT_TIMEOUT_MS=300000
-ENV BASH_MAX_TIMEOUT_MS=300000
-ENV MCP_TOOL_TIMEOUT=300000
+ENV BASH_DEFAULT_TIMEOUT_MS=600000
+ENV BASH_MAX_TIMEOUT_MS=600000
+ENV MCP_TOOL_TIMEOUT=600000
 
 ############################################################################
 # Install Gemini CLI

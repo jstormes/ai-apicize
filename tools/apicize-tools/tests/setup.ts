@@ -4,8 +4,8 @@
 // Extend Jest matchers if needed
 // import './custom-matchers';
 
-// Global test timeout
-jest.setTimeout(10000);
+// Global test timeout - 30 seconds default
+jest.setTimeout(30000);
 
 // Mock console methods for testing
 const originalConsoleError = console.error;

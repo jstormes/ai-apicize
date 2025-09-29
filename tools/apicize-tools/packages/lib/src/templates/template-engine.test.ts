@@ -214,7 +214,8 @@ describe('TemplateEngine', () => {
             const result = templateEngine.generateRequestGroup(group, workbook);
 
             expect(result).toContain('describe(\'Authentication\', function() {');
-            expect(result).toContain('// Nested group - would be implemented recursively');
+            // Should contain recursive nested group implementation, not placeholder comment
+            expect(result).not.toContain('// Nested group - would be implemented recursively');
         });
     });
 

@@ -1,4 +1,4 @@
-import { ApicizeWorkbook, Request, RequestGroup } from '../types';
+import { ApicizeWorkbook, Request, RequestGroup, ExecutionMode } from '../types';
 
 export interface TemplateContext {
     [key: string]: any;
@@ -65,13 +65,19 @@ export class TemplateEngine {
      * Generate a request group test file
      */
     public generateRequestGroup(group: RequestGroup, workbook: ApicizeWorkbook, options?: TemplateOptions): string {
+        const subGroups = this.getSubGroups(group);
+        const subGroupsWithContent = subGroups.map(subGroup => ({
+            ...subGroup,
+            nestedContent: this.generateNestedGroupContent(subGroup, workbook, options)
+        }));
+
         const context: TemplateContext = {
             groupName: group.name,
             group,
             workbook,
             requests: this.getRequestsFromGroup(group),
-            subGroups: this.getSubGroups(group),
-            hasSubGroups: this.getSubGroups(group).length > 0,
+            subGroups: subGroupsWithContent,
+            hasSubGroups: subGroups.length > 0,
             hasRequests: this.getRequestsFromGroup(group).length > 0,
             executionMode: group.execution || 'SEQUENTIAL',
             ...options
@@ -81,23 +87,61 @@ export class TemplateEngine {
     }
 
     /**
+     * Generate nested group content for recursive groups
+     */
+    private generateNestedGroupContent(group: RequestGroup, workbook: ApicizeWorkbook, options?: TemplateOptions): string {
+        const requests = this.getRequestsFromGroup(group);
+        const subGroups = this.getSubGroups(group);
+
+        const subGroupsWithContent = subGroups.map(subGroup => ({
+            ...subGroup,
+            nestedContent: this.generateNestedGroupContent(subGroup, workbook, options)
+        }));
+
+        const context: TemplateContext = {
+            groupName: group.name,
+            group,
+            workbook,
+            requests,
+            subGroups: subGroupsWithContent,
+            hasSubGroups: subGroups.length > 0,
+            hasRequests: requests.length > 0,
+            executionMode: group.execution || 'SEQUENTIAL',
+            ...options
+        };
+
+        return this.render(this.getNestedGroupTemplate(), context, options);
+    }
+
+    /**
      * Generate an individual request test
      */
     public generateIndividualRequest(request: Request, workbook: ApicizeWorkbook, options?: TemplateOptions): string {
+        // Ensure all required properties have default values
+        const requestWithDefaults = {
+            ...request,
+            keepAlive: request.keepAlive ?? false,
+            acceptInvalidCerts: request.acceptInvalidCerts ?? false,
+            runs: request.runs ?? 1,
+            multiRunExecution: request.multiRunExecution ?? ExecutionMode.SEQUENTIAL,
+            numberOfRedirects: request.numberOfRedirects ?? 10,
+            timeout: request.timeout ?? 30000
+        };
+
         const context: TemplateContext = {
-            requestName: request.name,
-            request,
+            requestName: requestWithDefaults.name,
+            request: requestWithDefaults,
             workbook,
-            method: request.method,
-            url: request.url,
-            hasHeaders: request.headers && request.headers.length > 0,
-            headers: request.headers || [],
-            hasBody: request.body && request.body.type !== 'None',
-            body: request.body,
-            hasQueryParams: request.queryStringParams && request.queryStringParams.length > 0,
-            queryParams: request.queryStringParams || [],
-            testCode: request.test || this.getDefaultTestCode(),
-            timeout: request.timeout || 30000,
+            method: requestWithDefaults.method,
+            url: requestWithDefaults.url,
+            hasHeaders: requestWithDefaults.headers && requestWithDefaults.headers.length > 0,
+            headers: requestWithDefaults.headers || [],
+            hasBody: requestWithDefaults.body && requestWithDefaults.body.type !== 'None',
+            body: requestWithDefaults.body,
+            hasQueryParams: requestWithDefaults.queryStringParams && requestWithDefaults.queryStringParams.length > 0,
+            queryParams: requestWithDefaults.queryStringParams || [],
+            testCode: requestWithDefaults.test || this.getDefaultTestCode(),
+            timeout: requestWithDefaults.timeout,
             ...options
         };
 
@@ -245,7 +289,17 @@ export class TemplateEngine {
     }
 
     private getRequestsFromGroup(group: RequestGroup): Request[] {
-        return (group.children || []).filter((item): item is Request => !('children' in item));
+        return (group.children || [])
+            .filter((item): item is Request => !('children' in item))
+            .map(request => ({
+                ...request,
+                keepAlive: request.keepAlive ?? false,
+                acceptInvalidCerts: request.acceptInvalidCerts ?? false,
+                runs: request.runs ?? 1,
+                multiRunExecution: request.multiRunExecution ?? ExecutionMode.SEQUENTIAL,
+                numberOfRedirects: request.numberOfRedirects ?? 10,
+                timeout: request.timeout ?? 30000
+            }));
     }
 
     private getSubGroups(group: RequestGroup): RequestGroup[] {
@@ -387,7 +441,8 @@ describe('{{groupName}}', function() {
             "runs": {{this.runs}},
             "multiRunExecution": "{{this.multiRunExecution}}",
             "keepAlive": {{this.keepAlive}},
-            "acceptInvalidCerts": {{this.acceptInvalidCerts}}
+            "acceptInvalidCerts": {{this.acceptInvalidCerts}},
+            "test": {{JSON.stringify(this.test)}}
         }
         @apicize-request-metadata-end */
         {{/if}}
@@ -417,13 +472,90 @@ describe('{{groupName}}', function() {
 
 {{#if hasSubGroups}}
 {{#each subGroups}}
-    describe('{{this.name}}', function() {
-        // Nested group - would be implemented recursively
-    });
+    {{this.nestedContent}}
 {{/each}}
 {{/if}}
 });
 `;
+    }
+
+    private getNestedGroupTemplate(): string {
+        return `describe('{{groupName}}', function() {
+    {{#if includeMetadata}}
+    /* @apicize-group-metadata
+    {
+        "id": "{{group.id}}",
+        "name": "{{group.name}}",
+        "execution": "{{group.execution}}",
+        "runs": {{group.runs}},
+        "multiRunExecution": "{{group.multiRunExecution}}",
+        "selectedScenario": {{JSON.stringify(group.selectedScenario)}},
+        "selectedData": {{JSON.stringify(group.selectedData)}}
+    }
+    @apicize-group-metadata-end */
+    {{/if}}
+
+    before(async function() {
+        const helper = new TestHelper();
+        context = await helper.setupGroup('{{group.id}}');
+        $ = context.$;
+    });
+
+{{#if hasRequests}}
+{{#each requests}}
+    describe('{{this.name}}', function() {
+        {{#if includeMetadata}}
+        /* @apicize-request-metadata
+        {
+            "id": "{{this.id}}",
+            "name": "{{this.name}}",
+            "url": "{{this.url}}",
+            "method": "{{this.method}}",
+            "headers": {{JSON.stringify(this.headers)}},
+            "body": {{JSON.stringify(this.body)}},
+            "queryStringParams": {{JSON.stringify(this.queryStringParams)}},
+            "timeout": {{this.timeout}},
+            "numberOfRedirects": {{this.numberOfRedirects}},
+            "runs": {{this.runs}},
+            "multiRunExecution": "{{this.multiRunExecution}}",
+            "keepAlive": {{this.keepAlive}},
+            "acceptInvalidCerts": {{this.acceptInvalidCerts}},
+            "test": {{JSON.stringify(this.test)}}
+        }
+        @apicize-request-metadata-end */
+        {{/if}}
+
+        beforeEach(async function() {
+            this.timeout({{this.timeout}});
+
+            response = await context.execute({
+                id: '{{this.id}}',
+                method: '{{this.method}}',
+                url: '{{this.url}}',
+                headers: {{JSON.stringify(this.headers)}},
+                body: {{JSON.stringify(this.body)}},
+                queryStringParams: {{JSON.stringify(this.queryStringParams)}},
+                timeout: {{this.timeout}},
+                numberOfRedirects: {{this.numberOfRedirects}},
+                acceptInvalidCerts: {{this.acceptInvalidCerts}}
+            });
+
+            $ = context.$;
+        });
+
+        it('should pass the embedded test', function() {
+            {{{this.test}}}
+        });
+    });
+{{/each}}
+{{/if}}
+
+{{#if hasSubGroups}}
+{{#each subGroups}}
+    {{this.nestedContent}}
+{{/each}}
+{{/if}}
+});`;
     }
 
     private getIndividualRequestTemplate(): string {

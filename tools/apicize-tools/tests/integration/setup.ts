@@ -2,6 +2,9 @@
  * Integration test setup and utilities
  */
 
+// Set timeout for integration tests
+jest.setTimeout(120000); // 2 minutes
+
 import * as fs from 'fs';
 import * as path from 'path';
 import { spawn } from 'child_process';

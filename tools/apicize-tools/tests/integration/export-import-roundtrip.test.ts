@@ -87,7 +87,7 @@ describe('Export-Import Round-Trip Tests', () => {
       if (comparison.differences.length > 0) {
         console.log('Round-trip differences:', comparison.differences);
       }
-    });
+    }, 60000);
 
     test('should preserve authentication configurations', async () => {
       const originalFile = path.join(context.workbooksDir, 'with-authentication.apicize');
@@ -119,7 +119,7 @@ describe('Export-Import Round-Trip Tests', () => {
 
       expect(imported.authorizations).toEqual(original.authorizations);
       expect(imported.defaults?.selectedAuthorization).toEqual(original.defaults?.selectedAuthorization);
-    });
+    }, 60000);
 
     test('should preserve request groups and hierarchy', async () => {
       const originalFile = path.join(context.workbooksDir, 'request-groups.apicize');

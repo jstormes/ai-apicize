@@ -13,8 +13,7 @@ import {
   validateApicizeStructure,
   validateTypeScriptProject,
   compareApicizeFiles,
-  CLITestContext,
-  TestResult
+  CLITestContext
 } from './setup';
 
 describe('CLI Commands Integration Tests', () => {
