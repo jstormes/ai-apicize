@@ -28,33 +28,53 @@ module.exports = {
     '^@apicize/examples(.*)$': '<rootDir>/packages/examples/src$1'
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  testTimeout: 10000,
+  // Use project-specific timeout configurations
   verbose: true,
   // Test project specific configuration
   projects: [
     {
       displayName: 'unit',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
       testMatch: [
         '<rootDir>/packages/**/__tests__/**/*.ts',
         '<rootDir>/packages/**/?(*.)+(spec|test).ts'
       ],
-      testTimeout: 10000
+      transform: {
+        '^.+\\.ts$': 'ts-jest',
+      },
+      moduleNameMapper: {
+        '^@apicize/lib(.*)$': '<rootDir>/packages/lib/src$1',
+        '^@apicize/tools(.*)$': '<rootDir>/packages/tools/src$1',
+        '^@apicize/examples(.*)$': '<rootDir>/packages/examples/src$1'
+      },
+      // testTimeout: 10000 // Moved to individual test files if needed
     },
     {
       displayName: 'integration',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
       testMatch: [
         '<rootDir>/tests/integration/**/*.test.ts'
       ],
-      testTimeout: 120000, // 2 minutes for integration tests
+      transform: {
+        '^.+\\.ts$': 'ts-jest',
+      },
+      // testTimeout: 120000 // 2 minutes for integration tests - moved to individual test files if needed
       maxWorkers: 1, // Run integration tests sequentially
       setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
     },
     {
       displayName: 'performance',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
       testMatch: [
         '<rootDir>/tests/performance/**/*.test.ts'
       ],
-      testTimeout: 300000, // 5 minutes for performance tests
+      transform: {
+        '^.+\\.ts$': 'ts-jest',
+      },
+      // testTimeout: 300000 // 5 minutes for performance tests - moved to individual test files if needed
       maxWorkers: 1, // Run performance tests sequentially
       setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
     }

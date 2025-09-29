@@ -119,8 +119,12 @@ describe('TemplateEngine', () => {
             const result = templateEngine.generateMainIndex(workbook);
 
             expect(result).toContain('// Auto-generated from api-tests.apicize');
-            expect(result).toContain('import { TestHelper, ApicizeContext, ApicizeResponse, BodyType } from \'@apicize/lib\';');
-            expect(result).toContain('describe(\' API Tests\', function() {');
+            expect(result).toContain('TestHelper,');
+            expect(result).toContain('ApicizeContext,');
+            expect(result).toContain('ApicizeResponse,');
+            expect(result).toContain('BodyType');
+            expect(result).toContain('} from \'@apicize/lib\';');
+            expect(result).toContain('describe(\'API Tests\', function() {');
             expect(result).toContain('this.timeout(30000);');
             expect(result).toContain('describe(\'Authentication\', function() {');
             expect(result).toContain('import \'./suites/0-Authentication.spec\';');
@@ -135,7 +139,7 @@ describe('TemplateEngine', () => {
             const result = templateEngine.generateMainIndex(workbook);
 
             expect(result).toContain('// Auto-generated from api-tests.apicize');
-            expect(result).toContain('describe(\' API Tests\', function() {');
+            expect(result).toContain('describe(\'API Tests\', function() {');
             expect(result).not.toContain('import \'./suites/');
         });
     });

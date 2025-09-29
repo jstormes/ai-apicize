@@ -391,7 +391,7 @@ describe('{{groupName}}', function() {
             $ = context.$;
         });
 
-        {{this.testCode}}
+        {{this.test}}
     });
 {{/each}}
 {{/if}}

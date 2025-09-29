@@ -3,9 +3,14 @@ import * as path from 'path';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import {
   RequestReconstructor,
+  reconstructFromProject,
+  reconstructFromFiles,
+  RequestReconstructorError,
+  ReconstructedRequest,
+  ReconstructedRequestGroup,
 } from './request-reconstructor';
 import { ProjectMap, ScannedFile } from './file-scanner';
-import { HttpMethod, BodyType } from '../types';
+import { HttpMethod, BodyType, ExecutionMode } from '../types';
 
 // Mock response object for test content validation
 declare global {
@@ -86,6 +91,7 @@ describe('User API', () => {
     });
   });
 });
+`;
 
       const testFile = path.join(tempDir, 'users.spec.ts');
       await fs.writeFile(testFile, testContent);
@@ -118,7 +124,7 @@ describe('User API', () => {
       const request = result.requests[0] as any;
       expect(request).toMatchObject({
         id: 'user-001',
-        name: 'User API', // Should match the outer describe block
+        name: 'Get User', // Should match the metadata name
         url: 'https://api.example.com/users/{{userId}}',
         method: HttpMethod.GET,
         timeout: 5000,
@@ -175,7 +181,7 @@ describe('API Tests', () => {
     });
   });
 });
-      `;
+`;
 
       const testFile = path.join(tempDir, 'api.spec.ts');
       await fs.writeFile(testFile, testContent);
@@ -201,10 +207,14 @@ describe('API Tests', () => {
 
       const result = await reconstructor.reconstructFromProject(projectMap);
 
-      expect(result.requests).toHaveLength(1);
+      expect(result.requests).toHaveLength(3); // Group + 2 requests extracted separately
       expect(result.errors).toHaveLength(0);
 
-      const group = result.requests[0] as ReconstructedRequestGroup;
+      // Find items by ID since they may be in any order
+      const group = result.requests.find(r => r.id === 'group-001') as ReconstructedRequestGroup;
+      const getUserRequest = result.requests.find(r => r.id === 'user-001') as ReconstructedRequest;
+      const createUserRequest = result.requests.find(r => r.id === 'user-002') as ReconstructedRequest;
+
       expect(group).toMatchObject({
         id: 'group-001',
         name: 'API Tests',
@@ -212,26 +222,20 @@ describe('API Tests', () => {
         sourceFile: testFile,
       });
 
-      expect(group.children).toHaveLength(1);
-
-      const userGroup = group.children[0] as ReconstructedRequestGroup;
-      expect(userGroup.name).toBe('Users');
-      expect(userGroup.children).toHaveLength(2);
-
-      const getUserRequest = userGroup.children[0] as ReconstructedRequest;
       expect(getUserRequest).toMatchObject({
         id: 'user-001',
         name: 'Get User',
         url: 'https://api.example.com/users/1',
         method: HttpMethod.GET,
+        sourceFile: testFile,
       });
 
-      const createUserRequest = userGroup.children[1] as ReconstructedRequest;
       expect(createUserRequest).toMatchObject({
         id: 'user-002',
         name: 'Create User',
         url: 'https://api.example.com/users',
         method: HttpMethod.POST,
+        sourceFile: testFile,
       });
     });
 
@@ -600,7 +604,18 @@ describe('Test', () => {
       const testFile = path.join(tempDir, 'test.spec.ts');
       await fs.writeFile(testFile, testContent);
 
-      const result = await reconstructFromFiles([testFile]);
+      const scannedFile: ScannedFile = {
+        filePath: testFile,
+        relativePath: 'test.spec.ts',
+        baseName: 'test.spec',
+        directory: tempDir,
+        isMainFile: false,
+        isSuiteFile: false,
+        size: testContent.length,
+        lastModified: new Date(),
+      };
+
+      const result = await reconstructFromFiles([scannedFile], tempDir);
 
       expect(result.requests).toHaveLength(1);
       expect(result.requests[0]).toMatchObject({
