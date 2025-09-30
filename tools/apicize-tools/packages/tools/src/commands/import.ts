@@ -83,7 +83,7 @@ async function importAction(inputDirectory: string, options: ImportOptions): Pro
 
     // Create import pipeline (lazy load library only when command runs)
     spinner.text = 'Initializing import pipeline...';
-    const { ImportPipeline } = await import('@jstormes/apicize-lib');
+    const { ImportPipeline } = require('@jstormes/apicize-lib');
     const pipeline = new ImportPipeline();
 
     // Execute import

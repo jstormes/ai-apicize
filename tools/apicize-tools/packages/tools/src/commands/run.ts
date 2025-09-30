@@ -62,7 +62,7 @@ async function runAction(inputFile: string, options: RunOptions): Promise<void> 
 
     // Export to temporary directory (lazy load library only when command runs)
     spinner.text = 'Exporting to TypeScript tests...';
-    const { ExportPipeline } = await import('@jstormes/apicize-lib');
+    const { ExportPipeline } = require('@jstormes/apicize-lib');
     const exportPipeline = new ExportPipeline();
 
     const exportResult = await exportPipeline.exportFromFile(resolvedInputFile, {

@@ -1,6 +1,6 @@
 {
   "name": "@jstormes/apicize-tools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI tools for working with .apicize API test files - convert between .apicize and TypeScript/Mocha/Chai tests",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

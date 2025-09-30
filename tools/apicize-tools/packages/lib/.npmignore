@@ -14,10 +14,7 @@ __tests__/
 *.spec.*
 coverage/
 
-# Documentation
-docs/
-
-# Build artifacts
+# Build artifacts (keep dist/ for npm!)
 *.tsbuildinfo
 .turbo/
 
@@ -54,3 +51,6 @@ yarn-error.log*
 tmp/
 temp/
 *.tmp
+
+# Examples (not needed in published package)
+examples/

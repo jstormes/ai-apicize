@@ -73,7 +73,7 @@ async function exportAction(inputFile: string, options: ExportOptions): Promise<
 
     // Create export pipeline (lazy load library only when command runs)
     spinner.text = 'Initializing export pipeline...';
-    const { ExportPipeline } = await import('@jstormes/apicize-lib');
+    const { ExportPipeline } = require('@jstormes/apicize-lib');
     const pipeline = new ExportPipeline();
 
     // Execute export

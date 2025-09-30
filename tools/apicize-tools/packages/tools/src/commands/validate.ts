@@ -67,13 +67,13 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
       const data = JSON.parse(fileContent);
 
       // Perform validation (lazy load library only when command runs)
-      const { validateApicizeFile } = await import('@jstormes/apicize-lib');
+      const { validateApicizeFile } = require('@jstormes/apicize-lib');
       const validation = validateApicizeFile(data);
 
       const result: ValidationResult = {
         file: resolvedFile,
         isValid: validation.valid,
-        errors: validation.errors.map(err => ({
+        errors: validation.errors.map((err: any) => ({
           message: err.message,
           path: err.path,
           code: err.keyword,
