@@ -203,11 +203,16 @@ describe('Test with shared code', () => {
 });
       `;
 
-      const result = extractor.extractFromContent(content, { includeSharedCode: true, includeTypeDefinitions: true });
+      const result = extractor.extractFromContent(content, {
+        includeSharedCode: true,
+        includeTypeDefinitions: true,
+      });
 
       expect(result.sharedCode).toHaveLength(4);
 
-      const variable = result.sharedCode.find(c => c.type === 'variable' && c.name === 'testHelper');
+      const variable = result.sharedCode.find(
+        c => c.type === 'variable' && c.name === 'testHelper'
+      );
       expect(variable).toBeDefined();
 
       const func = result.sharedCode.find(c => c.type === 'function' && c.name === 'createUser');
@@ -456,7 +461,7 @@ describe('Demo API Tests', () => {
 
       const result = extractor.extractFromContent(content, {
         includeSharedCode: true,
-        preserveComments: true
+        preserveComments: true,
       });
 
       expect(result.errors).toHaveLength(0);
@@ -478,7 +483,7 @@ describe('Demo API Tests', () => {
       const test = userSuite.tests[0];
       expect(test.name).toBe('should create user successfully');
       expect(test.body).toContain('expect(response.status).to.equal(201)');
-      expect(test.body).toContain('output(\'userId\', data.id)');
+      expect(test.body).toContain("output('userId', data.id)");
     });
   });
 });

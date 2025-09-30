@@ -8,7 +8,7 @@ describe('Demo File Validation', () => {
 
   beforeAll(() => {
     validator = new ApicizeValidator();
-    demoFilePath = path.join(__dirname, '../../../../../app/app/src-tauri/help/demo/demo.apicize');
+    demoFilePath = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
   });
 
   describe('demo.apicize validation', () => {

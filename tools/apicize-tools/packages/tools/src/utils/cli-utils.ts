@@ -18,7 +18,7 @@ export function createSpinner(text: string): Ora {
   return ora({
     text,
     spinner: 'dots',
-    color: 'blue'
+    color: 'blue',
   });
 }
 

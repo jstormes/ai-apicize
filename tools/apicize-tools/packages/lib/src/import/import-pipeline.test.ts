@@ -36,7 +36,7 @@ describe('ImportPipeline', () => {
       const options = {
         skipValidation: true,
         maxFileSize: 1024 * 1024,
-        autoGenerateIds: true
+        autoGenerateIds: true,
       };
       const pipeline = new ImportPipeline(options);
       expect(pipeline).toBeInstanceOf(ImportPipeline);
@@ -48,8 +48,7 @@ describe('ImportPipeline', () => {
       const nonExistentPath = join(tempDir, 'non-existent');
       const pipeline = new ImportPipeline();
 
-      await expect(pipeline.importProject(nonExistentPath))
-        .rejects.toThrow(ImportPipelineError);
+      await expect(pipeline.importProject(nonExistentPath)).rejects.toThrow(ImportPipelineError);
     });
 
     it('should fail with file instead of directory', async () => {
@@ -58,8 +57,7 @@ describe('ImportPipeline', () => {
 
       const pipeline = new ImportPipeline();
 
-      await expect(pipeline.importProject(filePath))
-        .rejects.toThrow(ImportPipelineError);
+      await expect(pipeline.importProject(filePath)).rejects.toThrow(ImportPipelineError);
     });
 
     it('should handle empty project gracefully', async () => {
@@ -99,7 +97,10 @@ describe('ImportPipeline', () => {
         if (await fs.stat(testFilePath).catch(() => false)) {
           const content = await fs.readFile(testFilePath, 'utf-8');
           console.log('Test file content length:', content.length);
-          console.log('Contains @apicize-request-metadata:', content.includes('@apicize-request-metadata'));
+          console.log(
+            'Contains @apicize-request-metadata:',
+            content.includes('@apicize-request-metadata')
+          );
         }
       }
 
@@ -144,7 +145,7 @@ describe('ImportPipeline', () => {
   async function createEmptyProject(dir: string): Promise<void> {
     const packageJson = {
       name: 'test-project',
-      version: '1.0.0'
+      version: '1.0.0',
     };
 
     await fs.writeFile(join(dir, 'package.json'), JSON.stringify(packageJson, null, 2));
@@ -157,7 +158,10 @@ describe('ImportPipeline', () => {
     await createTestFile(testFilePath);
 
     // Verify the file was created
-    const exists = await fs.stat(testFilePath).then(() => true).catch(() => false);
+    const exists = await fs
+      .stat(testFilePath)
+      .then(() => true)
+      .catch(() => false);
     if (!exists) {
       throw new Error(`Test file was not created at ${testFilePath}`);
     }

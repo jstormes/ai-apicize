@@ -48,6 +48,20 @@ The `/tools` directory serves as the central location for all Apicize tooling de
 ### Goal
 Enable seamless bidirectional conversion between Apicize's JSON format and executable TypeScript tests while maintaining complete data fidelity for round-trip operations.
 
+## Development Guidelines
+
+### Command Execution Timeouts
+**Default Timeout**: All bash commands should use a 10-minute (600,000ms) timeout unless there's a specific reason to use a shorter timeout. This is especially important for:
+- Running test suites
+- Building packages
+- Running integration tests
+- Long-running CLI operations
+
+Use the timeout parameter in bash commands:
+```javascript
+<parameter name="timeout">600000</parameter>
+```
+
 ## .apicize File Format Specification
 
 ### Top-Level Structure

@@ -33,12 +33,7 @@ export class TestHelperImpl implements ITestHelper {
    */
   async setupTest(testName: string): Promise<ApicizeContext> {
     // Create a basic context for the test
-    const context = new TestContext(
-      testName,
-      this.variableEngine,
-      this.client,
-      this.outputData
-    );
+    const context = new TestContext(testName, this.variableEngine, this.client, this.outputData);
 
     return context;
   }
@@ -59,6 +54,7 @@ export class TestHelperImpl implements ITestHelper {
   /**
    * Load data by ID (placeholder implementation)
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async loadData(_dataId: string): Promise<unknown> {
     // This would typically load from data files
     // For now, return empty object

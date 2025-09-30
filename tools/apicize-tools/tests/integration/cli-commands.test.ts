@@ -13,7 +13,7 @@ import {
   validateApicizeStructure,
   validateTypeScriptProject,
   compareApicizeFiles,
-  CLITestContext
+  CLITestContext,
 } from './setup';
 
 describe('CLI Commands Integration Tests', () => {
@@ -30,7 +30,7 @@ describe('CLI Commands Integration Tests', () => {
     console.log('Building tools package for integration tests...');
     const buildResult = await runCLICommand(npmCommand, ['run', 'build'], {
       cwd: context.toolsPath,
-      timeout: 60000
+      timeout: 60000,
     });
 
     if (buildResult.exitCode !== 0) {
@@ -47,7 +47,7 @@ describe('CLI Commands Integration Tests', () => {
     test('should show help when --help flag is provided', async () => {
       const result = await runCLICommand('node', ['dist/cli.js', '--help'], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(0);
@@ -63,7 +63,7 @@ describe('CLI Commands Integration Tests', () => {
     test('should show version when --version flag is provided', async () => {
       const result = await runCLICommand('node', ['dist/cli.js', '--version'], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(0);
@@ -73,7 +73,7 @@ describe('CLI Commands Integration Tests', () => {
     test('should show error for unknown command', async () => {
       const result = await runCLICommand('node', ['dist/cli.js', 'unknown-command'], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(1);
@@ -87,13 +87,14 @@ describe('CLI Commands Integration Tests', () => {
       const testFile = copyTestFile(demoFile, context.tempDir, 'demo.apicize');
       const outputDir = path.join(context.tempDir, 'exported-tests');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', outputDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', outputDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Export completed successfully');
@@ -103,24 +104,23 @@ describe('CLI Commands Integration Tests', () => {
       expect(validation.valid).toBe(true);
 
       // Check for expected files
-      expect(checkDirectoryContents(outputDir, [
-        'package.json',
-        'tsconfig.json',
-        '.spec.ts'
-      ])).toBe(true);
+      expect(checkDirectoryContents(outputDir, ['package.json', 'tsconfig.json', '.spec.ts'])).toBe(
+        true
+      );
     });
 
     test('should handle missing input file gracefully', async () => {
       const missingFile = path.join(context.tempDir, 'missing.apicize');
       const outputDir = path.join(context.tempDir, 'output');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'export', missingFile,
-        '--output', outputDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 10000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', missingFile, '--output', outputDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 10000,
+        }
+      );
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Input file does not exist');
@@ -131,13 +131,14 @@ describe('CLI Commands Integration Tests', () => {
       fs.writeFileSync(invalidFile, '{ invalid json }');
       const outputDir = path.join(context.tempDir, 'output');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'export', invalidFile,
-        '--output', outputDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 10000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', invalidFile, '--output', outputDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 10000,
+        }
+      );
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Export failed');
@@ -148,14 +149,14 @@ describe('CLI Commands Integration Tests', () => {
       const testFile = copyTestFile(demoFile, context.tempDir, 'demo-scenario.apicize');
       const outputDir = path.join(context.tempDir, 'scenario-tests');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', outputDir,
-        '--scenario', 'Development'
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', outputDir, '--scenario', 'Development'],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Export completed successfully');
@@ -170,25 +171,27 @@ describe('CLI Commands Integration Tests', () => {
       const testFile = copyTestFile(demoFile, context.tempDir, 'demo-roundtrip.apicize');
       const exportDir = path.join(context.tempDir, 'roundtrip-export');
 
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', exportDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
       // Then import it back
       const importedFile = path.join(context.tempDir, 'imported.apicize');
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir,
-        '--output', importedFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(importResult.exitCode).toBe(0);
       expect(importResult.stdout).toContain('Import completed successfully');
@@ -206,13 +209,14 @@ describe('CLI Commands Integration Tests', () => {
       const missingDir = path.join(context.tempDir, 'missing-dir');
       const outputFile = path.join(context.tempDir, 'output.apicize');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'import', missingDir,
-        '--output', outputFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 10000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', missingDir, '--output', outputFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 10000,
+        }
+      );
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Input path is not a directory');
@@ -224,11 +228,9 @@ describe('CLI Commands Integration Tests', () => {
       const demoFile = path.join(context.workbooksDir, 'demo.apicize');
       const testFile = copyTestFile(demoFile, context.tempDir, 'validate-demo.apicize');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', testFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'validate', testFile], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(0);
@@ -240,11 +242,9 @@ describe('CLI Commands Integration Tests', () => {
       const invalidFile = path.join(context.tempDir, 'invalid-validate.apicize');
       fs.writeFileSync(invalidFile, JSON.stringify({ version: 999 })); // Invalid version
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', invalidFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'validate', invalidFile], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(1);
@@ -261,12 +261,14 @@ describe('CLI Commands Integration Tests', () => {
         }
       });
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', path.join(context.tempDir, '*.apicize')
-      ], {
-        cwd: context.toolsPath,
-        timeout: 15000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'validate', path.join(context.tempDir, '*.apicize')],
+        {
+          cwd: context.toolsPath,
+          timeout: 15000,
+        }
+      );
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Validation completed');
@@ -277,13 +279,14 @@ describe('CLI Commands Integration Tests', () => {
     test('should create new .apicize file with basic template', async () => {
       const outputFile = path.join(context.tempDir, 'new-basic.apicize');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'create', 'test-api',
-        '--output', outputFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 15000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'create', 'test-api', '--output', outputFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 15000,
+        }
+      );
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Created "new-basic.apicize"');
@@ -302,14 +305,14 @@ describe('CLI Commands Integration Tests', () => {
     test('should create file with rest-crud template', async () => {
       const outputFile = path.join(context.tempDir, 'new-crud.apicize');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'create', 'crud-api',
-        '--template', 'rest-crud',
-        '--output', outputFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 15000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'create', 'crud-api', '--template', 'rest-crud', '--output', outputFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 15000,
+        }
+      );
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Created "new-crud.apicize"');
@@ -322,13 +325,14 @@ describe('CLI Commands Integration Tests', () => {
       const outputFile = path.join(context.tempDir, 'existing.apicize');
       fs.writeFileSync(outputFile, '{}'); // Create existing file
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'create', 'test-api',
-        '--output', outputFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 10000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'create', 'test-api', '--output', outputFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 10000,
+        }
+      );
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Output file already exists');
@@ -338,14 +342,14 @@ describe('CLI Commands Integration Tests', () => {
       const outputFile = path.join(context.tempDir, 'overwrite.apicize');
       fs.writeFileSync(outputFile, '{}'); // Create existing file
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'create', 'test-api',
-        '--output', outputFile,
-        '--overwrite'
-      ], {
-        cwd: context.toolsPath,
-        timeout: 15000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'create', 'test-api', '--output', outputFile, '--overwrite'],
+        {
+          cwd: context.toolsPath,
+          timeout: 15000,
+        }
+      );
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Created "overwrite.apicize"');
@@ -357,28 +361,34 @@ describe('CLI Commands Integration Tests', () => {
       // Create a simple test file that should pass
       const simpleTest = {
         version: 1.0,
-        requests: [{
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Simple Test',
-          children: [{
-            id: '123e4567-e89b-12d3-a456-426614174001',
-            name: 'Basic Request',
-            url: 'https://httpbin.org/status/200',
-            method: 'GET',
-            test: 'describe("Basic Request", () => { it("should return 200", () => { expect(response.status).to.equal(200); }); });',
-            headers: [],
-            queryStringParams: [],
-            timeout: 30000,
-            runs: 1
-          }],
-          execution: 'SEQUENTIAL',
-          runs: 1
-        }],
-        scenarios: [{
-          id: '123e4567-e89b-12d3-a456-426614174002',
-          name: 'Default',
-          variables: []
-        }],
+        requests: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Simple Test',
+            children: [
+              {
+                id: '123e4567-e89b-12d3-a456-426614174001',
+                name: 'Basic Request',
+                url: 'https://httpbin.org/status/200',
+                method: 'GET',
+                test: 'describe("Basic Request", () => { it("should return 200", () => { expect(response.status).to.equal(200); }); });',
+                headers: [],
+                queryStringParams: [],
+                timeout: 30000,
+                runs: 1,
+              },
+            ],
+            execution: 'SEQUENTIAL',
+            runs: 1,
+          },
+        ],
+        scenarios: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            name: 'Default',
+            variables: [],
+          },
+        ],
         authorizations: [],
         certificates: [],
         proxies: [],
@@ -386,19 +396,17 @@ describe('CLI Commands Integration Tests', () => {
         defaults: {
           selectedScenario: {
             id: '123e4567-e89b-12d3-a456-426614174002',
-            name: 'Default'
-          }
-        }
+            name: 'Default',
+          },
+        },
       };
 
       const testFile = path.join(context.tempDir, 'run-test.apicize');
       fs.writeFileSync(testFile, JSON.stringify(simpleTest, null, 2));
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'run', testFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'run', testFile], {
         cwd: context.toolsPath,
-        timeout: 60000
+        timeout: 60000,
       });
 
       // Note: The run command might fail due to missing dependencies in the temporary environment
@@ -410,11 +418,9 @@ describe('CLI Commands Integration Tests', () => {
     test('should handle missing .apicize file', async () => {
       const missingFile = path.join(context.tempDir, 'missing-run.apicize');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'run', missingFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'run', missingFile], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(1);
@@ -435,34 +441,38 @@ describe('CLI Commands Integration Tests', () => {
       const importedFile = path.join(context.tempDir, 'workflow-imported.apicize');
 
       // Step 1: Export
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', exportDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
       // Step 2: Import
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir,
-        '--output', importedFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
       // Step 3: Validate
-      const validateResult = await runCLICommand('node', [
-        'dist/cli.js', 'validate', importedFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 10000
-      });
+      const validateResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'validate', importedFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 10000,
+        }
+      );
 
       expect(validateResult.exitCode).toBe(0);
 
@@ -490,13 +500,14 @@ describe('CLI Commands Integration Tests', () => {
       }
 
       // Validate all files
-      const validateResult = await runCLICommand('node', [
-        'dist/cli.js', 'validate',
-        ...testFiles
-      ], {
-        cwd: context.toolsPath,
-        timeout: 20000
-      });
+      const validateResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'validate', ...testFiles],
+        {
+          cwd: context.toolsPath,
+          timeout: 20000,
+        }
+      );
 
       expect(validateResult.exitCode).toBe(0);
       expect(validateResult.stdout).toContain(`Valid files: ${testFiles.length}`);
@@ -508,11 +519,9 @@ describe('CLI Commands Integration Tests', () => {
       const corruptedFile = path.join(context.tempDir, 'corrupted.apicize');
       fs.writeFileSync(corruptedFile, 'This is not JSON at all');
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', corruptedFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'validate', corruptedFile], {
         cwd: context.toolsPath,
-        timeout: 10000
+        timeout: 10000,
       });
 
       expect(result.exitCode).toBe(1);
@@ -523,13 +532,14 @@ describe('CLI Commands Integration Tests', () => {
       const longName = 'a'.repeat(200);
       const testFile = path.join(context.tempDir, `${longName}.apicize`);
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'create', 'test',
-        '--output', testFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 15000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'create', 'test', '--output', testFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 15000,
+        }
+      );
 
       // Should handle gracefully (may succeed or fail with clear error)
       expect([0, 1]).toContain(result.exitCode);
@@ -539,13 +549,14 @@ describe('CLI Commands Integration Tests', () => {
       // Try to create in root directory (should fail on most systems)
       const restrictedFile = '/test-restricted.apicize';
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'create', 'test',
-        '--output', restrictedFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 10000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'create', 'test', '--output', restrictedFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 10000,
+        }
+      );
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Create failed');
@@ -565,13 +576,14 @@ describe('CLI Commands Integration Tests', () => {
 
       const startTime = Date.now();
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', outputDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 45000 // 45 second timeout
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', outputDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 45000, // 45 second timeout
+        }
+      );
 
       const duration = Date.now() - startTime;
 

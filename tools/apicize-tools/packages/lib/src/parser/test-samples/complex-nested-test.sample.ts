@@ -34,12 +34,12 @@ function generateTestData(type: 'user' | 'product') {
   if (type === 'user') {
     return {
       name: `Test User ${Date.now()}`,
-      email: `test${Date.now()}@example.com`
+      email: `test${Date.now()}@example.com`,
     };
   } else {
     return {
       name: `Test Product ${Date.now()}`,
-      price: Math.floor(Math.random() * 1000)
+      price: Math.floor(Math.random() * 1000),
     };
   }
 }
@@ -113,13 +113,13 @@ describe('E-Commerce API Tests', () => {
         testDataManager.store('currentUser', userData);
 
         response = await context.execute({
-          url: "https://api.ecommerce.com/auth/register",
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
+          url: 'https://api.ecommerce.com/auth/register',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: {
             ...userData,
-            password: "TestPassword123!"
-          }
+            password: 'TestPassword123!',
+          },
         });
 
         $ = context.$;
@@ -128,9 +128,10 @@ describe('E-Commerce API Tests', () => {
       it('should register new user', async () => {
         await validateResponse(response, 201);
 
-        const data = (response.body.type == BodyType.JSON)
-          ? response.body.data
-          : expect.fail('Response body is not JSON');
+        const data =
+          response.body.type == BodyType.JSON
+            ? response.body.data
+            : expect.fail('Response body is not JSON');
 
         const userData = testDataManager.get('currentUser');
         expect(data.name).to.equal(userData.name);
@@ -166,11 +167,11 @@ describe('E-Commerce API Tests', () => {
 
         response = await context.execute({
           url: `https://api.ecommerce.com/users/${$.userId}`,
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Authorization": `Bearer ${$.authToken}`,
-            "Accept": "application/json"
-          }
+            Authorization: `Bearer ${$.authToken}`,
+            Accept: 'application/json',
+          },
         });
 
         $ = context.$;
@@ -179,9 +180,10 @@ describe('E-Commerce API Tests', () => {
       it('should get user profile', () => {
         expect(response.status).to.equal(200);
 
-        const data = (response.body.type == BodyType.JSON)
-          ? response.body.data
-          : expect.fail('Response body is not JSON');
+        const data =
+          response.body.type == BodyType.JSON
+            ? response.body.data
+            : expect.fail('Response body is not JSON');
 
         expect(data.id).to.equal($.userId);
         expect(data.name).to.be.a('string');
@@ -194,9 +196,10 @@ describe('E-Commerce API Tests', () => {
       it('should have valid profile structure', () => {
         expect(response.status).to.equal(200);
 
-        const data = (response.body.type == BodyType.JSON)
-          ? response.body.data
-          : expect.fail('Response body is not JSON');
+        const data =
+          response.body.type == BodyType.JSON
+            ? response.body.data
+            : expect.fail('Response body is not JSON');
 
         // Validate profile structure
         expect(data).to.have.property('id');
@@ -240,8 +243,8 @@ describe('E-Commerce API Tests', () => {
         context = await helper.setupTest('Search Products');
 
         response = await context.execute({
-          url: "https://api.ecommerce.com/products?q=laptop&limit=10",
-          method: "GET"
+          url: 'https://api.ecommerce.com/products?q=laptop&limit=10',
+          method: 'GET',
         });
 
         $ = context.$;
@@ -250,9 +253,10 @@ describe('E-Commerce API Tests', () => {
       it('should search products successfully', () => {
         expect(response.status).to.equal(200);
 
-        const data = (response.body.type == BodyType.JSON)
-          ? response.body.data
-          : expect.fail('Response body is not JSON');
+        const data =
+          response.body.type == BodyType.JSON
+            ? response.body.data
+            : expect.fail('Response body is not JSON');
 
         expect(data).to.have.property('products');
         expect(data).to.have.property('totalCount');
@@ -293,14 +297,14 @@ describe('E-Commerce API Tests', () => {
 
         response = await context.execute({
           url: `https://api.ecommerce.com/products/${$.firstProductId}`,
-          method: "GET",
-          headers: {"Accept": "application/json"}
+          method: 'GET',
+          headers: { Accept: 'application/json' },
         });
 
         $ = context.$;
       });
 
-      it('should get product details', function() {
+      it('should get product details', function () {
         if (!$.firstProductId) {
           this.skip();
           return;
@@ -308,9 +312,10 @@ describe('E-Commerce API Tests', () => {
 
         expect(response.status).to.equal(200);
 
-        const data = (response.body.type == BodyType.JSON)
-          ? response.body.data
-          : expect.fail('Response body is not JSON');
+        const data =
+          response.body.type == BodyType.JSON
+            ? response.body.data
+            : expect.fail('Response body is not JSON');
 
         expect(data.id).to.equal($.firstProductId);
         expect(data.name).to.be.a('string');

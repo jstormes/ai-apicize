@@ -15,7 +15,7 @@ import {
   error,
   info,
   verbose,
-  executeCommand
+  executeCommand,
 } from '../utils/cli-utils';
 
 interface ValidateOptions {
@@ -49,7 +49,8 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
   }
 
   for (const file of files) {
-    const spinner = options.format === 'text' ? createSpinner(`Validating ${basename(file)}...`) : null;
+    const spinner =
+      options.format === 'text' ? createSpinner(`Validating ${basename(file)}...`) : null;
 
     try {
       spinner?.start();
@@ -75,7 +76,7 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
         errors: validation.errors.map(err => ({
           message: err.message,
           path: err.path,
-          code: err.keyword
+          code: err.keyword,
         })),
         warnings: [],
         stats: {
@@ -83,8 +84,8 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
           requests: data.requests?.length || 0,
           groups: 0,
           scenarios: data.scenarios?.length || 0,
-          authConfigs: data.authorizations?.length || 0
-        }
+          authConfigs: data.authorizations?.length || 0,
+        },
       };
 
       results.push(result);
@@ -114,24 +115,25 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
           });
         }
       }
-
     } catch (err) {
       const result: ValidationResult = {
         file: resolve(file),
         isValid: false,
-        errors: [{
-          message: err instanceof Error ? err.message : String(err),
-          path: '',
-          code: 'FILE_ERROR'
-        }],
+        errors: [
+          {
+            message: err instanceof Error ? err.message : String(err),
+            path: '',
+            code: 'FILE_ERROR',
+          },
+        ],
         warnings: [],
         stats: {
           fileSize: 0,
           requests: 0,
           groups: 0,
           scenarios: 0,
-          authConfigs: 0
-        }
+          authConfigs: 0,
+        },
       };
 
       results.push(result);
@@ -158,9 +160,9 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
         validFiles: results.filter(r => r.isValid).length,
         totalErrors,
         totalWarnings,
-        duration
+        duration,
       },
-      results
+      results,
     };
 
     console.log(JSON.stringify(output, null, 2));
@@ -171,8 +173,10 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
 
     if (totalErrors === 0) {
       success(`All ${files.length} file(s) are valid`);
+      info(`Valid files: ${validFiles}`);
     } else {
       error(`${files.length - validFiles} of ${files.length} file(s) have errors`);
+      info(`Invalid files: ${files.length - validFiles}`);
     }
 
     if (totalWarnings > 0) {

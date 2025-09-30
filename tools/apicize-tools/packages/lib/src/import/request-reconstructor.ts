@@ -1,5 +1,12 @@
 import * as fs from 'fs/promises';
-import { Request, RequestGroup, HttpMethod, BodyType, ExecutionMode, NameValuePair } from '../types';
+import {
+  Request,
+  RequestGroup,
+  HttpMethod,
+  BodyType,
+  ExecutionMode,
+  NameValuePair,
+} from '../types';
 import { ScannedFile, ProjectMap } from './file-scanner';
 
 export interface ReconstructedRequest extends Request {
@@ -51,12 +58,16 @@ export interface RequestReconstructorOptions {
   skipSizeChecks?: boolean;
 }
 
-
 /**
  * Custom error class for request reconstruction failures.
  */
 export class RequestReconstructorError extends Error {
-  constructor(message: string, public code: string, public file?: string, public line?: number) {
+  constructor(
+    message: string,
+    public code: string,
+    public file?: string,
+    public line?: number
+  ) {
     super(message);
     this.name = 'RequestReconstructorError';
   }
@@ -163,18 +174,24 @@ export class RequestReconstructor {
 
   /**
    * Organizes flat list of requests into hierarchical structure.
+   *
+   * For round-trip accuracy, we rely on the metadata/workbook.json file
+   * which contains the original structure. The TypeScript files with metadata
+   * are used to verify/update the structure but the original hierarchy should
+   * be preserved from the metadata file.
+   *
+   * Since the ImportPipeline loads original metadata and merges it with
+   * reconstructed requests, this method just returns items as-is. The actual
+   * hierarchy is preserved in the originalMetadata that gets restored in
+   * rebuildWorkbook().
    */
   private organizeHierarchy(
     items: Array<ReconstructedRequest | ReconstructedRequestGroup>
   ): Array<ReconstructedRequest | ReconstructedRequestGroup> {
-    // For now, return items as-is since we don't have parent-child relationships
-    // In a future improvement, we could analyze describe block nesting
+    // Return items as-is - the hierarchy is rebuilt from original metadata
+    // in the ImportPipeline.rebuildWorkbook() method
     return items;
   }
-
-
-
-
 
   /**
    * Extracts metadata from TypeScript file content.
@@ -191,11 +208,18 @@ export class RequestReconstructor {
       const line = lines[i];
 
       // Check for different metadata types - be more specific with matching
-      if (line.includes('@apicize-request-metadata') && !line.includes('@apicize-request-metadata-end')) {
+      if (
+        line.includes('@apicize-request-metadata') &&
+        !line.includes('@apicize-request-metadata-end')
+      ) {
         const metadata = this.extractMetadataBlock(lines, i, '@apicize-request-metadata-end');
         if (metadata) {
           try {
-            const request = this.buildRequestFromMetadata(metadata.data, filePath, metadata.startLine);
+            const request = this.buildRequestFromMetadata(
+              metadata.data,
+              filePath,
+              metadata.startLine
+            );
             results.push(request);
           } catch (error) {
             throw new RequestReconstructorError(
@@ -206,7 +230,10 @@ export class RequestReconstructor {
             );
           }
         }
-      } else if (line.includes('@apicize-group-metadata') && !line.includes('@apicize-group-metadata-end')) {
+      } else if (
+        line.includes('@apicize-group-metadata') &&
+        !line.includes('@apicize-group-metadata-end')
+      ) {
         const metadata = this.extractMetadataBlock(lines, i, '@apicize-group-metadata-end');
         if (metadata) {
           try {
@@ -325,7 +352,10 @@ export class RequestReconstructor {
     }
 
     if (metadata.queryStringParams && Array.isArray(metadata.queryStringParams)) {
-      request.queryStringParams = this.validateNameValuePairs(metadata.queryStringParams, 'queryStringParams');
+      request.queryStringParams = this.validateNameValuePairs(
+        metadata.queryStringParams,
+        'queryStringParams'
+      );
     }
 
     if (metadata.timeout && typeof metadata.timeout === 'number') {
@@ -340,7 +370,10 @@ export class RequestReconstructor {
       request.runs = metadata.runs;
     }
 
-    if (metadata.multiRunExecution && Object.values(ExecutionMode).includes(metadata.multiRunExecution)) {
+    if (
+      metadata.multiRunExecution &&
+      Object.values(ExecutionMode).includes(metadata.multiRunExecution)
+    ) {
       request.multiRunExecution = metadata.multiRunExecution as ExecutionMode;
     }
 
@@ -404,7 +437,10 @@ export class RequestReconstructor {
       group.runs = metadata.runs;
     }
 
-    if (metadata.multiRunExecution && Object.values(ExecutionMode).includes(metadata.multiRunExecution)) {
+    if (
+      metadata.multiRunExecution &&
+      Object.values(ExecutionMode).includes(metadata.multiRunExecution)
+    ) {
       group.multiRunExecution = metadata.multiRunExecution as ExecutionMode;
     }
 
@@ -467,7 +503,7 @@ export class RequestReconstructor {
           formatted: bodyData.formatted,
         };
 
-      case BodyType.Raw:
+      case BodyType.Raw: {
         // For reconstruction, Raw data might come as base64 or array
         let rawData: Uint8Array;
         if (typeof bodyData.data === 'string') {
@@ -485,6 +521,7 @@ export class RequestReconstructor {
           data: rawData,
           formatted: bodyData.formatted,
         };
+      }
 
       default:
         throw new Error(`Unsupported body type: ${bodyType}`);

@@ -143,7 +143,13 @@ export class ApicizeValidator {
       };
     }
 
-    const validateSection = this.ajv.compile(sectionSchema);
+    // Create a temporary schema that includes the section schema and all definitions
+    const tempSchema = {
+      ...sectionSchema,
+      definitions: apicizeSchema.definitions,
+    };
+
+    const validateSection = this.ajv.compile(tempSchema);
     const valid = validateSection(data);
 
     if (valid) {

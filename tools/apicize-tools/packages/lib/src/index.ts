@@ -26,7 +26,7 @@ export {
   ApicizeTimeoutError,
   ApicizeNetworkError,
   IntegratedApicizeClient,
-  TestHelper
+  TestHelper,
 } from './client';
 
 // Version information

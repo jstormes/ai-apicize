@@ -12,316 +12,338 @@ import { FileScanner } from '../import/file-scanner';
 import { ApicizeWorkbook } from '../types';
 
 describe('Round-trip Integration Tests', () => {
-    let tempDir: string;
-    let exportPipeline: ExportPipeline;
-    let importPipeline: ImportPipeline;
-    let fileScanner: FileScanner;
+  let tempDir: string;
+  let exportPipeline: ExportPipeline;
+  let importPipeline: ImportPipeline;
+  let fileScanner: FileScanner;
 
-    beforeEach(async () => {
-        // Create temporary directory for test files
-        tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'apicize-roundtrip-'));
+  beforeEach(async () => {
+    // Create temporary directory for test files
+    tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'apicize-roundtrip-'));
 
-        // Initialize pipelines
-        exportPipeline = new ExportPipeline();
-        importPipeline = new ImportPipeline();
-        fileScanner = new FileScanner();
-    });
+    // Initialize pipelines
+    exportPipeline = new ExportPipeline();
+    importPipeline = new ImportPipeline();
+    fileScanner = new FileScanner();
+  });
 
-    afterEach(async () => {
-        // Clean up temporary directory
-        try {
-            await fs.promises.rm(tempDir, { recursive: true, force: true });
-        } catch (error) {
-            console.warn(`Failed to clean up temp directory: ${tempDir}`, error);
+  afterEach(async () => {
+    // Clean up temporary directory
+    try {
+      await fs.promises.rm(tempDir, { recursive: true, force: true });
+    } catch (error) {
+      console.warn(`Failed to clean up temp directory: ${tempDir}`, error);
+    }
+  });
+
+  describe('demo.apicize round-trip', () => {
+    it('should maintain data fidelity through export→import cycle', async () => {
+      // Step 1: Load original .apicize file
+      const originalApicizeFile = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
+      expect(fs.existsSync(originalApicizeFile)).toBe(true);
+
+      const originalContent = await fs.promises.readFile(originalApicizeFile, 'utf-8');
+      const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
+
+      // Step 2: Export to TypeScript
+      const exportOutputDir = path.join(tempDir, 'exported');
+      const exportResult = await exportPipeline.exportWorkbook(
+        originalWorkbook,
+        originalApicizeFile,
+        {
+          outputDir: exportOutputDir,
+          includeMetadata: true,
+          generateHelpers: true,
+          splitByGroup: true,
         }
+      );
+
+      expect(exportResult.success).toBe(true);
+      expect(exportResult.filesCreated.length).toBeGreaterThan(0);
+
+      // Verify key files were created
+      expect(exportResult.filesCreated.find(f => f.includes('index.spec.ts'))).toBeDefined();
+      expect(exportResult.filesCreated.find(f => f.includes('package.json'))).toBeDefined();
+
+      // Step 3: Scan the exported TypeScript project
+      const projectMap = await fileScanner.scanProject(exportOutputDir);
+      expect(projectMap.allFiles.length).toBeGreaterThan(0);
+
+      // Step 4: Import back to .apicize
+      const importResult = await importPipeline.importProject(exportOutputDir);
+      expect(importResult.workbook).toBeDefined();
+
+      // Step 5: Compare original vs round-trip workbook
+      const roundTripWorkbook = importResult.workbook;
+
+      // Basic structure validation
+      expect(roundTripWorkbook.version).toBe(originalWorkbook.version);
+      expect(roundTripWorkbook.requests).toBeDefined();
+      expect(Array.isArray(roundTripWorkbook.requests)).toBe(true);
+
+      // Request count validation
+      const originalRequestCount = countAllRequests(originalWorkbook.requests || []);
+      const roundTripRequestCount = countAllRequests(roundTripWorkbook.requests || []);
+      expect(roundTripRequestCount).toBe(originalRequestCount);
+
+      // Group count validation
+      const originalGroupCount = countAllGroups(originalWorkbook.requests || []);
+      const roundTripGroupCount = countAllGroups(roundTripWorkbook.requests || []);
+      expect(roundTripGroupCount).toBe(originalGroupCount);
+
+      // Scenarios preservation
+      if (originalWorkbook.scenarios) {
+        expect(roundTripWorkbook.scenarios).toBeDefined();
+        expect(roundTripWorkbook.scenarios!.length).toBe(originalWorkbook.scenarios.length);
+      }
+
+      // Authorizations preservation
+      if (originalWorkbook.authorizations) {
+        expect(roundTripWorkbook.authorizations).toBeDefined();
+        expect(roundTripWorkbook.authorizations!.length).toBe(
+          originalWorkbook.authorizations.length
+        );
+      }
+
+      console.log('Round-trip statistics:', {
+        originalRequests: originalRequestCount,
+        roundTripRequests: roundTripRequestCount,
+        originalGroups: originalGroupCount,
+        roundTripGroups: roundTripGroupCount,
+        exportedFiles: exportResult.filesCreated.length,
+        importedItems:
+          importResult.statistics.requestsReconstructed +
+          importResult.statistics.groupsReconstructed,
+      });
     });
 
-    describe('demo.apicize round-trip', () => {
-        it('should maintain data fidelity through export→import cycle', async () => {
-            // Step 1: Load original .apicize file
-            const originalApicizeFile = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
-            expect(fs.existsSync(originalApicizeFile)).toBe(true);
+    it('should preserve request properties and test code', async () => {
+      // Load and process demo.apicize
+      const originalApicizeFile = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
+      const originalContent = await fs.promises.readFile(originalApicizeFile, 'utf-8');
+      const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
 
-            const originalContent = await fs.promises.readFile(originalApicizeFile, 'utf-8');
-            const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
+      // Export → Import cycle
+      const exportOutputDir = path.join(tempDir, 'exported-requests');
+      await exportPipeline.exportWorkbook(originalWorkbook, originalApicizeFile, {
+        outputDir: exportOutputDir,
+      });
+      const importResult = await importPipeline.importProject(exportOutputDir);
 
-            // Step 2: Export to TypeScript
-            const exportOutputDir = path.join(tempDir, 'exported');
-            const exportResult = await exportPipeline.exportWorkbook(
-                originalWorkbook,
-                originalApicizeFile,
-                {
-                    outputDir: exportOutputDir,
-                    includeMetadata: true,
-                    generateHelpers: true,
-                    splitByGroup: true
-                }
-            );
+      expect(importResult.workbook).toBeDefined();
+      const roundTripWorkbook = importResult.workbook;
 
-            expect(exportResult.success).toBe(true);
-            expect(exportResult.filesCreated.length).toBeGreaterThan(0);
+      // Find specific requests to validate detailed properties
+      const originalRequests = flattenAllRequests(originalWorkbook.requests || []);
+      const roundTripRequests = flattenAllRequests(roundTripWorkbook.requests || []);
 
-            // Verify key files were created
-            expect(exportResult.filesCreated.find(f => f.includes('index.spec.ts'))).toBeDefined();
-            expect(exportResult.filesCreated.find(f => f.includes('package.json'))).toBeDefined();
+      // Test specific request preservation
+      for (const originalRequest of originalRequests) {
+        const roundTripRequest = roundTripRequests.find(r => r.id === originalRequest.id);
+        expect(roundTripRequest).toBeDefined();
 
-            // Step 3: Scan the exported TypeScript project
-            const projectMap = await fileScanner.scanProject(exportOutputDir);
-            expect(projectMap.allFiles.length).toBeGreaterThan(0);
+        if (roundTripRequest) {
+          // Basic properties
+          expect(roundTripRequest.name).toBe(originalRequest.name);
+          expect(roundTripRequest.url).toBe(originalRequest.url);
+          expect(roundTripRequest.method).toBe(originalRequest.method);
 
-            // Step 4: Import back to .apicize
-            const importResult = await importPipeline.importProject(exportOutputDir);
-            expect(importResult.workbook).toBeDefined();
+          // Test code preservation
+          if (originalRequest.test) {
+            expect(roundTripRequest.test).toBeDefined();
+            expect(typeof roundTripRequest.test).toBe('string');
+            // Test code should contain similar patterns (exact match may vary due to formatting)
+            expect(roundTripRequest.test.length).toBeGreaterThan(0);
+          }
 
-            // Step 5: Compare original vs round-trip workbook
-            const roundTripWorkbook = importResult.workbook;
+          // Headers preservation
+          if (originalRequest.headers && originalRequest.headers.length > 0) {
+            expect(roundTripRequest.headers).toBeDefined();
+            expect(roundTripRequest.headers!.length).toBe(originalRequest.headers.length);
+          }
 
-            // Basic structure validation
-            expect(roundTripWorkbook.version).toBe(originalWorkbook.version);
-            expect(roundTripWorkbook.requests).toBeDefined();
-            expect(Array.isArray(roundTripWorkbook.requests)).toBe(true);
+          // Body preservation
+          if (originalRequest.body && originalRequest.body.type !== 'None') {
+            expect(roundTripRequest.body).toBeDefined();
+            expect(roundTripRequest.body!.type).toBe(originalRequest.body.type);
+          }
+        }
+      }
+    });
+  });
 
-            // Request count validation
-            const originalRequestCount = countAllRequests(originalWorkbook.requests || []);
-            const roundTripRequestCount = countAllRequests(roundTripWorkbook.requests || []);
-            expect(roundTripRequestCount).toBe(originalRequestCount);
+  describe('complex workbook round-trip', () => {
+    it('should handle request-groups.apicize with nested structures', async () => {
+      const complexApicizeFile = path.join(
+        __dirname,
+        '../../../examples/workbooks/request-groups.apicize'
+      );
 
-            // Group count validation
-            const originalGroupCount = countAllGroups(originalWorkbook.requests || []);
-            const roundTripGroupCount = countAllGroups(roundTripWorkbook.requests || []);
-            expect(roundTripGroupCount).toBe(originalGroupCount);
+      if (!fs.existsSync(complexApicizeFile)) {
+        console.warn('Skipping request-groups.apicize test - file not found');
+        return;
+      }
 
-            // Scenarios preservation
-            if (originalWorkbook.scenarios) {
-                expect(roundTripWorkbook.scenarios).toBeDefined();
-                expect(roundTripWorkbook.scenarios!.length).toBe(originalWorkbook.scenarios.length);
-            }
+      const originalContent = await fs.promises.readFile(complexApicizeFile, 'utf-8');
+      const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
 
-            // Authorizations preservation
-            if (originalWorkbook.authorizations) {
-                expect(roundTripWorkbook.authorizations).toBeDefined();
-                expect(roundTripWorkbook.authorizations!.length).toBe(originalWorkbook.authorizations.length);
-            }
+      // Export → Import cycle
+      const exportOutputDir = path.join(tempDir, 'exported-complex');
+      await exportPipeline.exportWorkbook(originalWorkbook, complexApicizeFile, {
+        outputDir: exportOutputDir,
+      });
+      const importResult = await importPipeline.importProject(exportOutputDir);
 
-            console.log('Round-trip statistics:', {
-                originalRequests: originalRequestCount,
-                roundTripRequests: roundTripRequestCount,
-                originalGroups: originalGroupCount,
-                roundTripGroups: roundTripGroupCount,
-                exportedFiles: exportResult.filesCreated.length,
-                importedItems: importResult.statistics.requestsReconstructed + importResult.statistics.groupsReconstructed
-            });
-        });
+      expect(importResult.workbook).toBeDefined();
+      const roundTripWorkbook = importResult.workbook;
 
-        it('should preserve request properties and test code', async () => {
-            // Load and process demo.apicize
-            const originalApicizeFile = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
-            const originalContent = await fs.promises.readFile(originalApicizeFile, 'utf-8');
-            const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
+      // Validate complex structure preservation
+      expect(roundTripWorkbook.version).toBe(originalWorkbook.version);
 
-            // Export → Import cycle
-            const exportOutputDir = path.join(tempDir, 'exported-requests');
-            await exportPipeline.exportWorkbook(originalWorkbook, originalApicizeFile, { outputDir: exportOutputDir });
-            const importResult = await importPipeline.importProject(exportOutputDir);
+      const originalHierarchy = analyzeHierarchy(originalWorkbook.requests || []);
+      const roundTripHierarchy = analyzeHierarchy(roundTripWorkbook.requests || []);
 
-            expect(importResult.workbook).toBeDefined();
-            const roundTripWorkbook = importResult.workbook;
+      expect(roundTripHierarchy.totalItems).toBe(originalHierarchy.totalItems);
+      expect(roundTripHierarchy.maxDepth).toBeLessThanOrEqual(originalHierarchy.maxDepth + 1); // Allow for some flattening
+    });
+  });
 
-            // Find specific requests to validate detailed properties
-            const originalRequests = flattenAllRequests(originalWorkbook.requests || []);
-            const roundTripRequests = flattenAllRequests(roundTripWorkbook.requests || []);
+  describe('minimal workbook round-trip', () => {
+    it('should handle minimal.apicize with basic structure', async () => {
+      const minimalApicizeFile = path.join(
+        __dirname,
+        '../../../examples/workbooks/minimal.apicize'
+      );
 
-            // Test specific request preservation
-            for (const originalRequest of originalRequests) {
-                const roundTripRequest = roundTripRequests.find(r => r.id === originalRequest.id);
-                expect(roundTripRequest).toBeDefined();
+      if (!fs.existsSync(minimalApicizeFile)) {
+        console.warn('Skipping minimal.apicize test - file not found');
+        return;
+      }
 
-                if (roundTripRequest) {
-                    // Basic properties
-                    expect(roundTripRequest.name).toBe(originalRequest.name);
-                    expect(roundTripRequest.url).toBe(originalRequest.url);
-                    expect(roundTripRequest.method).toBe(originalRequest.method);
+      const originalContent = await fs.promises.readFile(minimalApicizeFile, 'utf-8');
+      const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
 
-                    // Test code preservation
-                    if (originalRequest.test) {
-                        expect(roundTripRequest.test).toBeDefined();
-                        expect(typeof roundTripRequest.test).toBe('string');
-                        // Test code should contain similar patterns (exact match may vary due to formatting)
-                        expect(roundTripRequest.test.length).toBeGreaterThan(0);
-                    }
+      // Export → Import cycle
+      const exportOutputDir = path.join(tempDir, 'exported-minimal');
+      await exportPipeline.exportWorkbook(originalWorkbook, minimalApicizeFile, {
+        outputDir: exportOutputDir,
+      });
+      const importResult = await importPipeline.importProject(exportOutputDir);
 
-                    // Headers preservation
-                    if (originalRequest.headers && originalRequest.headers.length > 0) {
-                        expect(roundTripRequest.headers).toBeDefined();
-                        expect(roundTripRequest.headers!.length).toBe(originalRequest.headers.length);
-                    }
+      expect(importResult.workbook).toBeDefined();
+      const roundTripWorkbook = importResult.workbook;
 
-                    // Body preservation
-                    if (originalRequest.body && originalRequest.body.type !== 'None') {
-                        expect(roundTripRequest.body).toBeDefined();
-                        expect(roundTripRequest.body!.type).toBe(originalRequest.body.type);
-                    }
-                }
-            }
-        });
+      // Basic validation for minimal structure
+      expect(roundTripWorkbook.version).toBe(originalWorkbook.version);
+
+      if (originalWorkbook.requests) {
+        expect(roundTripWorkbook.requests).toBeDefined();
+        const originalCount = countAllRequests(originalWorkbook.requests);
+        const roundTripCount = countAllRequests(roundTripWorkbook.requests || []);
+        expect(roundTripCount).toBe(originalCount);
+      }
+    });
+  });
+
+  describe('round-trip limitations and edge cases', () => {
+    it('should handle workbooks with no requests', async () => {
+      const emptyWorkbook: ApicizeWorkbook = {
+        version: 1.0,
+        requests: [],
+      };
+
+      // Export → Import cycle
+      const exportOutputDir = path.join(tempDir, 'exported-empty');
+      await exportPipeline.exportWorkbook(emptyWorkbook, 'empty.apicize', {
+        outputDir: exportOutputDir,
+      });
+      const importResult = await importPipeline.importProject(exportOutputDir);
+
+      expect(importResult.workbook).toBeDefined();
+      const roundTripWorkbook = importResult.workbook;
+
+      expect(roundTripWorkbook.version).toBe(emptyWorkbook.version);
+      expect(roundTripWorkbook.requests).toBeDefined();
+      expect(roundTripWorkbook.requests!.length).toBe(0);
     });
 
-    describe('complex workbook round-trip', () => {
-        it('should handle request-groups.apicize with nested structures', async () => {
-            const complexApicizeFile = path.join(__dirname, '../../../examples/workbooks/request-groups.apicize');
+    it('should report any data loss or transformation issues', async () => {
+      // This test documents known limitations in the round-trip process
+      const originalApicizeFile = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
+      const originalContent = await fs.promises.readFile(originalApicizeFile, 'utf-8');
+      const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
 
-            if (!fs.existsSync(complexApicizeFile)) {
-                console.warn('Skipping request-groups.apicize test - file not found');
-                return;
-            }
+      // Export → Import cycle
+      const exportOutputDir = path.join(tempDir, 'exported-limitations');
+      const exportResult = await exportPipeline.exportWorkbook(
+        originalWorkbook,
+        originalApicizeFile,
+        { outputDir: exportOutputDir }
+      );
+      const importResult = await importPipeline.importProject(exportOutputDir);
 
-            const originalContent = await fs.promises.readFile(complexApicizeFile, 'utf-8');
-            const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
+      // Document any warnings or limitations
+      if (importResult.warnings && importResult.warnings.length > 0) {
+        console.log('Round-trip warnings:', importResult.warnings);
+      }
 
-            // Export → Import cycle
-            const exportOutputDir = path.join(tempDir, 'exported-complex');
-            await exportPipeline.exportWorkbook(originalWorkbook, complexApicizeFile, { outputDir: exportOutputDir });
-            const importResult = await importPipeline.importProject(exportOutputDir);
+      if (exportResult.warnings && exportResult.warnings.length > 0) {
+        console.log('Export warnings:', exportResult.warnings);
+      }
 
-            expect(importResult.workbook).toBeDefined();
-            const roundTripWorkbook = importResult.workbook;
-
-            // Validate complex structure preservation
-            expect(roundTripWorkbook.version).toBe(originalWorkbook.version);
-
-            const originalHierarchy = analyzeHierarchy(originalWorkbook.requests || []);
-            const roundTripHierarchy = analyzeHierarchy(roundTripWorkbook.requests || []);
-
-            expect(roundTripHierarchy.totalItems).toBe(originalHierarchy.totalItems);
-            expect(roundTripHierarchy.maxDepth).toBeLessThanOrEqual(originalHierarchy.maxDepth + 1); // Allow for some flattening
-        });
+      // This test always passes but logs any issues found
+      expect(true).toBe(true);
     });
-
-    describe('minimal workbook round-trip', () => {
-        it('should handle minimal.apicize with basic structure', async () => {
-            const minimalApicizeFile = path.join(__dirname, '../../../examples/workbooks/minimal.apicize');
-
-            if (!fs.existsSync(minimalApicizeFile)) {
-                console.warn('Skipping minimal.apicize test - file not found');
-                return;
-            }
-
-            const originalContent = await fs.promises.readFile(minimalApicizeFile, 'utf-8');
-            const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
-
-            // Export → Import cycle
-            const exportOutputDir = path.join(tempDir, 'exported-minimal');
-            await exportPipeline.exportWorkbook(originalWorkbook, minimalApicizeFile, { outputDir: exportOutputDir });
-            const importResult = await importPipeline.importProject(exportOutputDir);
-
-            expect(importResult.workbook).toBeDefined();
-            const roundTripWorkbook = importResult.workbook;
-
-            // Basic validation for minimal structure
-            expect(roundTripWorkbook.version).toBe(originalWorkbook.version);
-
-            if (originalWorkbook.requests) {
-                expect(roundTripWorkbook.requests).toBeDefined();
-                const originalCount = countAllRequests(originalWorkbook.requests);
-                const roundTripCount = countAllRequests(roundTripWorkbook.requests || []);
-                expect(roundTripCount).toBe(originalCount);
-            }
-        });
-    });
-
-    describe('round-trip limitations and edge cases', () => {
-        it('should handle workbooks with no requests', async () => {
-            const emptyWorkbook: ApicizeWorkbook = {
-                version: 1.0,
-                requests: []
-            };
-
-            // Export → Import cycle
-            const exportOutputDir = path.join(tempDir, 'exported-empty');
-            await exportPipeline.exportWorkbook(emptyWorkbook, 'empty.apicize', { outputDir: exportOutputDir });
-            const importResult = await importPipeline.importProject(exportOutputDir);
-
-            expect(importResult.workbook).toBeDefined();
-            const roundTripWorkbook = importResult.workbook;
-
-            expect(roundTripWorkbook.version).toBe(emptyWorkbook.version);
-            expect(roundTripWorkbook.requests).toBeDefined();
-            expect(roundTripWorkbook.requests!.length).toBe(0);
-        });
-
-        it('should report any data loss or transformation issues', async () => {
-            // This test documents known limitations in the round-trip process
-            const originalApicizeFile = path.join(__dirname, '../../../examples/workbooks/demo.apicize');
-            const originalContent = await fs.promises.readFile(originalApicizeFile, 'utf-8');
-            const originalWorkbook: ApicizeWorkbook = JSON.parse(originalContent);
-
-            // Export → Import cycle
-            const exportOutputDir = path.join(tempDir, 'exported-limitations');
-            const exportResult = await exportPipeline.exportWorkbook(originalWorkbook, originalApicizeFile, { outputDir: exportOutputDir });
-            const importResult = await importPipeline.importProject(exportOutputDir);
-
-            // Document any warnings or limitations
-            if (importResult.warnings && importResult.warnings.length > 0) {
-                console.log('Round-trip warnings:', importResult.warnings);
-            }
-
-            if (exportResult.warnings && exportResult.warnings.length > 0) {
-                console.log('Export warnings:', exportResult.warnings);
-            }
-
-            // This test always passes but logs any issues found
-            expect(true).toBe(true);
-        });
-    });
+  });
 });
 
 // Helper functions for analyzing workbook structure
 function countAllRequests(items: any[]): number {
-    let count = 0;
-    for (const item of items) {
-        if (item.children) {
-            count += countAllRequests(item.children);
-        } else {
-            count += 1;
-        }
+  let count = 0;
+  for (const item of items) {
+    if (item.children) {
+      count += countAllRequests(item.children);
+    } else {
+      count += 1;
     }
-    return count;
+  }
+  return count;
 }
 
 function countAllGroups(items: any[]): number {
-    let count = 0;
-    for (const item of items) {
-        if (item.children) {
-            count += 1;
-            count += countAllGroups(item.children);
-        }
+  let count = 0;
+  for (const item of items) {
+    if (item.children) {
+      count += 1;
+      count += countAllGroups(item.children);
     }
-    return count;
+  }
+  return count;
 }
 
 function flattenAllRequests(items: any[]): any[] {
-    const requests: any[] = [];
-    for (const item of items) {
-        if (item.children) {
-            requests.push(...flattenAllRequests(item.children));
-        } else {
-            requests.push(item);
-        }
+  const requests: any[] = [];
+  for (const item of items) {
+    if (item.children) {
+      requests.push(...flattenAllRequests(item.children));
+    } else {
+      requests.push(item);
     }
-    return requests;
+  }
+  return requests;
 }
 
 function analyzeHierarchy(items: any[], depth = 0): { totalItems: number; maxDepth: number } {
-    let totalItems = items.length;
-    let maxDepth = depth;
+  let totalItems = items.length;
+  let maxDepth = depth;
 
-    for (const item of items) {
-        if (item.children) {
-            const childAnalysis = analyzeHierarchy(item.children, depth + 1);
-            totalItems += childAnalysis.totalItems;
-            maxDepth = Math.max(maxDepth, childAnalysis.maxDepth);
-        }
+  for (const item of items) {
+    if (item.children) {
+      const childAnalysis = analyzeHierarchy(item.children, depth + 1);
+      totalItems += childAnalysis.totalItems;
+      maxDepth = Math.max(maxDepth, childAnalysis.maxDepth);
     }
+  }
 
-    return { totalItems, maxDepth };
+  return { totalItems, maxDepth };
 }

@@ -19,7 +19,7 @@ program
   .version(version)
   .option('-v, --verbose', 'enable verbose output')
   .option('--no-color', 'disable colored output')
-  .hook('preAction', (thisCommand) => {
+  .hook('preAction', thisCommand => {
     // Set up global options
     const opts = thisCommand.opts();
     if (opts.noColor) {
@@ -39,12 +39,12 @@ runCommand(program);
 
 // Error handling
 program.configureOutput({
-  writeErr: (str) => process.stderr.write(chalk.red(str)),
-  writeOut: (str) => process.stdout.write(str)
+  writeErr: str => process.stderr.write(chalk.red(str)),
+  writeOut: str => process.stdout.write(str),
 });
 
 // Handle unknown commands
-program.on('command:*', (operands) => {
+program.on('command:*', operands => {
   console.error(chalk.red(`Unknown command: ${operands[0]}`));
   console.log(chalk.yellow('Use "apicize --help" to see available commands'));
   process.exit(1);

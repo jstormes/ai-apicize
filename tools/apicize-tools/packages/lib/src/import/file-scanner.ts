@@ -197,7 +197,10 @@ export class FileScanner {
   /**
    * Categorizes files into main files and suite files.
    */
-  private categorizeFiles(files: ScannedFile[]): { mainFiles: ScannedFile[]; suiteFiles: ScannedFile[] } {
+  private categorizeFiles(files: ScannedFile[]): {
+    mainFiles: ScannedFile[];
+    suiteFiles: ScannedFile[];
+  } {
     const mainFiles: ScannedFile[] = [];
     const suiteFiles: ScannedFile[] = [];
 
@@ -220,10 +223,7 @@ export class FileScanner {
     const fileName = path.basename(relativePath);
 
     // Main files are specifically named index.spec.ts or index.test.ts
-    return (
-      fileName === 'index.spec.ts' ||
-      fileName === 'index.test.ts'
-    );
+    return fileName === 'index.spec.ts' || fileName === 'index.test.ts';
   }
 
   /**
@@ -259,12 +259,7 @@ export class FileScanner {
    * Finds Apicize configuration file.
    */
   private async findConfigFile(rootPath: string): Promise<string | undefined> {
-    const configNames = [
-      'apicize.config.json',
-      'apicize.json',
-      '.apicizerc.json',
-      '.apicizerc',
-    ];
+    const configNames = ['apicize.config.json', 'apicize.json', '.apicizerc.json', '.apicizerc'];
 
     for (const configName of configNames) {
       const configPath = await this.findFile(rootPath, configName);
@@ -329,7 +324,9 @@ export class FileScanner {
   /**
    * Validates that a scanned project looks like an exported Apicize project.
    */
-  static async validateApicizeProject(projectMap: ProjectMap): Promise<{ valid: boolean; issues: string[] }> {
+  static async validateApicizeProject(
+    projectMap: ProjectMap
+  ): Promise<{ valid: boolean; issues: string[] }> {
     const issues: string[] = [];
 
     // Check for package.json
@@ -365,7 +362,9 @@ export class FileScanner {
       }
 
       if (!hasLibDirectory && !hasConfigDirectory) {
-        issues.push('Project does not appear to have Apicize library structure (missing lib/ or config/ directories)');
+        issues.push(
+          'Project does not appear to have Apicize library structure (missing lib/ or config/ directories)'
+        );
       }
     } catch (error) {
       issues.push('Error checking project structure');

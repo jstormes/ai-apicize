@@ -20,12 +20,12 @@ const complexObject = {
   nested: {
     deeply: {
       nested: {
-        value: 'test'
-      }
-    }
+        value: 'test',
+      },
+    },
   },
   array: [1, 2, 3],
-  function: () => 'test'
+  function: () => 'test',
 };
 
 // Arrow function
@@ -51,12 +51,14 @@ class TestHelper {
   }
 }
 
-// Type definitions
+// Type definitions (used in tests)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type TestConfig = {
   timeout: number;
   retries: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface TestInterface {
   id: string;
   name: string;
@@ -100,7 +102,7 @@ suite('Edge Cases - Suite', () => {
 
 // Tests with various async patterns
 describe('Async Patterns', () => {
-  beforeEach(async function() {
+  beforeEach(async function () {
     this.timeout(5000);
     await new Promise(resolve => setTimeout(resolve, 10));
   });
@@ -143,7 +145,13 @@ describe('Complex Code Structures', () => {
   @apicize-request-metadata-end */
 
   it('test with complex object destructuring', () => {
-    const { nested: { deeply: { nested: { value } } } } = complexObject;
+    const {
+      nested: {
+        deeply: {
+          nested: { value },
+        },
+      },
+    } = complexObject;
     expect(value).to.equal('test');
   });
 
@@ -185,11 +193,9 @@ describe('Complex Code Structures', () => {
 describe('Unusual Formatting', function () {
   this.timeout(10000);
 
-  it('test with unusual spacing',
-    function () {
-      expect  (  1  +  1  )  .to  .equal  (  2  );
-    }
-  );
+  it('test with unusual spacing', function () {
+    expect(1 + 1).to.equal(2);
+  });
 
   it('test with\nmultiline string', () => {
     const multiline = `
@@ -223,24 +229,25 @@ describe('Level 1', () => {
 // Tests with hooks
 describe('Hook Tests', () => {
   let setupValue: string;
-  let cleanupValue: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let _cleanupValue: string;
 
-  before(function() {
+  before(function () {
     setupValue = 'setup complete';
     console.log('Global setup');
   });
 
-  after(function() {
-    cleanupValue = 'cleanup complete';
+  after(function () {
+    _cleanupValue = 'cleanup complete';
     console.log('Global cleanup');
   });
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     await new Promise(resolve => setTimeout(resolve, 1));
     console.log('Test setup');
   });
 
-  afterEach(function() {
+  afterEach(function () {
     console.log('Test cleanup');
   });
 

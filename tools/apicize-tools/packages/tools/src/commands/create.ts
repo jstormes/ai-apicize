@@ -13,7 +13,7 @@ import {
   info,
   verbose,
   handleCliError,
-  executeCommand
+  executeCommand,
 } from '../utils/cli-utils';
 
 interface CreateOptions {
@@ -41,9 +41,7 @@ async function createAction(name: string, options: CreateOptions): Promise<void>
 
   try {
     // Determine output file
-    const outputFile = options.output
-      ? resolve(options.output)
-      : resolve(`${name}.apicize`);
+    const outputFile = options.output ? resolve(options.output) : resolve(`${name}.apicize`);
 
     verbose(`Output file: ${outputFile}`);
 
@@ -71,7 +69,7 @@ async function createAction(name: string, options: CreateOptions): Promise<void>
 
     spinner.succeed('Created new .apicize file');
 
-    success(`Created \"${basename(outputFile)}\" using ${options.template || 'basic'} template`);
+    success(`Created "${basename(outputFile)}" using ${options.template || 'basic'} template`);
     info(`File location: ${outputFile}`);
     info(`Template: ${options.template || 'basic'}`);
 
@@ -81,7 +79,6 @@ async function createAction(name: string, options: CreateOptions): Promise<void>
     console.log('  1. Edit the file to add your API requests');
     console.log('  2. Configure scenarios and authentication');
     console.log(`  3. Run: apicize export ${basename(outputFile)}`);
-
   } catch (err) {
     handleCliError(err, spinner);
   }
@@ -97,33 +94,33 @@ async function interactiveCreate(name: string, template: string): Promise<any> {
       type: 'input',
       name: 'description',
       message: 'Description of this API test collection:',
-      default: `API tests for ${name}`
+      default: `API tests for ${name}`,
     },
     {
       type: 'input',
       name: 'baseUrl',
       message: 'Base URL for API endpoints:',
-      default: 'https://api.example.com'
+      default: 'https://api.example.com',
     },
     {
       type: 'confirm',
       name: 'addAuth',
       message: 'Add authentication configuration?',
-      default: false
+      default: false,
     },
     {
       type: 'list',
       name: 'authType',
       message: 'Authentication type:',
       choices: ['Basic', 'API Key', 'OAuth2'],
-      when: (answers) => answers.addAuth
+      when: answers => answers.addAuth,
     },
     {
       type: 'confirm',
       name: 'addScenarios',
       message: 'Add environment scenarios (dev, staging, production)?',
-      default: true
-    }
+      default: true,
+    },
   ]);
 
   return await buildTemplate(template, name, answers);
@@ -134,7 +131,7 @@ async function getTemplate(templateType: string, name: string): Promise<any> {
     description: `API tests for ${name}`,
     baseUrl: 'https://api.example.com',
     addAuth: false,
-    addScenarios: true
+    addScenarios: true,
   });
 }
 
@@ -147,7 +144,7 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
     certificates: [],
     proxies: [],
     data: [],
-    defaults: {}
+    defaults: {},
   };
 
   // Add scenarios if requested
@@ -160,14 +157,14 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
           {
             name: 'baseUrl',
             value: config.baseUrl.replace('api.example.com', 'api-dev.example.com'),
-            type: 'TEXT'
+            type: 'TEXT',
           },
           {
             name: 'apiKey',
             value: 'dev-api-key-here',
-            type: 'TEXT'
-          }
-        ]
+            type: 'TEXT',
+          },
+        ],
       },
       {
         id: uuidv4(),
@@ -176,20 +173,20 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
           {
             name: 'baseUrl',
             value: config.baseUrl,
-            type: 'TEXT'
+            type: 'TEXT',
           },
           {
             name: 'apiKey',
             value: 'prod-api-key-here',
-            type: 'TEXT'
-          }
-        ]
-      }
+            type: 'TEXT',
+          },
+        ],
+      },
     ];
 
     workbook.defaults.selectedScenario = {
       id: workbook.scenarios[0].id,
-      name: workbook.scenarios[0].name
+      name: workbook.scenarios[0].name,
     };
   }
 
@@ -204,7 +201,7 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
           name: 'Basic Auth',
           type: 'Basic',
           username: 'your-username',
-          password: 'your-password'
+          password: 'your-password',
         };
         break;
       case 'API Key':
@@ -213,7 +210,7 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
           name: 'API Key',
           type: 'ApiKey',
           header: 'X-API-Key',
-          value: '{{apiKey}}'
+          value: '{{apiKey}}',
         };
         break;
       case 'OAuth2':
@@ -224,7 +221,7 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
           accessTokenUrl: '{{baseUrl}}/oauth/token',
           clientId: 'your-client-id',
           clientSecret: 'your-client-secret',
-          scope: 'api:read api:write'
+          scope: 'api:read api:write',
         };
         break;
     }
@@ -233,7 +230,7 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
       workbook.authorizations.push(authConfig);
       workbook.defaults.selectedAuthorization = {
         id: authConfig.id,
-        name: authConfig.name
+        name: authConfig.name,
       };
     }
   }
@@ -255,6 +252,7 @@ async function buildTemplate(templateType: string, _name: string, config: any): 
   return workbook;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function buildBasicTemplate(_config: any): Promise<any[]> {
   const groupId = uuidv4();
   const getRequestId = uuidv4();
@@ -270,36 +268,55 @@ async function buildBasicTemplate(_config: any): Promise<any[]> {
           name: 'Get Example',
           url: '{{baseUrl}}/example',
           method: 'GET',
-          test: `describe('Get Example', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return JSON response', () => {\n    expect(response.body.type).to.equal(BodyType.JSON);\n  });\n});`,
+          test: `describe('Get Example', () => {
+  it('should return 200 status', () => {
+    expect(response.status).to.equal(200);
+  });
+
+  it('should return JSON response', () => {
+    expect(response.body.type).to.equal(BodyType.JSON);
+  });
+});`,
           headers: [],
           queryStringParams: [],
           timeout: 30000,
-          runs: 1
+          runs: 1,
         },
         {
           id: postRequestId,
           name: 'Post Example',
           url: '{{baseUrl}}/example',
           method: 'POST',
-          test: `describe('Post Example', () => {\n  it('should return 201 status', () => {\n    expect(response.status).to.equal(201);\n  });\n\n  it('should return created resource', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('id');\n    output('createdId', data.id);\n  });\n});`,
-          headers: [
-            { name: 'Content-Type', value: 'application/json' }
-          ],
+          test: `describe('Post Example', () => {
+  it('should return 201 status', () => {
+    expect(response.status).to.equal(201);
+  });
+
+  it('should return created resource', () => {
+    const data = (response.body.type == BodyType.JSON)
+      ? response.body.data
+      : expect.fail('Response body is not JSON');
+
+    expect(data).to.have.property('id');
+    output('createdId', data.id);
+  });
+});`,
+          headers: [{ name: 'Content-Type', value: 'application/json' }],
           body: {
             type: 'JSON',
             data: {
               name: 'Example Item',
-              description: 'This is an example'
-            }
+              description: 'This is an example',
+            },
           },
           queryStringParams: [],
           timeout: 30000,
-          runs: 1
-        }
+          runs: 1,
+        },
       ],
       execution: 'SEQUENTIAL',
-      runs: 1
-    }
+      runs: 1,
+    },
   ];
 }
 

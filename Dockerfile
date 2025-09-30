@@ -68,10 +68,10 @@ RUN git config --global --add safe.directory /project
 RUN echo "alias claude='claude --dangerously-skip-permissions'\n" >> /home/user/.bashrc
 
 ############################################################################
-# Set Claude Code timeouts to 5 minutes
+# Set Claude Code timeouts to 10 minutes
 ############################################################################
 ENV BASH_DEFAULT_TIMEOUT_MS=600000
-ENV BASH_MAX_TIMEOUT_MS=600000
+ENV BASH_MAX_TIMEOUT_MS=600001
 ENV MCP_TOOL_TIMEOUT=600000
 
 ############################################################################

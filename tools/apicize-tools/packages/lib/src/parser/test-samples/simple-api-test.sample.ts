@@ -53,10 +53,10 @@ describe('Simple API Tests', () => {
       context = await helper.setupTest('Get Users');
 
       response = await context.execute({
-        url: context.substituteVariables("https://api.example.com/users"),
-        method: "GET",
-        headers: {"Accept": "application/json"},
-        timeout: 30000
+        url: context.substituteVariables('https://api.example.com/users'),
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        timeout: 30000,
       });
 
       $ = context.$;
@@ -65,9 +65,10 @@ describe('Simple API Tests', () => {
     it('should get users list', () => {
       expect(response.status).to.equal(200);
 
-      const data = (response.body.type == BodyType.JSON)
-        ? response.body.data
-        : expect.fail('Response body is not JSON');
+      const data =
+        response.body.type == BodyType.JSON
+          ? response.body.data
+          : expect.fail('Response body is not JSON');
 
       expect(data).to.be.an('array');
       expect(data.length).to.be.greaterThan(0);
@@ -98,16 +99,16 @@ describe('Simple API Tests', () => {
       context = await helper.setupTest('Create User');
 
       response = await context.execute({
-        url: "https://api.example.com/users",
-        method: "POST",
+        url: 'https://api.example.com/users',
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
         body: {
-          name: $.userName || "Test User",
-          email: $.userEmail || "test@example.com"
-        }
+          name: $.userName || 'Test User',
+          email: $.userEmail || 'test@example.com',
+        },
       });
 
       $ = context.$;
@@ -116,12 +117,13 @@ describe('Simple API Tests', () => {
     it('should create new user', async () => {
       expect(response.status).to.equal(201);
 
-      const data = (response.body.type == BodyType.JSON)
-        ? response.body.data
-        : expect.fail('Response body is not JSON');
+      const data =
+        response.body.type == BodyType.JSON
+          ? response.body.data
+          : expect.fail('Response body is not JSON');
 
-      expect(data.name).to.equal($.userName || "Test User");
-      expect(data.email).to.equal($.userEmail || "test@example.com");
+      expect(data.name).to.equal($.userName || 'Test User');
+      expect(data.email).to.equal($.userEmail || 'test@example.com');
       expect(data.id).to.be.a('string');
 
       // Save user ID for later tests

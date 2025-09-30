@@ -107,7 +107,14 @@ export class TestExtractionError extends Error {
  */
 export class TestExtractor {
   private static readonly TEST_FRAMEWORK_FUNCTIONS = new Set([
-    'describe', 'suite', 'it', 'test', 'before', 'after', 'beforeEach', 'afterEach'
+    'describe',
+    'suite',
+    'it',
+    'test',
+    'before',
+    'after',
+    'beforeEach',
+    'afterEach',
   ]);
 
   /**
@@ -157,7 +164,7 @@ export class TestExtractor {
       includeSharedCode = true,
       includeTypeDefinitions = false,
       formatCode = false,
-      strictMode = false
+      strictMode = false,
     } = options;
 
     const errors: string[] = [];
@@ -165,12 +172,7 @@ export class TestExtractor {
 
     try {
       // Create TypeScript source file
-      const sourceFile = ts.createSourceFile(
-        'test.ts',
-        content,
-        ts.ScriptTarget.Latest,
-        true
-      );
+      const sourceFile = ts.createSourceFile('test.ts', content, ts.ScriptTarget.Latest, true);
 
       // Check for syntax errors
       const syntaxErrors = this.checkSyntaxErrors(sourceFile);
@@ -228,7 +230,10 @@ export class TestExtractor {
    * @returns Validated test code
    * @throws TestExtractionError if extraction fails
    */
-  async extractAndValidate(content: string, options: TestExtractionOptions = {}): Promise<ExtractedTestCode> {
+  async extractAndValidate(
+    content: string,
+    options: TestExtractionOptions = {}
+  ): Promise<ExtractedTestCode> {
     let result: ExtractedTestCode;
 
     // Check if content is a file path or actual content
@@ -275,7 +280,10 @@ export class TestExtractor {
    * @param testName Name of the test to find
    * @returns Array of matching tests with their parent suite info
    */
-  findTestsByName(testCode: ExtractedTestCode, testName: string): Array<{
+  findTestsByName(
+    testCode: ExtractedTestCode,
+    testName: string
+  ): Array<{
     test: ExtractedTest;
     suitePath: string[];
   }> {
@@ -345,8 +353,12 @@ export class TestExtractor {
       totalWarnings: testCode.warnings.length,
       hasBeforeHooks: allSuites.some(suite => suite.hooks.some(hook => hook.type === 'before')),
       hasAfterHooks: allSuites.some(suite => suite.hooks.some(hook => hook.type === 'after')),
-      hasBeforeEachHooks: allSuites.some(suite => suite.hooks.some(hook => hook.type === 'beforeEach')),
-      hasAfterEachHooks: allSuites.some(suite => suite.hooks.some(hook => hook.type === 'afterEach')),
+      hasBeforeEachHooks: allSuites.some(suite =>
+        suite.hooks.some(hook => hook.type === 'beforeEach')
+      ),
+      hasAfterEachHooks: allSuites.some(suite =>
+        suite.hooks.some(hook => hook.type === 'afterEach')
+      ),
     };
   }
 
@@ -373,6 +385,7 @@ export class TestExtractor {
   /**
    * Extract import statements from the source file
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private extractImports(sourceFile: ts.SourceFile, _content: string): ExtractedImport[] {
     const imports: ExtractedImport[] = [];
 
@@ -403,7 +416,11 @@ export class TestExtractor {
   /**
    * Extract test suites from the source file
    */
-  private extractTestSuites(sourceFile: ts.SourceFile, _content: string, formatCode: boolean): ExtractedTestSuite[] {
+  private extractTestSuites(
+    sourceFile: ts.SourceFile,
+    _content: string,
+    formatCode: boolean
+  ): ExtractedTestSuite[] {
     const suites: ExtractedTestSuite[] = [];
 
     // Only look at top-level statements to avoid extracting nested describes as top-level
@@ -431,7 +448,11 @@ export class TestExtractor {
   /**
    * Extract a single test suite from a call expression
    */
-  private extractTestSuite(node: ts.CallExpression, sourceFile: ts.SourceFile, formatCode: boolean): ExtractedTestSuite | null {
+  private extractTestSuite(
+    node: ts.CallExpression,
+    sourceFile: ts.SourceFile,
+    formatCode: boolean
+  ): ExtractedTestSuite | null {
     const expression = node.expression;
     if (!ts.isIdentifier(expression)) return null;
 
@@ -447,7 +468,8 @@ export class TestExtractor {
 
     // Get the function body (second argument)
     const bodyArg = node.arguments[1];
-    if (!bodyArg || !ts.isFunctionExpression(bodyArg) && !ts.isArrowFunction(bodyArg)) return null;
+    if (!bodyArg || (!ts.isFunctionExpression(bodyArg) && !ts.isArrowFunction(bodyArg)))
+      return null;
 
     const body = bodyArg.body;
     if (!body || !ts.isBlock(body)) return null;
@@ -497,7 +519,11 @@ export class TestExtractor {
   /**
    * Extract a test case from a call expression
    */
-  private extractTest(node: ts.CallExpression, sourceFile: ts.SourceFile, formatCode: boolean): ExtractedTest | null {
+  private extractTest(
+    node: ts.CallExpression,
+    sourceFile: ts.SourceFile,
+    formatCode: boolean
+  ): ExtractedTest | null {
     const expression = node.expression;
     if (!ts.isIdentifier(expression)) return null;
 
@@ -513,7 +539,8 @@ export class TestExtractor {
 
     // Get the function body (second argument)
     const bodyArg = node.arguments[1];
-    if (!bodyArg || !ts.isFunctionExpression(bodyArg) && !ts.isArrowFunction(bodyArg)) return null;
+    if (!bodyArg || (!ts.isFunctionExpression(bodyArg) && !ts.isArrowFunction(bodyArg)))
+      return null;
 
     const body = bodyArg.body;
     const isAsync = this.isAsyncFunction(bodyArg);
@@ -543,7 +570,11 @@ export class TestExtractor {
   /**
    * Extract a hook from a call expression
    */
-  private extractHook(node: ts.CallExpression, sourceFile: ts.SourceFile, formatCode: boolean): ExtractedHook | null {
+  private extractHook(
+    node: ts.CallExpression,
+    sourceFile: ts.SourceFile,
+    formatCode: boolean
+  ): ExtractedHook | null {
     const expression = node.expression;
     if (!ts.isIdentifier(expression)) return null;
 
@@ -589,13 +620,20 @@ export class TestExtractor {
   /**
    * Extract shared code (variables, functions, etc.) from the source file
    */
-  private extractSharedCode(sourceFile: ts.SourceFile, _content: string, includeTypeDefinitions: boolean): ExtractedSharedCode[] {
+  private extractSharedCode(
+    sourceFile: ts.SourceFile,
+    _content: string,
+    includeTypeDefinitions: boolean
+  ): ExtractedSharedCode[] {
     const sharedCode: ExtractedSharedCode[] = [];
 
     const visit = (node: ts.Node) => {
       // Skip test framework calls as they're handled separately
-      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) &&
-          TestExtractor.TEST_FRAMEWORK_FUNCTIONS.has(node.expression.text)) {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        TestExtractor.TEST_FRAMEWORK_FUNCTIONS.has(node.expression.text)
+      ) {
         return;
       }
 
@@ -607,7 +645,10 @@ export class TestExtractor {
         codeBlock = this.extractFunctionDeclaration(node, sourceFile);
       } else if (ts.isClassDeclaration(node)) {
         codeBlock = this.extractClassDeclaration(node, sourceFile);
-      } else if (includeTypeDefinitions && (ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node))) {
+      } else if (
+        includeTypeDefinitions &&
+        (ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node))
+      ) {
         codeBlock = this.extractTypeDeclaration(node, sourceFile);
       }
 
@@ -625,7 +666,10 @@ export class TestExtractor {
   /**
    * Extract variable declaration
    */
-  private extractVariableDeclaration(node: ts.VariableStatement, sourceFile: ts.SourceFile): ExtractedSharedCode {
+  private extractVariableDeclaration(
+    node: ts.VariableStatement,
+    sourceFile: ts.SourceFile
+  ): ExtractedSharedCode {
     const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
     const fullText = node.getText(sourceFile);
 
@@ -652,7 +696,10 @@ export class TestExtractor {
   /**
    * Extract function declaration
    */
-  private extractFunctionDeclaration(node: ts.FunctionDeclaration, sourceFile: ts.SourceFile): ExtractedSharedCode {
+  private extractFunctionDeclaration(
+    node: ts.FunctionDeclaration,
+    sourceFile: ts.SourceFile
+  ): ExtractedSharedCode {
     const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
     const fullText = node.getText(sourceFile);
     const name = node.name?.text;
@@ -671,7 +718,10 @@ export class TestExtractor {
   /**
    * Extract class declaration
    */
-  private extractClassDeclaration(node: ts.ClassDeclaration, sourceFile: ts.SourceFile): ExtractedSharedCode {
+  private extractClassDeclaration(
+    node: ts.ClassDeclaration,
+    sourceFile: ts.SourceFile
+  ): ExtractedSharedCode {
     const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
     const fullText = node.getText(sourceFile);
     const name = node.name?.text;
@@ -690,7 +740,10 @@ export class TestExtractor {
   /**
    * Extract type declaration
    */
-  private extractTypeDeclaration(node: ts.TypeAliasDeclaration | ts.InterfaceDeclaration, sourceFile: ts.SourceFile): ExtractedSharedCode {
+  private extractTypeDeclaration(
+    node: ts.TypeAliasDeclaration | ts.InterfaceDeclaration,
+    sourceFile: ts.SourceFile
+  ): ExtractedSharedCode {
     const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
     const fullText = node.getText(sourceFile);
     const name = node.name?.text;
@@ -710,7 +763,7 @@ export class TestExtractor {
    * Check if a function is async
    */
   private isAsyncFunction(node: ts.FunctionExpression | ts.ArrowFunction): boolean {
-    return !!(node.modifiers?.some(mod => mod.kind === ts.SyntaxKind.AsyncKeyword));
+    return !!node.modifiers?.some(mod => mod.kind === ts.SyntaxKind.AsyncKeyword);
   }
 
   /**

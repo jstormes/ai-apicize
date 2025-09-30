@@ -44,7 +44,7 @@ export function setupTestContext(): CLITestContext {
       if (fs.existsSync(tempDir)) {
         fs.rmSync(tempDir, { recursive: true, force: true });
       }
-    }
+    },
   };
 }
 
@@ -65,17 +65,17 @@ export function runCLICommand(
     const child = spawn(command, args, {
       cwd: options.cwd || process.cwd(),
       stdio: 'pipe',
-      timeout: options.timeout || 30000
+      timeout: options.timeout || 30000,
     });
 
     let stdout = '';
     let stderr = '';
 
-    child.stdout?.on('data', (data) => {
+    child.stdout?.on('data', data => {
       stdout += data.toString();
     });
 
-    child.stderr?.on('data', (data) => {
+    child.stderr?.on('data', data => {
       stderr += data.toString();
     });
 
@@ -85,17 +85,17 @@ export function runCLICommand(
       child.stdin.end();
     }
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       const duration = Date.now() - startTime;
       resolve({
         exitCode: code || 0,
         stdout,
         stderr,
-        duration
+        duration,
       });
     });
 
-    child.on('error', (error) => {
+    child.on('error', error => {
       reject(error);
     });
   });
@@ -123,13 +123,12 @@ export function checkDirectoryContents(dirPath: string, expectedFiles: string[])
     return false;
   }
 
-  const actualFiles = fs.readdirSync(dirPath, { recursive: true })
+  const actualFiles = fs
+    .readdirSync(dirPath, { recursive: true })
     .map(f => f.toString())
     .filter(f => !f.includes('node_modules'));
 
-  return expectedFiles.every(expected =>
-    actualFiles.some(actual => actual.includes(expected))
-  );
+  return expectedFiles.every(expected => actualFiles.some(actual => actual.includes(expected)));
 }
 
 /**
@@ -148,7 +147,15 @@ export function validateApicizeStructure(filePath: string): { valid: boolean; er
     const data = JSON.parse(content);
 
     // Check required top-level properties
-    const requiredProps = ['version', 'requests', 'scenarios', 'authorizations', 'certificates', 'proxies', 'data'];
+    const requiredProps = [
+      'version',
+      'requests',
+      'scenarios',
+      'authorizations',
+      'certificates',
+      'proxies',
+      'data',
+    ];
     requiredProps.forEach(prop => {
       if (!(prop in data)) {
         errors.push(`Missing required property: ${prop}`);
@@ -161,13 +168,19 @@ export function validateApicizeStructure(filePath: string): { valid: boolean; er
     }
 
     // Check arrays are arrays
-    const arrayProps = ['requests', 'scenarios', 'authorizations', 'certificates', 'proxies', 'data'];
+    const arrayProps = [
+      'requests',
+      'scenarios',
+      'authorizations',
+      'certificates',
+      'proxies',
+      'data',
+    ];
     arrayProps.forEach(prop => {
       if (data[prop] && !Array.isArray(data[prop])) {
         errors.push(`Property ${prop} must be an array`);
       }
     });
-
   } catch (error) {
     errors.push(`JSON parse error: ${error}`);
   }
@@ -178,7 +191,10 @@ export function validateApicizeStructure(filePath: string): { valid: boolean; er
 /**
  * Validate TypeScript project structure
  */
-export function validateTypeScriptProject(projectPath: string): { valid: boolean; errors: string[] } {
+export function validateTypeScriptProject(projectPath: string): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   try {
@@ -204,13 +220,13 @@ export function validateTypeScriptProject(projectPath: string): { valid: boolean
     }
 
     // Check for test files
-    const testFiles = fs.readdirSync(projectPath, { recursive: true })
+    const testFiles = fs
+      .readdirSync(projectPath, { recursive: true })
       .filter(f => f.toString().endsWith('.spec.ts'));
 
     if (testFiles.length === 0) {
       errors.push('No test files found (.spec.ts)');
     }
-
   } catch (error) {
     errors.push(`Project validation error: ${error}`);
   }
@@ -221,7 +237,10 @@ export function validateTypeScriptProject(projectPath: string): { valid: boolean
 /**
  * Compare two JSON objects for round-trip testing
  */
-export function compareApicizeFiles(original: string, imported: string): {
+export function compareApicizeFiles(
+  original: string,
+  imported: string
+): {
   identical: boolean;
   differences: string[];
   accuracy: number;
@@ -239,9 +258,8 @@ export function compareApicizeFiles(original: string, imported: string): {
     return {
       identical: differences.length === 0,
       differences,
-      accuracy
+      accuracy,
     };
-
   } catch (error) {
     differences.push(`Comparison error: ${error}`);
     return { identical: false, differences, accuracy: 0 };
@@ -254,12 +272,13 @@ function countFields(obj: any, path = ''): number {
   }
 
   if (Array.isArray(obj)) {
-    return obj.reduce((count, item, index) =>
-      count + countFields(item, `${path}[${index}]`), 0);
+    return obj.reduce((count, item, index) => count + countFields(item, `${path}[${index}]`), 0);
   }
 
-  return Object.keys(obj).reduce((count, key) =>
-    count + countFields(obj[key], path ? `${path}.${key}` : key), 0);
+  return Object.keys(obj).reduce(
+    (count, key) => count + countFields(obj[key], path ? `${path}.${key}` : key),
+    0
+  );
 }
 
 function compareObjects(obj1: any, obj2: any, path: string, differences: string[]): number {

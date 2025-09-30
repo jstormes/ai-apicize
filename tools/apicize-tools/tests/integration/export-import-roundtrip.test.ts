@@ -12,7 +12,7 @@ import {
   validateApicizeStructure,
   validateTypeScriptProject,
   compareApicizeFiles,
-  CLITestContext
+  CLITestContext,
 } from './setup';
 
 describe('Export-Import Round-Trip Tests', () => {
@@ -26,7 +26,7 @@ describe('Export-Import Round-Trip Tests', () => {
     // Ensure tools are built
     const buildResult = await runCLICommand(npmCommand, ['run', 'build'], {
       cwd: context.toolsPath,
-      timeout: 60000
+      timeout: 60000,
     });
 
     if (buildResult.exitCode !== 0) {
@@ -51,13 +51,14 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'demo-imported.apicize');
 
       // Export
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', exportDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 45000
-      });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 45000,
+        }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
@@ -66,13 +67,14 @@ describe('Export-Import Round-Trip Tests', () => {
       expect(exportValidation.valid).toBe(true);
 
       // Import back
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir,
-        '--output', importedFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 30000
-      });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 30000,
+        }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -101,15 +103,19 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'auth-imported.apicize');
 
       // Round-trip
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile, '--output', exportDir
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir, '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -118,7 +124,9 @@ describe('Export-Import Round-Trip Tests', () => {
       const imported = JSON.parse(fs.readFileSync(importedFile, 'utf8'));
 
       expect(imported.authorizations).toEqual(original.authorizations);
-      expect(imported.defaults?.selectedAuthorization).toEqual(original.defaults?.selectedAuthorization);
+      expect(imported.defaults?.selectedAuthorization).toEqual(
+        original.defaults?.selectedAuthorization
+      );
     }, 60000);
 
     test('should preserve request groups and hierarchy', async () => {
@@ -133,15 +141,19 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'groups-imported.apicize');
 
       // Round-trip
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile, '--output', exportDir
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir, '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -170,15 +182,19 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'minimal-imported.apicize');
 
       // Round-trip
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile, '--output', exportDir
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir, '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -201,19 +217,20 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'scenario-imported.apicize');
 
       // Export with specific scenario
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', exportDir,
-        '--scenario', 'Development'
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir, '--scenario', 'Development'],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
       // Import back
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir,
-        '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -229,49 +246,55 @@ describe('Export-Import Round-Trip Tests', () => {
     test('should handle special characters in test names and URLs', async () => {
       const specialCharsTest = {
         version: 1.0,
-        requests: [{
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Tests with "quotes" & <tags> % encoding',
-          children: [{
-            id: '123e4567-e89b-12d3-a456-426614174001',
-            name: 'Request with émojis 🚀 and unicode',
-            url: 'https://example.com/path with spaces/{{param}}',
-            method: 'POST',
-            test: 'describe("Test with special chars", () => { it("should work", () => { expect(1).to.equal(1); }); });',
-            headers: [
-              { name: 'Content-Type', value: 'application/json; charset=utf-8' },
-              { name: 'X-Special', value: 'value with "quotes" and \n newlines' }
+        requests: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Tests with "quotes" & <tags> % encoding',
+            children: [
+              {
+                id: '123e4567-e89b-12d3-a456-426614174001',
+                name: 'Request with émojis 🚀 and unicode',
+                url: 'https://example.com/path with spaces/{{param}}',
+                method: 'POST',
+                test: 'describe("Test with special chars", () => { it("should work", () => { expect(1).to.equal(1); }); });',
+                headers: [
+                  { name: 'Content-Type', value: 'application/json; charset=utf-8' },
+                  { name: 'X-Special', value: 'value with "quotes" and \n newlines' },
+                ],
+                body: {
+                  type: 'JSON',
+                  data: {
+                    message: 'Hello "world" with émojis 🌍',
+                    special: 'Line 1\nLine 2\tTabbed',
+                  },
+                },
+                queryStringParams: [
+                  { name: 'q', value: 'search with spaces' },
+                  { name: 'filter', value: 'status:"active" AND type:special' },
+                ],
+                timeout: 30000,
+                runs: 1,
+              },
             ],
-            body: {
-              type: 'JSON',
-              data: {
-                message: 'Hello "world" with émojis 🌍',
-                special: 'Line 1\nLine 2\tTabbed'
-              }
-            },
-            queryStringParams: [
-              { name: 'q', value: 'search with spaces' },
-              { name: 'filter', value: 'status:"active" AND type:special' }
+            execution: 'SEQUENTIAL',
+            runs: 1,
+          },
+        ],
+        scenarios: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            name: 'Special Scenario 🎯',
+            variables: [
+              { name: 'param', value: 'special/value with/slashes', type: 'TEXT' },
+              { name: 'encoding', value: 'ñoño español', type: 'TEXT' },
             ],
-            timeout: 30000,
-            runs: 1
-          }],
-          execution: 'SEQUENTIAL',
-          runs: 1
-        }],
-        scenarios: [{
-          id: '123e4567-e89b-12d3-a456-426614174002',
-          name: 'Special Scenario 🎯',
-          variables: [
-            { name: 'param', value: 'special/value with/slashes', type: 'TEXT' },
-            { name: 'encoding', value: 'ñoño español', type: 'TEXT' }
-          ]
-        }],
+          },
+        ],
         authorizations: [],
         certificates: [],
         proxies: [],
         data: [],
-        defaults: {}
+        defaults: {},
       };
 
       const testFile = path.join(context.tempDir, 'special-chars.apicize');
@@ -281,15 +304,19 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'special-imported.apicize');
 
       // Round-trip
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile, '--output', exportDir
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir, '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -301,34 +328,40 @@ describe('Export-Import Round-Trip Tests', () => {
     test('should handle empty and null values correctly', async () => {
       const emptyValuesTest = {
         version: 1.0,
-        requests: [{
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Empty Values Test',
-          children: [{
-            id: '123e4567-e89b-12d3-a456-426614174001',
-            name: 'Request with empty values',
-            url: 'https://example.com/empty',
-            method: 'GET',
-            test: '',
-            headers: [],
-            body: { type: 'None' },
-            queryStringParams: [],
-            timeout: 30000,
-            runs: 1
-          }],
-          execution: 'SEQUENTIAL',
-          runs: 1
-        }],
-        scenarios: [{
-          id: '123e4567-e89b-12d3-a456-426614174002',
-          name: 'Empty Scenario',
-          variables: []
-        }],
+        requests: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Empty Values Test',
+            children: [
+              {
+                id: '123e4567-e89b-12d3-a456-426614174001',
+                name: 'Request with empty values',
+                url: 'https://example.com/empty',
+                method: 'GET',
+                test: '',
+                headers: [],
+                body: { type: 'None' },
+                queryStringParams: [],
+                timeout: 30000,
+                runs: 1,
+              },
+            ],
+            execution: 'SEQUENTIAL',
+            runs: 1,
+          },
+        ],
+        scenarios: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            name: 'Empty Scenario',
+            variables: [],
+          },
+        ],
         authorizations: [],
         certificates: [],
         proxies: [],
         data: [],
-        defaults: {}
+        defaults: {},
       };
 
       const testFile = path.join(context.tempDir, 'empty-values.apicize');
@@ -338,15 +371,19 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'empty-imported.apicize');
 
       // Round-trip
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile, '--output', exportDir
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir, '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -360,53 +397,59 @@ describe('Export-Import Round-Trip Tests', () => {
     test('should handle large numeric values and complex body types', async () => {
       const complexDataTest = {
         version: 1.0,
-        requests: [{
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Complex Data Test',
-          children: [{
-            id: '123e4567-e89b-12d3-a456-426614174001',
-            name: 'Request with complex body',
-            url: 'https://example.com/complex',
-            method: 'POST',
-            test: 'describe("Complex test", () => { it("should handle complex data", () => { expect(1).to.equal(1); }); });',
-            headers: [{ name: 'Content-Type', value: 'application/json' }],
-            body: {
-              type: 'JSON',
-              data: {
-                id: 9007199254740991, // Max safe integer
-                price: 123.456789,
-                active: true,
-                tags: ['test', 'complex', null],
-                metadata: {
-                  nested: {
-                    deep: {
-                      value: 'very deep'
-                    }
-                  }
+        requests: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Complex Data Test',
+            children: [
+              {
+                id: '123e4567-e89b-12d3-a456-426614174001',
+                name: 'Request with complex body',
+                url: 'https://example.com/complex',
+                method: 'POST',
+                test: 'describe("Complex test", () => { it("should handle complex data", () => { expect(1).to.equal(1); }); });',
+                headers: [{ name: 'Content-Type', value: 'application/json' }],
+                body: {
+                  type: 'JSON',
+                  data: {
+                    id: 9007199254740991, // Max safe integer
+                    price: 123.456789,
+                    active: true,
+                    tags: ['test', 'complex', null],
+                    metadata: {
+                      nested: {
+                        deep: {
+                          value: 'very deep',
+                        },
+                      },
+                    },
+                    timestamp: '2024-01-01T00:00:00.000Z',
+                  },
                 },
-                timestamp: '2024-01-01T00:00:00.000Z'
-              }
-            },
-            queryStringParams: [],
-            timeout: 60000,
-            numberOfRedirects: 10,
-            runs: 5,
-            multiRunExecution: 'CONCURRENT',
-            keepAlive: true
-          }],
-          execution: 'SEQUENTIAL',
-          runs: 1
-        }],
-        scenarios: [{
-          id: '123e4567-e89b-12d3-a456-426614174002',
-          name: 'Default',
-          variables: []
-        }],
+                queryStringParams: [],
+                timeout: 60000,
+                numberOfRedirects: 10,
+                runs: 5,
+                multiRunExecution: 'CONCURRENT',
+                keepAlive: true,
+              },
+            ],
+            execution: 'SEQUENTIAL',
+            runs: 1,
+          },
+        ],
+        scenarios: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            name: 'Default',
+            variables: [],
+          },
+        ],
         authorizations: [],
         certificates: [],
         proxies: [],
         data: [],
-        defaults: {}
+        defaults: {},
       };
 
       const testFile = path.join(context.tempDir, 'complex-data.apicize');
@@ -416,15 +459,19 @@ describe('Export-Import Round-Trip Tests', () => {
       const importedFile = path.join(context.tempDir, 'complex-imported.apicize');
 
       // Round-trip
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile, '--output', exportDir
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir, '--output', importedFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
 
       expect(importResult.exitCode).toBe(0);
 
@@ -432,9 +479,13 @@ describe('Export-Import Round-Trip Tests', () => {
       const original = JSON.parse(fs.readFileSync(testFile, 'utf8'));
       const imported = JSON.parse(fs.readFileSync(importedFile, 'utf8'));
 
-      expect(imported.requests[0].children[0].timeout).toBe(original.requests[0].children[0].timeout);
+      expect(imported.requests[0].children[0].timeout).toBe(
+        original.requests[0].children[0].timeout
+      );
       expect(imported.requests[0].children[0].runs).toBe(original.requests[0].children[0].runs);
-      expect(imported.requests[0].children[0].body.data).toEqual(original.requests[0].children[0].body.data);
+      expect(imported.requests[0].children[0].body.data).toEqual(
+        original.requests[0].children[0].body.data
+      );
     });
   });
 
@@ -455,16 +506,20 @@ describe('Export-Import Round-Trip Tests', () => {
         const importedFile = path.join(context.tempDir, `multi-roundtrip-${i}.apicize`);
 
         // Export
-        const exportResult = await runCLICommand('node', [
-          'dist/cli.js', 'export', currentFile, '--output', exportDir
-        ], { cwd: context.toolsPath, timeout: 30000 });
+        const exportResult = await runCLICommand(
+          'node',
+          ['dist/cli.js', 'export', currentFile, '--output', exportDir],
+          { cwd: context.toolsPath, timeout: 30000 }
+        );
 
         expect(exportResult.exitCode).toBe(0);
 
         // Import
-        const importResult = await runCLICommand('node', [
-          'dist/cli.js', 'import', exportDir, '--output', importedFile
-        ], { cwd: context.toolsPath, timeout: 30000 });
+        const importResult = await runCLICommand(
+          'node',
+          ['dist/cli.js', 'import', exportDir, '--output', importedFile],
+          { cwd: context.toolsPath, timeout: 30000 }
+        );
 
         expect(importResult.exitCode).toBe(0);
 

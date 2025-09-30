@@ -1,12 +1,6 @@
 // Auto-generated from api-tests.apicize
 import { describe, before, after } from 'mocha';
-import { expect } from 'chai';
-import {
-    TestHelper,
-    ApicizeContext,
-    ApicizeResponse,
-    BodyType
-} from '@apicize/lib';
+import { TestHelper, ApicizeContext } from '@apicize/lib';
 
 /* @apicize-file-metadata
 {
@@ -19,26 +13,27 @@ import {
 
 // Global test context
 let context: ApicizeContext;
-let response: ApicizeResponse;
-let $: Record<string, any>;
+// These variables are available for imported test suites
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let _$: Record<string, any>;
 
-const output = (key: string, value: any): void => {
-    context?.output(key, value);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _output = (key: string, value: any): void => {
+  context?.output(key, value);
 };
 
-describe('API Tests', function() {
-    this.timeout(30000);
+describe('API Tests', function () {
+  this.timeout(30000);
 
-    before(async function() {
-        const helper = new TestHelper();
-        context = await helper.setupWorkbook('api-tests');
-        $ = context.$;
-    });
+  before(async function () {
+    const helper = new TestHelper();
+    context = await helper.setupWorkbook('api-tests');
+    _$ = context.$;
+  });
 
-    after(async function() {
-        await context?.cleanup();
-    });
-
+  after(async function () {
+    await context?.cleanup();
+  });
 });
 
 // Import group test suites

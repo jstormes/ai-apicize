@@ -131,9 +131,7 @@ describe('User API', () => {
         sourceFile: testFile,
       });
 
-      expect(request.headers).toEqual([
-        { name: 'Authorization', value: 'Bearer {{token}}' },
-      ]);
+      expect(request.headers).toEqual([{ name: 'Authorization', value: 'Bearer {{token}}' }]);
     });
 
     it('should reconstruct hierarchical request groups', async () => {
@@ -213,7 +211,9 @@ describe('API Tests', () => {
       // Find items by ID since they may be in any order
       const group = result.requests.find(r => r.id === 'group-001') as ReconstructedRequestGroup;
       const getUserRequest = result.requests.find(r => r.id === 'user-001') as ReconstructedRequest;
-      const createUserRequest = result.requests.find(r => r.id === 'user-002') as ReconstructedRequest;
+      const createUserRequest = result.requests.find(
+        r => r.id === 'user-002'
+      ) as ReconstructedRequest;
 
       expect(group).toMatchObject({
         id: 'group-001',
@@ -404,7 +404,9 @@ describe('Upload File', () => {
         dependencies: new Map(),
       };
 
-      await expect(reconstructor.reconstructFromProject(projectMap)).rejects.toThrow(RequestReconstructorError);
+      await expect(reconstructor.reconstructFromProject(projectMap)).rejects.toThrow(
+        RequestReconstructorError
+      );
     });
 
     it('should skip large files and add warnings', async () => {
@@ -477,7 +479,9 @@ describe('Test', () => {
         dependencies: new Map(),
       };
 
-      await expect(reconstructor.reconstructFromProject(projectMap)).rejects.toThrow(RequestReconstructorError);
+      await expect(reconstructor.reconstructFromProject(projectMap)).rejects.toThrow(
+        RequestReconstructorError
+      );
     });
 
     it('should handle missing required fields', async () => {
@@ -517,7 +521,9 @@ describe('Test', () => {
         dependencies: new Map(),
       };
 
-      await expect(reconstructor.reconstructFromProject(projectMap)).rejects.toThrow(RequestReconstructorError);
+      await expect(reconstructor.reconstructFromProject(projectMap)).rejects.toThrow(
+        RequestReconstructorError
+      );
     });
 
     it('should skip error files when skipErrorFiles is true', async () => {

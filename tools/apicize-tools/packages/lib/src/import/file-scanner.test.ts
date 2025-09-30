@@ -105,7 +105,6 @@ describe('FileScanner', () => {
       expect(result.mainFiles).toHaveLength(2); // index.spec.ts and integration.spec.ts
       expect(result.suiteFiles).toHaveLength(1); // user-api.spec.ts
 
-
       // Verify file properties
       const mainFile = result.mainFiles.find(f => f.baseName === 'index.spec');
       expect(mainFile).toBeDefined();
@@ -128,7 +127,11 @@ describe('FileScanner', () => {
       const result = await scanner.scanProject(tempDir);
 
       expect(result.allFiles).toHaveLength(2);
-      expect(result.allFiles.every(f => f.relativePath.endsWith('.spec.ts') || f.relativePath.endsWith('.test.ts'))).toBe(true);
+      expect(
+        result.allFiles.every(
+          f => f.relativePath.endsWith('.spec.ts') || f.relativePath.endsWith('.test.ts')
+        )
+      ).toBe(true);
     });
 
     it('should build dependency graph when enabled', async () => {
@@ -140,7 +143,10 @@ describe('FileScanner', () => {
       await fs.writeFile(utilsPath, 'export function helper() {}');
 
       const testPath = path.join(tempDir, 'test.spec.ts');
-      await fs.writeFile(testPath, 'import { helper } from "./lib/utils";\ndescribe("test", () => {});');
+      await fs.writeFile(
+        testPath,
+        'import { helper } from "./lib/utils";\ndescribe("test", () => {});'
+      );
 
       const result = await scanner.scanProject(tempDir);
 
@@ -167,7 +173,10 @@ describe('FileScanner', () => {
     it('should skip dependency scanning when disabled', async () => {
       const noDepsScanner = new FileScanner({ scanDependencies: false });
 
-      await fs.writeFile(path.join(tempDir, 'test.spec.ts'), 'import { something } from "./other";\ndescribe("test", () => {});');
+      await fs.writeFile(
+        path.join(tempDir, 'test.spec.ts'),
+        'import { something } from "./other";\ndescribe("test", () => {});'
+      );
 
       const result = await noDepsScanner.scanProject(tempDir);
 
@@ -225,9 +234,11 @@ describe('FileScanner', () => {
       const validation = await FileScanner.validateApicizeProject(result);
 
       expect(validation.valid).toBe(false);
-      expect(validation.issues.some(issue =>
-        issue.includes('does not appear to have Apicize library structure')
-      )).toBe(true);
+      expect(
+        validation.issues.some(issue =>
+          issue.includes('does not appear to have Apicize library structure')
+        )
+      ).toBe(true);
     });
   });
 

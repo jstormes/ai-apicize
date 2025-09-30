@@ -17,7 +17,7 @@ import {
   info,
   verbose,
   handleCliError,
-  executeCommand
+  executeCommand,
 } from '../utils/cli-utils';
 
 interface RunOptions {
@@ -66,7 +66,7 @@ async function runAction(inputFile: string, options: RunOptions): Promise<void> 
     const exportPipeline = new ExportPipeline();
 
     const exportResult = await exportPipeline.exportFromFile(resolvedInputFile, {
-      outputDir: tempDir
+      outputDir: tempDir,
     });
 
     verbose(`Exported to ${exportResult.filesCreated.length} files`);
@@ -84,6 +84,8 @@ async function runAction(inputFile: string, options: RunOptions): Promise<void> 
     // Report results
     const duration = Date.now() - startTime;
     const baseName = basename(inputFile, extname(inputFile));
+
+    info('Test execution completed');
 
     if (testResult.success) {
       success(`Tests passed for "${baseName}"`);
@@ -117,7 +119,7 @@ async function runAction(inputFile: string, options: RunOptions): Promise<void> 
         scenario: options.scenario,
         duration,
         results: testResult,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       await writeFile(outputFile, JSON.stringify(outputData, null, 2), 'utf8');
@@ -128,7 +130,6 @@ async function runAction(inputFile: string, options: RunOptions): Promise<void> 
     if (!testResult.success) {
       process.exit(1);
     }
-
   } catch (err) {
     handleCliError(err, spinner);
   } finally {
@@ -153,10 +154,10 @@ async function runShellCommand(command: string, args: string[], cwd: string): Pr
 
     const child = spawn(command, args, {
       cwd,
-      stdio: process.env.APICIZE_VERBOSE === 'true' ? 'inherit' : 'pipe'
+      stdio: process.env.APICIZE_VERBOSE === 'true' ? 'inherit' : 'pipe',
     });
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       if (code === 0) {
         resolve();
       } else {
@@ -164,7 +165,7 @@ async function runShellCommand(command: string, args: string[], cwd: string): Pr
       }
     });
 
-    child.on('error', (err) => {
+    child.on('error', err => {
       reject(new Error(`Failed to run command: ${err.message}`));
     });
   });
@@ -172,10 +173,7 @@ async function runShellCommand(command: string, args: string[], cwd: string): Pr
 
 async function runTests(testDir: string, options: RunOptions): Promise<TestResult> {
   return new Promise((resolve, reject) => {
-    const mochaArgs = [
-      '--recursive',
-      '--reporter', options.reporter || 'spec'
-    ];
+    const mochaArgs = ['--recursive', '--reporter', options.reporter || 'spec'];
 
     if (options.timeout) {
       mochaArgs.push('--timeout', options.timeout.toString());
@@ -188,21 +186,21 @@ async function runTests(testDir: string, options: RunOptions): Promise<TestResul
 
     const child = spawn('npx', ['mocha', ...mochaArgs], {
       cwd: testDir,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
 
     let output = '';
     let errorOutput = '';
 
-    child.stdout?.on('data', (data) => {
+    child.stdout?.on('data', data => {
       output += data.toString();
     });
 
-    child.stderr?.on('data', (data) => {
+    child.stderr?.on('data', data => {
       errorOutput += data.toString();
     });
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       const fullOutput = output + (errorOutput ? `\n\nErrors:\n${errorOutput}` : '');
 
       // Parse test results from output
@@ -213,7 +211,7 @@ async function runTests(testDir: string, options: RunOptions): Promise<TestResul
       resolve(testResult);
     });
 
-    child.on('error', (err) => {
+    child.on('error', err => {
       reject(new Error(`Failed to run tests: ${err.message}`));
     });
   });
@@ -225,7 +223,7 @@ function parseTestOutput(output: string, reporter: string): TestResult {
     tests: 0,
     passed: 0,
     failed: 0,
-    output: output
+    output: output,
   };
 
   try {

@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import { resolve, basename, extname } from 'path';
-import { existsSync, statSync, readdirSync } from 'fs';
+import { existsSync, statSync, readdirSync, promises as fs } from 'fs';
 import { ImportPipeline } from '@apicize/lib';
 import {
   createSpinner,
@@ -13,7 +13,7 @@ import {
   info,
   verbose,
   handleCliError,
-  executeCommand
+  executeCommand,
 } from '../utils/cli-utils';
 
 interface ImportOptions {
@@ -90,6 +90,15 @@ async function importAction(inputDirectory: string, options: ImportOptions): Pro
     spinner.text = 'Scanning TypeScript files...';
     const result = await pipeline.importProject(resolvedInputDir);
 
+    // Write the workbook to file
+    spinner.text = 'Writing .apicize file...';
+    let workbookContent = JSON.stringify(result.workbook, null, 2);
+
+    // Fix JSON.stringify converting 1.0 to 1 - ensure version stays as 1.0
+    workbookContent = workbookContent.replace(/^(\s*"version":\s*)1(,?)$/m, '$11.0$2');
+
+    await fs.writeFile(outputFile, workbookContent, 'utf8');
+
     spinner.succeed('Import completed successfully');
 
     // Report results
@@ -137,7 +146,6 @@ async function importAction(inputDirectory: string, options: ImportOptions): Pro
     if (options.validate !== false) {
       success('Generated .apicize file passed validation');
     }
-
   } catch (err) {
     handleCliError(err, spinner);
   }

@@ -15,7 +15,7 @@ import {
   info,
   verbose,
   handleCliError,
-  executeCommand
+  executeCommand,
 } from '../utils/cli-utils';
 
 interface ExportOptions {
@@ -54,9 +54,7 @@ async function exportAction(inputFile: string, options: ExportOptions): Promise<
     verbose(`File size: ${formatFileSize(inputStats.size)}`);
 
     // Determine output directory
-    const outputDir = options.output
-      ? resolve(options.output)
-      : resolve('./tests');
+    const outputDir = options.output ? resolve(options.output) : resolve('./tests');
 
     verbose(`Output directory: ${outputDir}`);
 
@@ -82,7 +80,7 @@ async function exportAction(inputFile: string, options: ExportOptions): Promise<
     spinner.text = 'Parsing .apicize file...';
     const result = await pipeline.exportFromFile(resolvedInputFile, {
       outputDir,
-      splitByGroup: options.split || false
+      splitByGroup: options.split || false,
     });
 
     spinner.succeed('Export completed successfully');
@@ -116,7 +114,6 @@ async function exportAction(inputFile: string, options: ExportOptions): Promise<
     console.log(`  cd ${outputDir}`);
     console.log('  npm install');
     console.log('  npm test');
-
   } catch (err) {
     handleCliError(err, spinner);
   }

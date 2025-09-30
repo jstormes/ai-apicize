@@ -5,12 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-  setupTestContext,
-  runCLICommand,
-  copyTestFile,
-  CLITestContext
-} from '../integration/setup';
+import { setupTestContext, runCLICommand, CLITestContext } from '../integration/setup';
 
 describe('Performance Tests', () => {
   let context: CLITestContext;
@@ -23,7 +18,7 @@ describe('Performance Tests', () => {
     // Ensure tools are built
     const buildResult = await runCLICommand(npmCommand, ['run', 'build'], {
       cwd: context.toolsPath,
-      timeout: 60000
+      timeout: 60000,
     });
 
     if (buildResult.exitCode !== 0) {
@@ -43,11 +38,9 @@ describe('Performance Tests', () => {
 
       const startTime = Date.now();
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', testFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'validate', testFile], {
         cwd: context.toolsPath,
-        timeout: 15000
+        timeout: 15000,
       });
 
       const duration = Date.now() - startTime;
@@ -66,11 +59,9 @@ describe('Performance Tests', () => {
 
       const startTime = Date.now();
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', testFile
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'validate', testFile], {
         cwd: context.toolsPath,
-        timeout: 45000
+        timeout: 45000,
       });
 
       const duration = Date.now() - startTime;
@@ -90,13 +81,14 @@ describe('Performance Tests', () => {
 
       const startTime = Date.now();
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', outputDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 60000
-      });
+      const result = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', outputDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 60000,
+        }
+      );
 
       const duration = Date.now() - startTime;
 
@@ -124,12 +116,9 @@ describe('Performance Tests', () => {
 
       const startTime = Date.now();
 
-      const result = await runCLICommand('node', [
-        'dist/cli.js', 'validate',
-        ...files
-      ], {
+      const result = await runCLICommand('node', ['dist/cli.js', 'validate', ...files], {
         cwd: context.toolsPath,
-        timeout: 60000
+        timeout: 60000,
       });
 
       const duration = Date.now() - startTime;
@@ -154,24 +143,26 @@ describe('Performance Tests', () => {
       const startTime = Date.now();
 
       // Export
-      const exportResult = await runCLICommand('node', [
-        'dist/cli.js', 'export', testFile,
-        '--output', exportDir
-      ], {
-        cwd: context.toolsPath,
-        timeout: 60000
-      });
+      const exportResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'export', testFile, '--output', exportDir],
+        {
+          cwd: context.toolsPath,
+          timeout: 60000,
+        }
+      );
 
       expect(exportResult.exitCode).toBe(0);
 
       // Import
-      const importResult = await runCLICommand('node', [
-        'dist/cli.js', 'import', exportDir,
-        '--output', importFile
-      ], {
-        cwd: context.toolsPath,
-        timeout: 60000
-      });
+      const importResult = await runCLICommand(
+        'node',
+        ['dist/cli.js', 'import', exportDir, '--output', importFile],
+        {
+          cwd: context.toolsPath,
+          timeout: 60000,
+        }
+      );
 
       const duration = Date.now() - startTime;
 
@@ -198,11 +189,9 @@ describe('Performance Tests', () => {
 
       // Run multiple validations concurrently
       const promises = files.map(file =>
-        runCLICommand('node', [
-          'dist/cli.js', 'validate', file
-        ], {
+        runCLICommand('node', ['dist/cli.js', 'validate', file], {
           cwd: context.toolsPath,
-          timeout: 30000
+          timeout: 30000,
         })
       );
 
@@ -225,7 +214,7 @@ describe('Performance Tests', () => {
       const metrics = {
         smallFile: { size: 10, validationTime: 0, exportTime: 0 },
         mediumFile: { size: 50, validationTime: 0, exportTime: 0 },
-        largeFile: { size: 100, validationTime: 0, exportTime: 0 }
+        largeFile: { size: 100, validationTime: 0, exportTime: 0 },
       };
 
       // Test small file
@@ -234,17 +223,25 @@ describe('Performance Tests', () => {
       fs.writeFileSync(smallTestFile, JSON.stringify(smallFile, null, 2));
 
       let startTime = Date.now();
-      let result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', smallTestFile
-      ], { cwd: context.toolsPath, timeout: 15000 });
+      let result = await runCLICommand('node', ['dist/cli.js', 'validate', smallTestFile], {
+        cwd: context.toolsPath,
+        timeout: 15000,
+      });
       metrics.smallFile.validationTime = Date.now() - startTime;
       expect(result.exitCode).toBe(0);
 
       startTime = Date.now();
-      result = await runCLICommand('node', [
-        'dist/cli.js', 'export', smallTestFile,
-        '--output', path.join(context.tempDir, 'benchmark-small-export')
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      result = await runCLICommand(
+        'node',
+        [
+          'dist/cli.js',
+          'export',
+          smallTestFile,
+          '--output',
+          path.join(context.tempDir, 'benchmark-small-export'),
+        ],
+        { cwd: context.toolsPath, timeout: 30000 }
+      );
       metrics.smallFile.exportTime = Date.now() - startTime;
       expect(result.exitCode).toBe(0);
 
@@ -254,17 +251,25 @@ describe('Performance Tests', () => {
       fs.writeFileSync(mediumTestFile, JSON.stringify(mediumFile, null, 2));
 
       startTime = Date.now();
-      result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', mediumTestFile
-      ], { cwd: context.toolsPath, timeout: 20000 });
+      result = await runCLICommand('node', ['dist/cli.js', 'validate', mediumTestFile], {
+        cwd: context.toolsPath,
+        timeout: 20000,
+      });
       metrics.mediumFile.validationTime = Date.now() - startTime;
       expect(result.exitCode).toBe(0);
 
       startTime = Date.now();
-      result = await runCLICommand('node', [
-        'dist/cli.js', 'export', mediumTestFile,
-        '--output', path.join(context.tempDir, 'benchmark-medium-export')
-      ], { cwd: context.toolsPath, timeout: 45000 });
+      result = await runCLICommand(
+        'node',
+        [
+          'dist/cli.js',
+          'export',
+          mediumTestFile,
+          '--output',
+          path.join(context.tempDir, 'benchmark-medium-export'),
+        ],
+        { cwd: context.toolsPath, timeout: 45000 }
+      );
       metrics.mediumFile.exportTime = Date.now() - startTime;
       expect(result.exitCode).toBe(0);
 
@@ -274,17 +279,25 @@ describe('Performance Tests', () => {
       fs.writeFileSync(largeTestFile, JSON.stringify(largeFile, null, 2));
 
       startTime = Date.now();
-      result = await runCLICommand('node', [
-        'dist/cli.js', 'validate', largeTestFile
-      ], { cwd: context.toolsPath, timeout: 30000 });
+      result = await runCLICommand('node', ['dist/cli.js', 'validate', largeTestFile], {
+        cwd: context.toolsPath,
+        timeout: 30000,
+      });
       metrics.largeFile.validationTime = Date.now() - startTime;
       expect(result.exitCode).toBe(0);
 
       startTime = Date.now();
-      result = await runCLICommand('node', [
-        'dist/cli.js', 'export', largeTestFile,
-        '--output', path.join(context.tempDir, 'benchmark-large-export')
-      ], { cwd: context.toolsPath, timeout: 60000 });
+      result = await runCLICommand(
+        'node',
+        [
+          'dist/cli.js',
+          'export',
+          largeTestFile,
+          '--output',
+          path.join(context.tempDir, 'benchmark-large-export'),
+        ],
+        { cwd: context.toolsPath, timeout: 60000 }
+      );
       metrics.largeFile.exportTime = Date.now() - startTime;
       expect(result.exitCode).toBe(0);
 
@@ -294,8 +307,12 @@ describe('Performance Tests', () => {
         console.log(`${name}: ${data.size} requests`);
         console.log(`  Validation: ${data.validationTime}ms`);
         console.log(`  Export: ${data.exportTime}ms`);
-        console.log(`  Validation rate: ${(data.size / data.validationTime * 1000).toFixed(2)} requests/sec`);
-        console.log(`  Export rate: ${(data.size / data.exportTime * 1000).toFixed(2)} requests/sec`);
+        console.log(
+          `  Validation rate: ${((data.size / data.validationTime) * 1000).toFixed(2)} requests/sec`
+        );
+        console.log(
+          `  Export rate: ${((data.size / data.exportTime) * 1000).toFixed(2)} requests/sec`
+        );
       });
 
       // Performance assertions
@@ -347,27 +364,30 @@ function createLargeApicizeFile(requestCount: number): any {
 });`,
         headers: [
           { name: 'Content-Type', value: 'application/json' },
-          { name: 'X-Request-ID', value: `{{requestId}}-${requestId}` }
+          { name: 'X-Request-ID', value: `{{requestId}}-${requestId}` },
         ],
-        body: r % 2 === 0 ? {
-          type: 'JSON',
-          data: {
-            testId: `${g}-${r}`,
-            data: `Test data for request ${g}.${r}`,
-            timestamp: new Date().toISOString(),
-            metadata: {
-              group: g,
-              request: r,
-              type: 'performance-test'
-            }
-          }
-        } : undefined,
+        body:
+          r % 2 === 0
+            ? {
+                type: 'JSON',
+                data: {
+                  testId: `${g}-${r}`,
+                  data: `Test data for request ${g}.${r}`,
+                  timestamp: new Date().toISOString(),
+                  metadata: {
+                    group: g,
+                    request: r,
+                    type: 'performance-test',
+                  },
+                },
+              }
+            : undefined,
         queryStringParams: [
           { name: 'group', value: g.toString() },
-          { name: 'request', value: r.toString() }
+          { name: 'request', value: r.toString() },
         ],
         timeout: 30000,
-        runs: 1
+        runs: 1,
       });
     }
 
@@ -376,7 +396,7 @@ function createLargeApicizeFile(requestCount: number): any {
       name: `Test Group ${g + 1}`,
       children,
       execution: 'SEQUENTIAL',
-      runs: 1
+      runs: 1,
     });
   }
 
@@ -389,20 +409,24 @@ function createLargeApicizeFile(requestCount: number): any {
       variables: [
         {
           name: 'baseUrl',
-          value: [`https://api-dev.example.com`, `https://api-staging.example.com`, `https://api.example.com`][s],
-          type: 'TEXT'
+          value: [
+            `https://api-dev.example.com`,
+            `https://api-staging.example.com`,
+            `https://api.example.com`,
+          ][s],
+          type: 'TEXT',
         },
         {
           name: 'requestId',
           value: `perf-test-${s}`,
-          type: 'TEXT'
+          type: 'TEXT',
         },
         {
           name: 'timeout',
           value: [5000, 10000, 30000][s].toString(),
-          type: 'TEXT'
-        }
-      ]
+          type: 'TEXT',
+        },
+      ],
     });
   }
 
@@ -416,8 +440,8 @@ function createLargeApicizeFile(requestCount: number): any {
         name: 'API Key',
         type: 'ApiKey',
         header: 'X-API-Key',
-        value: '{{apiKey}}'
-      }
+        value: '{{apiKey}}',
+      },
     ],
     certificates: [],
     proxies: [],
@@ -425,12 +449,12 @@ function createLargeApicizeFile(requestCount: number): any {
     defaults: {
       selectedScenario: {
         id: 'scenario-0',
-        name: 'Development'
+        name: 'Development',
       },
       selectedAuthorization: {
         id: 'api-key',
-        name: 'API Key'
-      }
-    }
+        name: 'API Key',
+      },
+    },
   };
 }

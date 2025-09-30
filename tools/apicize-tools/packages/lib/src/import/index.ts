@@ -1,9 +1,4 @@
-export {
-  FileScanner,
-  FileScannerError,
-  scanProject,
-  findTestFiles,
-} from './file-scanner';
+export { FileScanner, FileScannerError, scanProject, findTestFiles } from './file-scanner';
 
 export {
   RequestReconstructor,
@@ -20,11 +15,7 @@ export {
   importAndSave,
 } from './import-pipeline';
 
-export type {
-  ScannedFile,
-  ProjectMap,
-  FileScannerOptions,
-} from './file-scanner';
+export type { ScannedFile, ProjectMap, FileScannerOptions } from './file-scanner';
 
 export type {
   ReconstructedRequest,

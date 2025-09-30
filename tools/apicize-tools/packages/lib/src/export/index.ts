@@ -1,6 +1,1 @@
-export {
-    ExportPipeline,
-    ExportOptions,
-    ExportResult,
-    ImportMapping
-} from './export-pipeline';
+export { ExportPipeline, ExportOptions, ExportResult, ImportMapping } from './export-pipeline';

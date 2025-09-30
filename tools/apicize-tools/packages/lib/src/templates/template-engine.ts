@@ -1,329 +1,346 @@
 import { ApicizeWorkbook, Request, RequestGroup, ExecutionMode } from '../types';
 
 export interface TemplateContext {
-    [key: string]: any;
+  [key: string]: any;
 }
 
 export interface TemplateOptions {
-    indent?: string;
-    includeMetadata?: boolean;
-    splitByGroup?: boolean;
-    generateHelpers?: boolean;
+  indent?: string;
+  includeMetadata?: boolean;
+  splitByGroup?: boolean;
+  generateHelpers?: boolean;
 }
 
 export class TemplateEngine {
-    private readonly defaultOptions: TemplateOptions = {
-        indent: '    ',
-        includeMetadata: true,
-        splitByGroup: true,
-        generateHelpers: true
+  private readonly defaultOptions: TemplateOptions = {
+    indent: '    ',
+    includeMetadata: true,
+    splitByGroup: true,
+    generateHelpers: true,
+  };
+
+  /**
+   * Render a template with the given context
+   */
+  public render(template: string, context: TemplateContext, options?: TemplateOptions): string {
+    const opts = { ...this.defaultOptions, ...options };
+    let result = template;
+
+    // Process control structures first so they can create proper variable contexts
+    // Handle loops {{#each items}}...{{/each}}
+    result = this.handleLoops(result, context);
+
+    // Handle conditionals {{#if condition}}...{{/if}}
+    result = this.handleConditionals(result, context);
+
+    // Simple template variable substitution {{variable}} - do this last
+    result = this.substituteVariables(result, context);
+
+    // Apply formatting
+    result = this.applyFormatting(result, opts);
+
+    return result;
+  }
+
+  /**
+   * Generate the main index.spec.ts file
+   */
+  public generateMainIndex(workbook: ApicizeWorkbook, options?: TemplateOptions): string {
+    const context: TemplateContext = {
+      workbookName: this.sanitizeFileName('api-tests'),
+      workbook,
+      hasRequests: workbook.requests && workbook.requests.length > 0,
+      requestGroups: this.getTopLevelGroups(workbook.requests || []),
+      hasScenarios: workbook.scenarios && workbook.scenarios.length > 0,
+      scenarios: workbook.scenarios || [],
+      defaultScenario: workbook.defaults?.selectedScenario,
+      exportDate: new Date().toISOString(),
+      ...options,
     };
 
-    /**
-     * Render a template with the given context
-     */
-    public render(template: string, context: TemplateContext, options?: TemplateOptions): string {
-        const opts = { ...this.defaultOptions, ...options };
-        let result = template;
+    return this.render(this.getMainIndexTemplate(), context, options);
+  }
 
-        // Process control structures first so they can create proper variable contexts
-        // Handle loops {{#each items}}...{{/each}}
-        result = this.handleLoops(result, context);
+  /**
+   * Generate a request group test file
+   */
+  public generateRequestGroup(
+    group: RequestGroup,
+    workbook: ApicizeWorkbook,
+    options?: TemplateOptions
+  ): string {
+    const subGroups = this.getSubGroups(group);
+    const subGroupsWithContent = subGroups.map(subGroup => ({
+      ...subGroup,
+      nestedContent: this.generateNestedGroupContent(subGroup, workbook, options),
+    }));
 
-        // Handle conditionals {{#if condition}}...{{/if}}
-        result = this.handleConditionals(result, context);
+    const context: TemplateContext = {
+      groupName: group.name,
+      group,
+      workbook,
+      requests: this.getRequestsFromGroup(group),
+      subGroups: subGroupsWithContent,
+      hasSubGroups: subGroups.length > 0,
+      hasRequests: this.getRequestsFromGroup(group).length > 0,
+      executionMode: group.execution || 'SEQUENTIAL',
+      ...options,
+    };
 
-        // Simple template variable substitution {{variable}} - do this last
-        result = this.substituteVariables(result, context);
+    return this.render(this.getRequestGroupTemplate(), context, options);
+  }
 
-        // Apply formatting
-        result = this.applyFormatting(result, opts);
+  /**
+   * Generate nested group content for recursive groups
+   */
+  private generateNestedGroupContent(
+    group: RequestGroup,
+    workbook: ApicizeWorkbook,
+    options?: TemplateOptions
+  ): string {
+    const requests = this.getRequestsFromGroup(group);
+    const subGroups = this.getSubGroups(group);
 
-        return result;
+    const subGroupsWithContent = subGroups.map(subGroup => ({
+      ...subGroup,
+      nestedContent: this.generateNestedGroupContent(subGroup, workbook, options),
+    }));
+
+    const context: TemplateContext = {
+      groupName: group.name,
+      group,
+      workbook,
+      requests,
+      subGroups: subGroupsWithContent,
+      hasSubGroups: subGroups.length > 0,
+      hasRequests: requests.length > 0,
+      executionMode: group.execution || 'SEQUENTIAL',
+      ...options,
+    };
+
+    return this.render(this.getNestedGroupTemplate(), context, options);
+  }
+
+  /**
+   * Generate an individual request test
+   */
+  public generateIndividualRequest(
+    request: Request,
+    workbook: ApicizeWorkbook,
+    options?: TemplateOptions
+  ): string {
+    // Ensure all required properties have default values
+    const requestWithDefaults = {
+      ...request,
+      keepAlive: request.keepAlive ?? false,
+      acceptInvalidCerts: request.acceptInvalidCerts ?? false,
+      runs: request.runs ?? 1,
+      multiRunExecution: request.multiRunExecution ?? ExecutionMode.SEQUENTIAL,
+      numberOfRedirects: request.numberOfRedirects ?? 10,
+      timeout: request.timeout ?? 30000,
+    };
+
+    const context: TemplateContext = {
+      requestName: requestWithDefaults.name,
+      request: requestWithDefaults,
+      workbook,
+      method: requestWithDefaults.method,
+      url: requestWithDefaults.url,
+      hasHeaders: requestWithDefaults.headers && requestWithDefaults.headers.length > 0,
+      headers: requestWithDefaults.headers || [],
+      hasBody: requestWithDefaults.body && requestWithDefaults.body.type !== 'None',
+      body: requestWithDefaults.body,
+      hasQueryParams:
+        requestWithDefaults.queryStringParams && requestWithDefaults.queryStringParams.length > 0,
+      queryParams: requestWithDefaults.queryStringParams || [],
+      testCode: requestWithDefaults.test || this.getDefaultTestCode(),
+      timeout: requestWithDefaults.timeout,
+      ...options,
+    };
+
+    return this.render(this.getIndividualRequestTemplate(), context, options);
+  }
+
+  /**
+   * Generate package.json for exported project
+   */
+  public generatePackageJson(workbook: ApicizeWorkbook, options?: TemplateOptions): string {
+    const context: TemplateContext = {
+      projectName: this.sanitizePackageName('apicize-tests'),
+      workbook,
+      ...options,
+    };
+
+    return this.render(this.getPackageJsonTemplate(), context, options);
+  }
+
+  /**
+   * Generate tsconfig.json for exported project
+   */
+  public generateTsConfig(options?: TemplateOptions): string {
+    const context: TemplateContext = {
+      ...options,
+    };
+
+    return this.render(this.getTsConfigTemplate(), context, options);
+  }
+
+  /**
+   * Generate mocha configuration
+   */
+  public generateMochaConfig(options?: TemplateOptions): string {
+    const context: TemplateContext = {
+      ...options,
+    };
+
+    return this.render(this.getMochaConfigTemplate(), context, options);
+  }
+
+  private substituteVariables(template: string, context: TemplateContext): string {
+    return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+      const trimmedKey = key.trim();
+
+      // Handle JSON.stringify expressions
+      if (trimmedKey.startsWith('JSON.stringify(') && trimmedKey.endsWith(')')) {
+        const property = trimmedKey.substring(15, trimmedKey.length - 1);
+        const value = this.getNestedProperty(context, property);
+        try {
+          // Use proper JSON serialization with null replacer to ensure safe formatting
+          return JSON.stringify(value || null, null, 0);
+        } catch (error) {
+          console.warn(`Failed to serialize ${property}:`, error);
+          return 'null';
+        }
+      }
+
+      const value = this.getNestedProperty(context, trimmedKey);
+
+      if (value !== undefined) {
+        return String(value);
+      }
+
+      return match;
+    });
+  }
+
+  private handleConditionals(template: string, context: TemplateContext): string {
+    const conditionalRegex = /\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g;
+    return template.replace(conditionalRegex, (_, condition, content) => {
+      const conditionValue = this.evaluateCondition(condition.trim(), context);
+      return conditionValue ? content : '';
+    });
+  }
+
+  private handleLoops(template: string, context: TemplateContext): string {
+    const loopRegex = /\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g;
+    return template.replace(loopRegex, (_, arrayKey, content) => {
+      const array = this.getNestedProperty(context, arrayKey.trim());
+      if (!Array.isArray(array)) return '';
+
+      return array
+        .map((item, index) => {
+          const itemContext = { ...context, this: item, index, '@index': index };
+
+          // Process nested loops and conditionals first, then variables
+          let processedContent = this.handleLoops(content, itemContext);
+          processedContent = this.handleConditionals(processedContent, itemContext);
+          processedContent = this.substituteVariables(processedContent, itemContext);
+
+          return processedContent;
+        })
+        .join('');
+    });
+  }
+
+  private applyFormatting(template: string, options: TemplateOptions): string {
+    // Remove excess blank lines
+    let formatted = template.replace(/\n\s*\n\s*\n/g, '\n\n');
+
+    // Ensure proper indentation
+    if (options.indent) {
+      formatted = this.normalizeIndentation(formatted, options.indent);
     }
 
-    /**
-     * Generate the main index.spec.ts file
-     */
-    public generateMainIndex(workbook: ApicizeWorkbook, options?: TemplateOptions): string {
-        const context: TemplateContext = {
-            workbookName: this.sanitizeFileName('api-tests'),
-            workbook,
-            hasRequests: workbook.requests && workbook.requests.length > 0,
-            requestGroups: this.getTopLevelGroups(workbook.requests || []),
-            hasScenarios: workbook.scenarios && workbook.scenarios.length > 0,
-            scenarios: workbook.scenarios || [],
-            defaultScenario: workbook.defaults?.selectedScenario,
-            exportDate: new Date().toISOString(),
-            ...options
-        };
+    return formatted.trim() + '\n';
+  }
 
-        return this.render(this.getMainIndexTemplate(), context, options);
-    }
+  private normalizeIndentation(text: string, indent: string): string {
+    const lines = text.split('\n');
+    let indentLevel = 0;
 
-    /**
-     * Generate a request group test file
-     */
-    public generateRequestGroup(group: RequestGroup, workbook: ApicizeWorkbook, options?: TemplateOptions): string {
-        const subGroups = this.getSubGroups(group);
-        const subGroupsWithContent = subGroups.map(subGroup => ({
-            ...subGroup,
-            nestedContent: this.generateNestedGroupContent(subGroup, workbook, options)
-        }));
+    return lines
+      .map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return '';
 
-        const context: TemplateContext = {
-            groupName: group.name,
-            group,
-            workbook,
-            requests: this.getRequestsFromGroup(group),
-            subGroups: subGroupsWithContent,
-            hasSubGroups: subGroups.length > 0,
-            hasRequests: this.getRequestsFromGroup(group).length > 0,
-            executionMode: group.execution || 'SEQUENTIAL',
-            ...options
-        };
-
-        return this.render(this.getRequestGroupTemplate(), context, options);
-    }
-
-    /**
-     * Generate nested group content for recursive groups
-     */
-    private generateNestedGroupContent(group: RequestGroup, workbook: ApicizeWorkbook, options?: TemplateOptions): string {
-        const requests = this.getRequestsFromGroup(group);
-        const subGroups = this.getSubGroups(group);
-
-        const subGroupsWithContent = subGroups.map(subGroup => ({
-            ...subGroup,
-            nestedContent: this.generateNestedGroupContent(subGroup, workbook, options)
-        }));
-
-        const context: TemplateContext = {
-            groupName: group.name,
-            group,
-            workbook,
-            requests,
-            subGroups: subGroupsWithContent,
-            hasSubGroups: subGroups.length > 0,
-            hasRequests: requests.length > 0,
-            executionMode: group.execution || 'SEQUENTIAL',
-            ...options
-        };
-
-        return this.render(this.getNestedGroupTemplate(), context, options);
-    }
-
-    /**
-     * Generate an individual request test
-     */
-    public generateIndividualRequest(request: Request, workbook: ApicizeWorkbook, options?: TemplateOptions): string {
-        // Ensure all required properties have default values
-        const requestWithDefaults = {
-            ...request,
-            keepAlive: request.keepAlive ?? false,
-            acceptInvalidCerts: request.acceptInvalidCerts ?? false,
-            runs: request.runs ?? 1,
-            multiRunExecution: request.multiRunExecution ?? ExecutionMode.SEQUENTIAL,
-            numberOfRedirects: request.numberOfRedirects ?? 10,
-            timeout: request.timeout ?? 30000
-        };
-
-        const context: TemplateContext = {
-            requestName: requestWithDefaults.name,
-            request: requestWithDefaults,
-            workbook,
-            method: requestWithDefaults.method,
-            url: requestWithDefaults.url,
-            hasHeaders: requestWithDefaults.headers && requestWithDefaults.headers.length > 0,
-            headers: requestWithDefaults.headers || [],
-            hasBody: requestWithDefaults.body && requestWithDefaults.body.type !== 'None',
-            body: requestWithDefaults.body,
-            hasQueryParams: requestWithDefaults.queryStringParams && requestWithDefaults.queryStringParams.length > 0,
-            queryParams: requestWithDefaults.queryStringParams || [],
-            testCode: requestWithDefaults.test || this.getDefaultTestCode(),
-            timeout: requestWithDefaults.timeout,
-            ...options
-        };
-
-        return this.render(this.getIndividualRequestTemplate(), context, options);
-    }
-
-    /**
-     * Generate package.json for exported project
-     */
-    public generatePackageJson(workbook: ApicizeWorkbook, options?: TemplateOptions): string {
-        const context: TemplateContext = {
-            projectName: this.sanitizePackageName('apicize-tests'),
-            workbook,
-            ...options
-        };
-
-        return this.render(this.getPackageJsonTemplate(), context, options);
-    }
-
-    /**
-     * Generate tsconfig.json for exported project
-     */
-    public generateTsConfig(options?: TemplateOptions): string {
-        const context: TemplateContext = {
-            ...options
-        };
-
-        return this.render(this.getTsConfigTemplate(), context, options);
-    }
-
-    /**
-     * Generate mocha configuration
-     */
-    public generateMochaConfig(options?: TemplateOptions): string {
-        const context: TemplateContext = {
-            ...options
-        };
-
-        return this.render(this.getMochaConfigTemplate(), context, options);
-    }
-
-    private substituteVariables(template: string, context: TemplateContext): string {
-        return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
-            const trimmedKey = key.trim();
-
-            // Handle JSON.stringify expressions
-            if (trimmedKey.startsWith('JSON.stringify(') && trimmedKey.endsWith(')')) {
-                const property = trimmedKey.substring(15, trimmedKey.length - 1);
-                const value = this.getNestedProperty(context, property);
-                try {
-                    // Use proper JSON serialization with null replacer to ensure safe formatting
-                    return JSON.stringify(value || null, null, 0);
-                } catch (error) {
-                    console.warn(`Failed to serialize ${property}:`, error);
-                    return 'null';
-                }
-            }
-
-            const value = this.getNestedProperty(context, trimmedKey);
-
-            if (value !== undefined) {
-                return String(value);
-            }
-
-            return match;
-        });
-    }
-
-    private handleConditionals(template: string, context: TemplateContext): string {
-        const conditionalRegex = /\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g;
-        return template.replace(conditionalRegex, (_, condition, content) => {
-            const conditionValue = this.evaluateCondition(condition.trim(), context);
-            return conditionValue ? content : '';
-        });
-    }
-
-    private handleLoops(template: string, context: TemplateContext): string {
-        const loopRegex = /\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g;
-        return template.replace(loopRegex, (_, arrayKey, content) => {
-            const array = this.getNestedProperty(context, arrayKey.trim());
-            if (!Array.isArray(array)) return '';
-
-            return array.map((item, index) => {
-                const itemContext = { ...context, this: item, index, '@index': index };
-
-                // Process nested loops and conditionals first, then variables
-                let processedContent = this.handleLoops(content, itemContext);
-                processedContent = this.handleConditionals(processedContent, itemContext);
-                processedContent = this.substituteVariables(processedContent, itemContext);
-
-                return processedContent;
-            }).join('');
-        });
-    }
-
-    private applyFormatting(template: string, options: TemplateOptions): string {
-        // Remove excess blank lines
-        let formatted = template.replace(/\n\s*\n\s*\n/g, '\n\n');
-
-        // Ensure proper indentation
-        if (options.indent) {
-            formatted = this.normalizeIndentation(formatted, options.indent);
+        // Adjust indent level for closing braces
+        if (trimmed.includes('}') && !trimmed.includes('{')) {
+          indentLevel = Math.max(0, indentLevel - 1);
         }
 
-        return formatted.trim() + '\n';
-    }
+        const result = indent.repeat(indentLevel) + trimmed;
 
-    private normalizeIndentation(text: string, indent: string): string {
-        const lines = text.split('\n');
-        let indentLevel = 0;
+        // Adjust indent level for opening braces
+        if (trimmed.includes('{') && !trimmed.includes('}')) {
+          indentLevel++;
+        }
 
-        return lines.map(line => {
-            const trimmed = line.trim();
-            if (!trimmed) return '';
+        return result;
+      })
+      .join('\n');
+  }
 
-            // Adjust indent level for closing braces
-            if (trimmed.includes('}') && !trimmed.includes('{')) {
-                indentLevel = Math.max(0, indentLevel - 1);
-            }
+  private getNestedProperty(obj: any, path: string): any {
+    return path.split('.').reduce((current, key) => {
+      return current && current[key] !== undefined ? current[key] : undefined;
+    }, obj);
+  }
 
-            const result = indent.repeat(indentLevel) + trimmed;
+  private evaluateCondition(condition: string, context: TemplateContext): boolean {
+    const value = this.getNestedProperty(context, condition);
+    return Boolean(value);
+  }
 
-            // Adjust indent level for opening braces
-            if (trimmed.includes('{') && !trimmed.includes('}')) {
-                indentLevel++;
-            }
+  private getTopLevelGroups(requests: (Request | RequestGroup)[]): RequestGroup[] {
+    return requests.filter((item): item is RequestGroup => 'children' in item);
+  }
 
-            return result;
-        }).join('\n');
-    }
+  private getRequestsFromGroup(group: RequestGroup): Request[] {
+    return (group.children || [])
+      .filter((item): item is Request => !('children' in item))
+      .map(request => ({
+        ...request,
+        keepAlive: request.keepAlive ?? false,
+        acceptInvalidCerts: request.acceptInvalidCerts ?? false,
+        runs: request.runs ?? 1,
+        multiRunExecution: request.multiRunExecution ?? ExecutionMode.SEQUENTIAL,
+        numberOfRedirects: request.numberOfRedirects ?? 10,
+        timeout: request.timeout ?? 30000,
+      }));
+  }
 
-    private getNestedProperty(obj: any, path: string): any {
-        return path.split('.').reduce((current, key) => {
-            return current && current[key] !== undefined ? current[key] : undefined;
-        }, obj);
-    }
+  private getSubGroups(group: RequestGroup): RequestGroup[] {
+    return (group.children || []).filter((item): item is RequestGroup => 'children' in item);
+  }
 
-    private evaluateCondition(condition: string, context: TemplateContext): boolean {
-        const value = this.getNestedProperty(context, condition);
-        return Boolean(value);
-    }
+  private sanitizeFileName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+  }
 
-    private getTopLevelGroups(requests: (Request | RequestGroup)[]): RequestGroup[] {
-        return requests.filter((item): item is RequestGroup => 'children' in item);
-    }
+  private sanitizePackageName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
+  }
 
-    private getRequestsFromGroup(group: RequestGroup): Request[] {
-        return (group.children || [])
-            .filter((item): item is Request => !('children' in item))
-            .map(request => ({
-                ...request,
-                keepAlive: request.keepAlive ?? false,
-                acceptInvalidCerts: request.acceptInvalidCerts ?? false,
-                runs: request.runs ?? 1,
-                multiRunExecution: request.multiRunExecution ?? ExecutionMode.SEQUENTIAL,
-                numberOfRedirects: request.numberOfRedirects ?? 10,
-                timeout: request.timeout ?? 30000
-            }));
-    }
-
-    private getSubGroups(group: RequestGroup): RequestGroup[] {
-        return (group.children || []).filter((item): item is RequestGroup => 'children' in item);
-    }
-
-    private sanitizeFileName(name: string): string {
-        return name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
-    }
-
-    private sanitizePackageName(name: string): string {
-        return name.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
-    }
-
-    private getDefaultTestCode(): string {
-        return `describe('should pass', () => {
+  private getDefaultTestCode(): string {
+    return `describe('should pass', () => {
     it('has successful response', () => {
         expect(response.status).to.be.oneOf([200, 201, 204]);
     });
 });`;
-    }
+  }
 
-    private getMainIndexTemplate(): string {
-        return `// Auto-generated from {{workbookName}}.apicize
+  private getMainIndexTemplate(): string {
+    return `// Auto-generated from {{workbookName}}.apicize
 import { describe, before, after } from 'mocha';
 import { expect } from 'chai';
 import {
@@ -380,10 +397,10 @@ describe('API Tests', function() {
 import './suites/{{@index}}-{{this.name}}.spec';
 {{/each}}
 `;
-    }
+  }
 
-    private getRequestGroupTemplate(): string {
-        return `// Auto-generated request group: {{groupName}}
+  private getRequestGroupTemplate(): string {
+    return `// Auto-generated request group: {{groupName}}
 import { describe, it, beforeEach, before } from 'mocha';
 import { expect } from 'chai';
 import {
@@ -477,10 +494,10 @@ describe('{{groupName}}', function() {
 {{/if}}
 });
 `;
-    }
+  }
 
-    private getNestedGroupTemplate(): string {
-        return `describe('{{groupName}}', function() {
+  private getNestedGroupTemplate(): string {
+    return `describe('{{groupName}}', function() {
     {{#if includeMetadata}}
     /* @apicize-group-metadata
     {
@@ -556,10 +573,10 @@ describe('{{groupName}}', function() {
 {{/each}}
 {{/if}}
 });`;
-    }
+  }
 
-    private getIndividualRequestTemplate(): string {
-        return `// Auto-generated individual request: {{requestName}}
+  private getIndividualRequestTemplate(): string {
+    return `// Auto-generated individual request: {{requestName}}
 import { describe, it, beforeEach } from 'mocha';
 import { expect } from 'chai';
 import {
@@ -623,10 +640,10 @@ describe('{{requestName}}', function() {
     {{testCode}}
 });
 `;
-    }
+  }
 
-    private getPackageJsonTemplate(): string {
-        return `{
+  private getPackageJsonTemplate(): string {
+    return `{
   "name": "{{projectName}}",
   "version": "1.0.0",
   "private": true,
@@ -666,10 +683,10 @@ describe('{{requestName}}', function() {
   }
 }
 `;
-    }
+  }
 
-    private getTsConfigTemplate(): string {
-        return `{
+  private getTsConfigTemplate(): string {
+    return `{
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
@@ -707,10 +724,10 @@ describe('{{requestName}}', function() {
   }
 }
 `;
-    }
+  }
 
-    private getMochaConfigTemplate(): string {
-        return `{
+  private getMochaConfigTemplate(): string {
+    return `{
   "require": ["ts-node/register"],
   "extensions": ["ts"],
   "spec": "tests/**/*.spec.ts",
@@ -721,5 +738,5 @@ describe('{{requestName}}', function() {
   "ui": "bdd"
 }
 `;
-    }
+  }
 }
