@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { resolve, basename, extname } from 'path';
 import { existsSync, statSync, readdirSync, promises as fs } from 'fs';
-import { ImportPipeline } from '@apicize/lib';
+import { ImportPipeline } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   formatFileSize,

@@ -348,7 +348,7 @@ import {
     ApicizeContext,
     ApicizeResponse,
     BodyType
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 {{#if includeMetadata}}
 /* @apicize-file-metadata
@@ -408,7 +408,7 @@ import {
     ApicizeContext,
     ApicizeResponse,
     BodyType
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 {{#if includeMetadata}}
 /* @apicize-group-metadata
@@ -584,7 +584,7 @@ import {
     ApicizeContext,
     ApicizeResponse,
     BodyType
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 {{#if includeMetadata}}
 /* @apicize-request-metadata
@@ -663,7 +663,7 @@ describe('{{requestName}}', function() {
     "clean": "rimraf dist coverage .nyc_output"
   },
   "dependencies": {
-    "@apicize/lib": "^1.0.0"
+    "@jstormes/apicize-lib": "^1.0.0"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.0",

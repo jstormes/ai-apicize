@@ -1,20 +1,20 @@
-# @apicize/lib
+# @jstormes/apicize-lib
 
 [![npm version](https://badge.fury.io/js/%40apicize%2Flib.svg)](https://badge.fury.io/js/%40apicize%2Flib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
-[![npm downloads](https://img.shields.io/npm/dm/@apicize/lib.svg)](https://www.npmjs.com/package/@apicize/lib)
+[![npm downloads](https://img.shields.io/npm/dm/@jstormes/apicize-lib.svg)](https://www.npmjs.com/package/@jstormes/apicize-lib)
 
 Core library for Apicize tools - provides TypeScript types, utilities, and runtime support for API testing with `.apicize` files.
 
 ## 📦 Installation
 
 ```bash
-npm install @apicize/lib
+npm install @jstormes/apicize-lib
 # or
-yarn add @apicize/lib
+yarn add @jstormes/apicize-lib
 # or
-pnpm add @apicize/lib
+pnpm add @jstormes/apicize-lib
 ```
 
 ## 🚀 Quick Start
@@ -27,7 +27,7 @@ import {
     TestContext,
     RequestExecutor,
     VariableEngine
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 // Parse and validate .apicize files
 const validator = new ApicizeValidator();
@@ -102,7 +102,7 @@ interface ApicizeResponse {
 ### Validation
 
 ```typescript
-import { ApicizeValidator, ValidationResult } from '@apicize/lib';
+import { ApicizeValidator, ValidationResult } from '@jstormes/apicize-lib';
 
 const validator = new ApicizeValidator();
 
@@ -123,7 +123,7 @@ const strictResult = await validator.validate('test.apicize', {
 ### Request Execution
 
 ```typescript
-import { RequestExecutor, ExecutionOptions } from '@apicize/lib';
+import { RequestExecutor, ExecutionOptions } from '@jstormes/apicize-lib';
 
 const executor = new RequestExecutor();
 
@@ -152,7 +152,7 @@ const responseWithOptions = await executor.execute(request, {
 ### Variable Substitution
 
 ```typescript
-import { VariableEngine } from '@apicize/lib';
+import { VariableEngine } from '@jstormes/apicize-lib';
 
 const engine = new VariableEngine();
 
@@ -177,7 +177,7 @@ const body = engine.substituteObject({
 ### Test Context
 
 ```typescript
-import { TestContext, TestHelper } from '@apicize/lib';
+import { TestContext, TestHelper } from '@jstormes/apicize-lib';
 
 // In test setup
 const helper = new TestHelper();
@@ -202,7 +202,7 @@ import {
     BasicAuth,
     OAuth2Client,
     ApiKeyAuth
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 const authManager = new AuthManager();
 
@@ -229,7 +229,7 @@ import {
     DataLoader,
     CsvParser,
     JsonParser
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 // Load CSV data
 const csvLoader = new DataLoader();
@@ -249,7 +249,7 @@ for (const row of csvData) {
 ### Path Utilities
 
 ```typescript
-import { PathUtils } from '@apicize/lib';
+import { PathUtils } from '@jstormes/apicize-lib';
 
 // Resolve paths
 const absolutePath = PathUtils.resolve('./relative/path');
@@ -264,7 +264,7 @@ const projectRoot = PathUtils.findProjectRoot();
 ### String Utilities
 
 ```typescript
-import { StringUtils } from '@apicize/lib';
+import { StringUtils } from '@jstormes/apicize-lib';
 
 // Generate IDs
 const uuid = StringUtils.generateId();
@@ -279,7 +279,7 @@ const result = StringUtils.processTemplate('Hello {{name}}', { name: 'World' });
 ### Validation Schemas
 
 ```typescript
-import { Schemas } from '@apicize/lib';
+import { Schemas } from '@jstormes/apicize-lib';
 
 // Get schema for validation
 const requestSchema = Schemas.getRequestSchema();
@@ -297,7 +297,7 @@ import {
     ValidationError,
     ExecutionError,
     ParseError
-} from '@apicize/lib';
+} from '@jstormes/apicize-lib';
 
 try {
     const result = await validator.validate(file);
@@ -402,7 +402,7 @@ export * from './testing/assertions';
 
 ```typescript
 import { expect } from 'chai';
-import { TestHelper, BodyType } from '@apicize/lib';
+import { TestHelper, BodyType } from '@jstormes/apicize-lib';
 
 describe('API Tests', function() {
     const helper = new TestHelper();
@@ -421,7 +421,7 @@ describe('API Tests', function() {
 ### With Jest
 
 ```typescript
-import { TestHelper, BodyType } from '@apicize/lib';
+import { TestHelper, BodyType } from '@jstormes/apicize-lib';
 
 describe('API Tests', () => {
     let context;
@@ -445,6 +445,6 @@ MIT © Apicize Tools
 ## 🔗 Links
 
 - [GitHub Repository](https://github.com/apicize/tools/tree/main/packages/lib)
-- [npm Package](https://www.npmjs.com/package/@apicize/lib)
-- [Main Tools Package](https://www.npmjs.com/package/@apicize/tools)
+- [npm Package](https://www.npmjs.com/package/@jstormes/apicize-lib)
+- [Main Tools Package](https://www.npmjs.com/package/@jstormes/apicize-tools)
 - [Documentation](https://github.com/apicize/tools/blob/main/docs/API-Reference.md)

@@ -1,9 +1,9 @@
-# @apicize/tools
+# @jstormes/apicize-tools
 
 [![npm version](https://badge.fury.io/js/%40apicize%2Ftools.svg)](https://badge.fury.io/js/%40apicize%2Ftools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/node/v/@apicize/tools.svg)](https://nodejs.org)
-[![npm downloads](https://img.shields.io/npm/dm/@apicize/tools.svg)](https://www.npmjs.com/package/@apicize/tools)
+[![Node.js Version](https://img.shields.io/node/v/@jstormes/apicize-tools.svg)](https://nodejs.org)
+[![npm downloads](https://img.shields.io/npm/dm/@jstormes/apicize-tools.svg)](https://www.npmjs.com/package/@jstormes/apicize-tools)
 
 CLI tools for working with `.apicize` API test files - seamlessly convert between `.apicize` format and executable TypeScript/Mocha/Chai tests.
 
@@ -13,10 +13,10 @@ CLI tools for working with `.apicize` API test files - seamlessly convert betwee
 
 ```bash
 # Install globally via npm
-npm install -g @apicize/tools
+npm install -g @jstormes/apicize-tools
 
 # Or use with npx without installation
-npx @apicize/tools export myfile.apicize
+npx @jstormes/apicize-tools export myfile.apicize
 ```
 
 ### Basic Usage
@@ -151,7 +151,7 @@ Create an `apicize.config.json` file in your project root:
 ```yaml
 # GitHub Actions example
 - name: Install Apicize Tools
-  run: npm install -g @apicize/tools
+  run: npm install -g @jstormes/apicize-tools
 
 - name: Validate API tests
   run: apicize validate **/*.apicize
@@ -226,7 +226,7 @@ Configure authentication in your `.apicize` files:
 
 ### Common Issues
 
-1. **Command not found**: Ensure global installation with `npm install -g @apicize/tools`
+1. **Command not found**: Ensure global installation with `npm install -g @jstormes/apicize-tools`
 2. **TypeScript errors**: Check Node.js version (>=16.0.0 required)
 3. **Import failures**: Ensure metadata comments are preserved in TypeScript files
 
@@ -243,7 +243,7 @@ Contributions are welcome! Please read our [Contributing Guide](https://github.c
 ## 🔗 Links
 
 - [GitHub Repository](https://github.com/apicize/tools)
-- [npm Package](https://www.npmjs.com/package/@apicize/tools)
+- [npm Package](https://www.npmjs.com/package/@jstormes/apicize-tools)
 - [Issue Tracker](https://github.com/apicize/tools/issues)
 - [Changelog](https://github.com/apicize/tools/blob/main/CHANGELOG.md)
 

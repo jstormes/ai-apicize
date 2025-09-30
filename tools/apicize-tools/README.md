@@ -28,8 +28,8 @@ This monorepo contains:
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [`@apicize/tools`](./packages/tools) | ![npm](https://img.shields.io/npm/v/@apicize/tools) | CLI tools for .apicize files |
-| [`@apicize/lib`](./packages/lib) | ![npm](https://img.shields.io/npm/v/@apicize/lib) | Core library and runtime |
+| [`@jstormes/apicize-tools`](./packages/tools) | ![npm](https://img.shields.io/npm/v/@jstormes/apicize-tools) | CLI tools for .apicize files |
+| [`@jstormes/apicize-lib`](./packages/lib) | ![npm](https://img.shields.io/npm/v/@jstormes/apicize-lib) | Core library and runtime |
 | [`@apicize/examples`](./packages/examples) | Private | Example files and templates |
 
 ## 🚀 Quick Start
@@ -38,10 +38,10 @@ This monorepo contains:
 
 ```bash
 # Install CLI globally
-npm install -g @apicize/tools
+npm install -g @jstormes/apicize-tools
 
 # Or use with npx
-npx @apicize/tools export myfile.apicize
+npx @jstormes/apicize-tools export myfile.apicize
 ```
 
 ### Basic Usage
@@ -212,7 +212,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## 🔗 Links
 
-- [npm Package](https://www.npmjs.com/package/@apicize/tools)
+- [npm Package](https://www.npmjs.com/package/@jstormes/apicize-tools)
 - [GitHub Repository](https://github.com/apicize/tools)
 - [Changelog](./CHANGELOG.md)
 - [Roadmap](./ROADMAP.md)

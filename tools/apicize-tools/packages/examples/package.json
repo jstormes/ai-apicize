@@ -1,5 +1,5 @@
 {
-  "name": "@apicize/examples",
+  "name": "@jstormes/apicize-examples",
   "version": "1.0.0",
   "description": "Example .apicize files for testing and development",
   "private": true,

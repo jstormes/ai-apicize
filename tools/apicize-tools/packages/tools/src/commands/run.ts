@@ -5,7 +5,7 @@ import { resolve, basename, extname } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { ExportPipeline } from '@apicize/lib';
+import { ExportPipeline } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   validateInputFile,

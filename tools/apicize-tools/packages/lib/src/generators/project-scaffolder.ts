@@ -587,7 +587,7 @@ export * from './client';
   }
 
   private generateRuntimeTypes(): string {
-    return `import { ApicizeWorkbook, ApicizeResponse, BodyType } from '@apicize/lib';
+    return `import { ApicizeWorkbook, ApicizeResponse, BodyType } from '@jstormes/apicize-lib';
 
 export interface ApicizeContext {
     $: Record<string, any>;
@@ -621,7 +621,7 @@ export { ApicizeResponse, BodyType };
 
   private generateRuntimeContext(): string {
     return `import { ApicizeContext, RequestConfig } from './types';
-import { ApicizeResponse } from '@apicize/lib';
+import { ApicizeResponse } from '@jstormes/apicize-lib';
 import { ApicizeClient } from './client';
 
 export class TestContext implements ApicizeContext {
@@ -659,7 +659,7 @@ export class TestContext implements ApicizeContext {
   }
 
   private generateRuntimeClient(): string {
-    return `import { ApicizeResponse, BodyType } from '@apicize/lib';
+    return `import { ApicizeResponse, BodyType } from '@jstormes/apicize-lib';
 import { RequestConfig } from './types';
 
 export class ApicizeClient {
@@ -760,7 +760,7 @@ export class TestHelper {
 
   private generateTestingAssertions(): string {
     return `import { expect } from 'chai';
-import { BodyType } from '@apicize/lib';
+import { BodyType } from '@jstormes/apicize-lib';
 
 // Custom Chai assertions for Apicize tests
 declare global {
@@ -1211,7 +1211,7 @@ REDIS_URL=
           'config:set': 'node scripts/config-manager.js set',
         },
         dependencies: {
-          '@apicize/lib': '^1.0.0',
+          '@jstormes/apicize-lib': '^1.0.0',
           dotenv: '^16.0.0',
         },
         devDependencies: {

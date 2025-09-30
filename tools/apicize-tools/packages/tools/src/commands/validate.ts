@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { resolve, basename } from 'path';
 import { statSync } from 'fs';
-import { validateApicizeFile } from '@apicize/lib';
+import { validateApicizeFile } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   validateInputFile,

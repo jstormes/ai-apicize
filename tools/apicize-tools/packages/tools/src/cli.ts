@@ -3,7 +3,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { version } from '@apicize/lib';
+import { version } from '@jstormes/apicize-lib';
 import { exportCommand } from './commands/export';
 import { importCommand } from './commands/import';
 import { validateCommand } from './commands/validate';

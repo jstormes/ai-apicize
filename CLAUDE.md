@@ -13,10 +13,10 @@ The Apicize tools will be distributed as a global npm package for easy command-l
 
 ```bash
 # Install globally via npm
-npm install -g @apicize/tools
+npm install -g @jstormes/apicize-tools
 
 # Or using npx without installation
-npx @apicize/tools export myfile.apicize
+npx @jstormes/apicize-tools export myfile.apicize
 
 # Available commands after global installation
 apicize export <file.apicize>    # Export to TypeScript
@@ -172,7 +172,7 @@ When exported to TypeScript, the test runtime provides these objects:
 - `response`: Contains the HTTP response (status, body, headers) from the executed request
 - `$`: Object containing scenario variables and outputs from previous tests
 - `output(key, value)`: Function to pass data to subsequent tests (stored in $)
-- `BodyType`: Enum for response body type checking (imported from @apicize/lib)
+- `BodyType`: Enum for response body type checking (imported from @jstormes/apicize-lib)
 
 **Note**: In the original .apicize file, tests appear synchronous. During export, the framework handles async execution by running the request in `beforeEach` and making the response available to the test code.
 
@@ -630,7 +630,7 @@ import {
     ApicizeContext,
     ApicizeResponse,
     BodyType
-} from '@apicize/lib';  // Imported from library, not defined locally
+} from '@jstormes/apicize-lib';  // Imported from library, not defined locally
 
 /* @apicize-file-metadata
 {
@@ -803,7 +803,7 @@ export class TestHelper {
 import { describe, it, before } from 'mocha';
 import { expect } from 'chai';
 // Import path uses npm package name for consistency
-import { TestHelper, ApicizeContext, BodyType } from '@apicize/lib';
+import { TestHelper, ApicizeContext, BodyType } from '@jstormes/apicize-lib';
 
 describe('CRUD Operations', function() {
     let context: ApicizeContext;
@@ -920,11 +920,11 @@ The scaffolded structure supports multiple execution modes:
 ## Package Configuration
 
 ### Global Tool Package.json
-The main @apicize/tools package for global installation:
+The main @jstormes/apicize-tools package for global installation:
 
 ```json
 {
-  "name": "@apicize/tools",
+  "name": "@jstormes/apicize-tools",
   "version": "1.0.0",
   "description": "CLI tools for working with .apicize API test files",
   "bin": {
@@ -935,7 +935,7 @@ The main @apicize/tools package for global installation:
   },
   "preferGlobal": true,
   "dependencies": {
-    "@apicize/lib": "^1.0.0",
+    "@jstormes/apicize-lib": "^1.0.0",
     "commander": "^11.0.0",
     "chalk": "^4.1.2",
     "ora": "^5.4.1",
@@ -975,7 +975,7 @@ For exported test projects:
     "validate": "apicize validate"
   },
   "dependencies": {
-    "@apicize/lib": "^1.0.0"
+    "@jstormes/apicize-lib": "^1.0.0"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.0",
