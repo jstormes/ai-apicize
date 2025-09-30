@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import { resolve, basename } from 'path';
 import { statSync } from 'fs';
-import { validateApicizeFile } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   validateInputFile,
@@ -67,7 +66,8 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
       const fileContent = await require('fs').promises.readFile(resolvedFile, 'utf8');
       const data = JSON.parse(fileContent);
 
-      // Perform validation
+      // Perform validation (lazy load library only when command runs)
+      const { validateApicizeFile } = await import('@jstormes/apicize-lib');
       const validation = validateApicizeFile(data);
 
       const result: ValidationResult = {

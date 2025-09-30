@@ -5,7 +5,6 @@ import { resolve, basename, extname } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { ExportPipeline } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   validateInputFile,
@@ -61,8 +60,9 @@ async function runAction(inputFile: string, options: RunOptions): Promise<void> 
     tempDir = join(tmpdir(), `apicize-run-${Date.now()}`);
     verbose(`Temporary directory: ${tempDir}`);
 
-    // Export to temporary directory
+    // Export to temporary directory (lazy load library only when command runs)
     spinner.text = 'Exporting to TypeScript tests...';
+    const { ExportPipeline } = await import('@jstormes/apicize-lib');
     const exportPipeline = new ExportPipeline();
 
     const exportResult = await exportPipeline.exportFromFile(resolvedInputFile, {

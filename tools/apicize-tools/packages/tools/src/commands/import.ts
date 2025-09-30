@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import { resolve, basename, extname } from 'path';
 import { existsSync, statSync, readdirSync, promises as fs } from 'fs';
-import { ImportPipeline } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   formatFileSize,
@@ -82,8 +81,9 @@ async function importAction(inputDirectory: string, options: ImportOptions): Pro
       throw new Error('Output file must have .apicize extension');
     }
 
-    // Create import pipeline
+    // Create import pipeline (lazy load library only when command runs)
     spinner.text = 'Initializing import pipeline...';
+    const { ImportPipeline } = await import('@jstormes/apicize-lib');
     const pipeline = new ImportPipeline();
 
     // Execute import

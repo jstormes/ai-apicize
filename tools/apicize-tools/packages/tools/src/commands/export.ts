@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import { resolve, basename, extname } from 'path';
 import { existsSync, statSync } from 'fs';
-import { ExportPipeline } from '@jstormes/apicize-lib';
 import {
   createSpinner,
   validateInputFile,
@@ -72,8 +71,9 @@ async function exportAction(inputFile: string, options: ExportOptions): Promise<
       }
     }
 
-    // Create export pipeline
+    // Create export pipeline (lazy load library only when command runs)
     spinner.text = 'Initializing export pipeline...';
+    const { ExportPipeline } = await import('@jstormes/apicize-lib');
     const pipeline = new ExportPipeline();
 
     // Execute export

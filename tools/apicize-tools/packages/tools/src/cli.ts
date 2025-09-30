@@ -3,12 +3,20 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { version } from '@jstormes/apicize-lib';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { exportCommand } from './commands/export';
 import { importCommand } from './commands/import';
 import { validateCommand } from './commands/validate';
 import { createCommand } from './commands/create';
 import { runCommand } from './commands/run';
+import { createDocsCommand } from './commands/docs';
+
+// Read version from package.json instead of importing entire library
+const packageJson = JSON.parse(
+  readFileSync(join(__dirname, '../package.json'), 'utf-8')
+);
+const version = packageJson.version;
 
 const program = new Command();
 
@@ -36,6 +44,7 @@ importCommand(program);
 validateCommand(program);
 createCommand(program);
 runCommand(program);
+program.addCommand(createDocsCommand());
 
 // Error handling
 program.configureOutput({
