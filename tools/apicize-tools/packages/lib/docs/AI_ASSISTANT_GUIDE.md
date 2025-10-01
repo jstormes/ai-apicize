@@ -23,11 +23,11 @@ npm install -g @jstormes/apicize-tools
 ## Available Commands
 
 ```bash
-apicize export <file.apicize>      # Export to TypeScript
-apicize import <test-folder>       # Import TypeScript back to .apicize
-apicize create <name>              # Create new .apicize file
-apicize validate <file.apicize>    # Validate file structure
-apicize run <file.apicize>         # Execute tests directly
+apicize-tools export <file.apicize>      # Export to TypeScript
+apicize-tools import <test-folder>       # Import TypeScript back to .apicize
+apicize-tools create <name>              # Create new .apicize file
+apicize-tools validate <file.apicize>    # Validate file structure
+apicize-tools run <file.apicize>         # Execute tests directly
 ```
 
 ## Common AI Assistant Use Cases
@@ -39,7 +39,7 @@ apicize run <file.apicize>         # Execute tests directly
 **AI Assistant Actions**:
 1. Understand API requirements (endpoints, methods, expected responses)
 2. Create .apicize file structure using Write tool
-3. Validate with `apicize validate`
+3. Validate with `apicize-tools validate`
 4. Explain the structure to user
 
 **Example .apicize Structure**:
@@ -82,7 +82,7 @@ apicize run <file.apicize>         # Execute tests directly
 **AI Assistant Actions**:
 ```bash
 # Use Bash tool with 10-minute timeout
-apicize export mytest.apicize --output ./tests
+apicize-tools export mytest.apicize --output ./tests
 ```
 
 **Result**: Creates complete TypeScript test project with:
@@ -122,8 +122,8 @@ apicize export mytest.apicize --output ./tests
 
 **AI Assistant Actions**:
 ```bash
-# Always use 10-minute timeout for apicize commands
-apicize validate mytest.apicize
+# Always use 10-minute timeout for apicize-tools commands
+apicize-tools validate mytest.apicize
 ```
 
 ### 5. Running Tests
@@ -132,7 +132,7 @@ apicize validate mytest.apicize
 
 **AI Assistant Actions**:
 ```bash
-apicize run mytest.apicize --scenario production
+apicize-tools run mytest.apicize --scenario production
 ```
 
 ## Practical Workflows for AI Assistants
@@ -144,7 +144,7 @@ apicize run mytest.apicize --scenario production
    ↓
 2. AI creates .apicize JSON structure
    ↓
-3. AI validates: apicize validate test.apicize
+3. AI validates: apicize-tools validate test.apicize
    ↓
 4. User can run or export to TypeScript
 ```
@@ -172,11 +172,11 @@ apicize run mytest.apicize --scenario production
 ```
 1. User has .apicize file
    ↓
-2. AI: apicize export test.apicize --output ./tests
+2. AI: apicize-tools export test.apicize --output ./tests
    ↓
 3. User modifies TypeScript tests
    ↓
-4. AI: apicize import ./tests --output updated.apicize
+4. AI: apicize-tools import ./tests --output updated.apicize
    ↓
 5. Result: 100% round-trip accuracy
 ```
@@ -217,7 +217,7 @@ Different test environments (dev, staging, production):
 
 Run with specific scenario:
 ```bash
-apicize run test.apicize --scenario prod
+apicize-tools run test.apicize --scenario prod
 ```
 
 ## Test Code Patterns
@@ -279,7 +279,7 @@ describe('capture', () => {
 ### 1. Always Use 10-Minute Timeout
 ```xml
 <invoke name="Bash">
-  <parameter name="command">apicize export test.apicize</parameter>
+  <parameter name="command">apicize-tools export test.apicize</parameter>
   <parameter name="description">Export .apicize to TypeScript</parameter>
   <parameter name="timeout">600000</parameter>
 </invoke>
@@ -288,7 +288,7 @@ describe('capture', () => {
 ### 2. Validate After Creation
 Always validate .apicize files after creating/modifying them:
 ```bash
-apicize validate mytest.apicize
+apicize-tools validate mytest.apicize
 ```
 
 ### 3. Use Example Files as Templates
@@ -384,7 +384,7 @@ For complex modifications:
 ### Using the Bash Tool
 ```xml
 <invoke name="Bash">
-  <parameter name="command">apicize validate test.apicize</parameter>
+  <parameter name="command">apicize-tools validate test.apicize</parameter>
   <parameter name="description">Validate .apicize file</parameter>
   <parameter name="timeout">600000</parameter>
 </invoke>
@@ -422,23 +422,23 @@ For complex modifications:
 ### Command Cheat Sheet
 ```bash
 # Create
-apicize create my-api-test --template rest-crud
+apicize-tools create my-api-test --template rest-crud
 
 # Validate
-apicize validate test.apicize
-apicize validate **/*.apicize
+apicize-tools validate test.apicize
+apicize-tools validate **/*.apicize
 
 # Export
-apicize export test.apicize --output ./tests
-apicize export test.apicize --output ./tests --scenario production
+apicize-tools export test.apicize --output ./tests
+apicize-tools export test.apicize --output ./tests --scenario production
 
 # Import
-apicize import ./tests --output updated.apicize
+apicize-tools import ./tests --output updated.apicize
 
 # Run
-apicize run test.apicize
-apicize run test.apicize --scenario staging
-apicize run test.apicize --reporter json
+apicize-tools run test.apicize
+apicize-tools run test.apicize --scenario staging
+apicize-tools run test.apicize --reporter json
 ```
 
 ### Common Test Assertions
@@ -511,8 +511,8 @@ Each request includes:
 - Variable usage for data passing between requests
 
 You can now:
-1. Run directly: `apicize run user-api-test.apicize`
-2. Export to TypeScript: `apicize export user-api-test.apicize --output ./tests`
+1. Run directly: `apicize-tools run user-api-test.apicize`
+2. Export to TypeScript: `apicize-tools export user-api-test.apicize --output ./tests`
 3. Customize scenarios for dev/staging/prod environments
 
 Would you like me to add authentication or modify any of the tests?
