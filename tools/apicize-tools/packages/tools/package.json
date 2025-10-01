@@ -1,14 +1,14 @@
 {
   "name": "@jstormes/apicize-tools",
-  "version": "1.0.1",
+  "version": "1.0.6",
   "description": "CLI tools for working with .apicize API test files - convert between .apicize and TypeScript/Mocha/Chai tests",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "apicize": "dist/cli.js"
+    "apicize-tools": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build --force",
     "test": "jest --passWithNoTests",
     "lint": "echo 'Linting handled at root level'",
     "clean": "rimraf dist",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/apicize/tools#readme",
   "dependencies": {
-    "@jstormes/apicize-lib": "^1.0.0",
+    "@jstormes/apicize-lib": "^1.0.2",
     "chalk": "^4.1.2",
     "commander": "^11.0.0",
     "inquirer": "^8.2.5",

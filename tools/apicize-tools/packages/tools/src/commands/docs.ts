@@ -18,8 +18,10 @@ export function createDocsCommand(): Command {
         console.log(chalk.blue('📚 Exporting Apicize documentation...'));
         console.log(chalk.gray(`Output directory: ${outputDir}`));
 
-        // Read the AI Assistant Guide from the packaged location
-        const guideSource = join(__dirname, '../../../lib/docs/AI_ASSISTANT_GUIDE.md');
+        // Read the AI Assistant Guide from the @jstormes/apicize-lib package
+        const libPackagePath = require.resolve('@jstormes/apicize-lib');
+        const libRoot = join(libPackagePath, '../../'); // Go up from dist/index.js to package root
+        const guideSource = join(libRoot, 'docs/AI_ASSISTANT_GUIDE.md');
         let exported = 0;
 
         if (docType === 'ai' || docType === 'all') {

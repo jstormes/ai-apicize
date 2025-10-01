@@ -22,7 +22,7 @@ const program = new Command();
 
 // Configure main program
 program
-  .name('apicize')
+  .name('apicize-tools')
   .description('CLI tools for working with .apicize API test files')
   .version(version)
   .option('-v, --verbose', 'enable verbose output')
@@ -55,7 +55,7 @@ program.configureOutput({
 // Handle unknown commands
 program.on('command:*', operands => {
   console.error(chalk.red(`Unknown command: ${operands[0]}`));
-  console.log(chalk.yellow('Use "apicize --help" to see available commands'));
+  console.log(chalk.yellow('Use "apicize-tools --help" to see available commands'));
   process.exit(1);
 });
 
