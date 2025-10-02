@@ -10,7 +10,7 @@
           "name": "Get User Query",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('Get User Query', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return user data', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('user');\n    expect(data.data.user).to.have.property('id');\n    expect(data.data.user).to.have.property('email');\n    expect(data.data.user).to.have.property('name');\n  });\n\n  it('should not have errors', () => {\n    const data = response.body.data;\n    expect(data.errors).to.be.undefined;\n  });\n});",
+          "test": "describe('Get User Query', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return user data', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('data');\n    expect(JSON_body.data).to.have.property('user');\n    expect(JSON_body.data.user).to.have.property('id');\n    expect(JSON_body.data.user).to.have.property('email');\n    expect(JSON_body.data.user).to.have.property('name');\n  });\n\n  it('should not have errors', () => {\n    const JSON_body = response.body.data;\n    expect(JSON_body.errors).to.be.undefined;\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -39,7 +39,7 @@
           "name": "Create User Mutation",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('Create User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should create user successfully', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('createUser');\n    \n    const createdUser = data.data.createUser;\n    expect(createdUser).to.have.property('id');\n    expect(createdUser.email).to.equal('newuser@example.com');\n    expect(createdUser.name).to.equal('New User');\n    \n    output('newUserId', createdUser.id);\n  });\n\n  it('should not have validation errors', () => {\n    const data = response.body.data;\n    expect(data.errors).to.be.undefined;\n  });\n});",
+          "test": "describe('Create User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should create user successfully', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('data');\n    expect(JSON_body.data).to.have.property('createUser');\n    \n    const createdUser = JSON_body.data.createUser;\n    expect(createdUser).to.have.property('id');\n    expect(createdUser.email).to.equal('newuser@example.com');\n    expect(createdUser.name).to.equal('New User');\n    \n    output('newUserId', createdUser.id);\n  });\n\n  it('should not have validation errors', () => {\n    const JSON_body = response.body.data;\n    expect(JSON_body.errors).to.be.undefined;\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -75,7 +75,7 @@
           "name": "List Users Query",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('List Users Query', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return paginated users', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('users');\n    \n    const usersData = data.data.users;\n    expect(usersData).to.have.property('nodes');\n    expect(usersData).to.have.property('pageInfo');\n    expect(usersData).to.have.property('totalCount');\n    \n    expect(usersData.nodes).to.be.an('array');\n    expect(usersData.pageInfo).to.have.property('hasNextPage');\n    expect(usersData.pageInfo).to.have.property('hasPreviousPage');\n  });\n\n  it('should include created user in results', () => {\n    const data = response.body.data;\n    const users = data.data.users.nodes;\n    const createdUser = users.find(user => user.id === $.newUserId);\n    expect(createdUser).to.exist;\n  });\n});",
+          "test": "describe('List Users Query', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return paginated users', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('data');\n    expect(JSON_body.data).to.have.property('users');\n    \n    const usersData = JSON_body.data.users;\n    expect(usersData).to.have.property('nodes');\n    expect(usersData).to.have.property('pageInfo');\n    expect(usersData).to.have.property('totalCount');\n    \n    expect(usersData.nodes).to.be.an('array');\n    expect(usersData.pageInfo).to.have.property('hasNextPage');\n    expect(usersData.pageInfo).to.have.property('hasPreviousPage');\n  });\n\n  it('should include created user in results', () => {\n    const JSON_body = response.body.data;\n    const users = JSON_body.data.users.nodes;\n    const createdUser = users.find(user => user.id === $.newUserId);\n    expect(createdUser).to.exist;\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -107,7 +107,7 @@
           "name": "Update User Mutation",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('Update User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should update user successfully', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('updateUser');\n    \n    const updatedUser = data.data.updateUser;\n    expect(updatedUser.id).to.equal($.newUserId);\n    expect(updatedUser.name).to.equal('Updated User');\n    expect(updatedUser.profile.firstName).to.equal('Updated');\n  });\n\n  it('should preserve unchanged fields', () => {\n    const data = response.body.data;\n    const updatedUser = data.data.updateUser;\n    expect(updatedUser.email).to.equal('newuser@example.com');\n  });\n});",
+          "test": "describe('Update User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should update user successfully', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('data');\n    expect(JSON_body.data).to.have.property('updateUser');\n    \n    const updatedUser = JSON_body.data.updateUser;\n    expect(updatedUser.id).to.equal($.newUserId);\n    expect(updatedUser.name).to.equal('Updated User');\n    expect(updatedUser.profile.firstName).to.equal('Updated');\n  });\n\n  it('should preserve unchanged fields', () => {\n    const JSON_body = response.body.data;\n    const updatedUser = JSON_body.data.updateUser;\n    expect(updatedUser.email).to.equal('newuser@example.com');\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -143,7 +143,7 @@
           "name": "Delete User Mutation",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('Delete User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should delete user successfully', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('data');\n    expect(data.data).to.have.property('deleteUser');\n    expect(data.data.deleteUser).to.be.true;\n  });\n\n  it('should not have errors', () => {\n    const data = response.body.data;\n    expect(data.errors).to.be.undefined;\n  });\n});",
+          "test": "describe('Delete User Mutation', () => {\n  it('should return successful response', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should delete user successfully', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('data');\n    expect(JSON_body.data).to.have.property('deleteUser');\n    expect(JSON_body.data.deleteUser).to.be.true;\n  });\n\n  it('should not have errors', () => {\n    const JSON_body = response.body.data;\n    expect(JSON_body.errors).to.be.undefined;\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -180,7 +180,7 @@
           "name": "Invalid Query Syntax",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('Invalid Query Syntax', () => {\n  it('should return 400 status', () => {\n    expect(response.status).to.equal(400);\n  });\n\n  it('should return syntax error', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('errors');\n    expect(data.errors).to.be.an('array');\n    expect(data.errors[0]).to.have.property('message');\n    expect(data.errors[0].message).to.contain('Syntax Error');\n  });\n});",
+          "test": "describe('Invalid Query Syntax', () => {\n  it('should return 400 status', () => {\n    expect(response.status).to.equal(400);\n  });\n\n  it('should return syntax error', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('errors');\n    expect(JSON_body.errors).to.be.an('array');\n    expect(JSON_body.errors[0]).to.have.property('message');\n    expect(JSON_body.errors[0].message).to.contain('Syntax Error');\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -202,7 +202,7 @@
           "name": "Unauthorized Query",
           "url": "{{baseUrl}}/graphql",
           "method": "POST",
-          "test": "describe('Unauthorized Query', () => {\n  it('should return 401 status', () => {\n    expect(response.status).to.equal(401);\n  });\n\n  it('should return authentication error', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('errors');\n    expect(data.errors[0].message).to.contain('Unauthorized');\n  });\n});",
+          "test": "describe('Unauthorized Query', () => {\n  it('should return 401 status', () => {\n    expect(response.status).to.equal(401);\n  });\n\n  it('should return authentication error', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('errors');\n    expect(JSON_body.errors[0].message).to.contain('Unauthorized');\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",

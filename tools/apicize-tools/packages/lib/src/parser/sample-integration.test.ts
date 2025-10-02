@@ -104,17 +104,17 @@ describe('API Testing Demo', () => {
       // Original test code from .apicize file
       expect(response.status).to.equal(201);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.name).to.equal($.userName);
-      expect(data.email).to.equal($.userEmail);
-      expect(data.id).to.be.a('string');
+      expect(JSON_body.name).to.equal($.userName);
+      expect(JSON_body.email).to.equal($.userEmail);
+      expect(JSON_body.id).to.be.a('string');
 
       // Save user ID for subsequent tests
-      output('createdUserId', data.id);
-      console.info(\`Created user with ID: \${data.id}\`);
+      output('createdUserId', JSON_body.id);
+      console.info(\`Created user with ID: \${JSON_body.id}\`);
     });
   });
 
@@ -156,14 +156,14 @@ describe('API Testing Demo', () => {
     it('should retrieve user by ID', () => {
       expect(response.status).to.equal(200);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.id).to.equal($.createdUserId);
-      expect(data.name).to.be.a('string');
-      expect(data.email).to.be.a('string');
-      expect(data.profile).to.be.an('object');
+      expect(JSON_body.id).to.equal($.createdUserId);
+      expect(JSON_body.name).to.be.a('string');
+      expect(JSON_body.email).to.be.a('string');
+      expect(JSON_body.profile).to.be.an('object');
     });
   });
 });
@@ -218,14 +218,14 @@ describe('Product Management', () => {
     it('should list products with pagination', () => {
       expect(response.status).to.equal(200);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.products).to.be.an('array');
-      expect(data.pagination).to.be.an('object');
-      expect(data.pagination.limit).to.equal(50);
-      expect(data.pagination.total).to.be.a('number');
+      expect(JSON_body.products).to.be.an('array');
+      expect(JSON_body.pagination).to.be.an('object');
+      expect(JSON_body.pagination.limit).to.equal(50);
+      expect(JSON_body.pagination.total).to.be.a('number');
     });
   });
 
@@ -269,19 +269,19 @@ describe('Product Management', () => {
     it('should create product with valid data', () => {
       expect(response.status).to.equal(201);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.name).to.equal($.productName);
-      expect(data.description).to.equal($.productDescription);
-      expect(data.price).to.equal(parseFloat($.productPrice));
-      expect(data.category).to.equal($.productCategory);
-      expect(data.id).to.be.a('string');
-      expect(data.createdAt).to.be.a('string');
+      expect(JSON_body.name).to.equal($.productName);
+      expect(JSON_body.description).to.equal($.productDescription);
+      expect(JSON_body.price).to.equal(parseFloat($.productPrice));
+      expect(JSON_body.category).to.equal($.productCategory);
+      expect(JSON_body.id).to.be.a('string');
+      expect(JSON_body.createdAt).to.be.a('string');
 
-      output('productId', data.id);
-      console.info(\`Created product: \${data.name} with ID: \${data.id}\`);
+      output('productId', JSON_body.id);
+      console.info(\`Created product: \${JSON_body.name} with ID: \${JSON_body.id}\`);
     });
   });
 });
@@ -420,35 +420,35 @@ it('should handle complex test scenarios', () => {
   expect(response.status).to.equal(200);
 
   // Check response body structure
-  const data = (response.body.type == BodyType.JSON)
+  const JSON_body = (response.body.type == BodyType.JSON)
     ? response.body.data
     : expect.fail('Response body is not JSON');
 
   // Validate nested object properties
-  expect(data.user).to.be.an('object');
-  expect(data.user.profile).to.be.an('object');
-  expect(data.user.profile.settings).to.be.an('object');
+  expect(JSON_body.user).to.be.an('object');
+  expect(JSON_body.user.profile).to.be.an('object');
+  expect(JSON_body.user.profile.settings).to.be.an('object');
 
   // Test array validation
-  expect(data.permissions).to.be.an('array');
-  expect(data.permissions).to.have.length.greaterThan(0);
+  expect(JSON_body.permissions).to.be.an('array');
+  expect(JSON_body.permissions).to.have.length.greaterThan(0);
 
   // Variable substitution and output
-  expect(data.user.id).to.equal($.expectedUserId);
-  output('actualUserId', data.user.id);
+  expect(JSON_body.user.id).to.equal($.expectedUserId);
+  output('actualUserId', JSON_body.user.id);
 
   // Complex assertions with loops
-  data.permissions.forEach((permission, index) => {
+  JSON_body.permissions.forEach((permission, index) => {
     expect(permission).to.have.property('name');
     expect(permission).to.have.property('granted');
     console.info(\`Permission \${index}: \${permission.name} = \${permission.granted}\`);
   });
 
   // Conditional logic
-  if (data.user.role === 'admin') {
-    expect(data.adminFeatures).to.be.an('array');
+  if (JSON_body.user.role === 'admin') {
+    expect(JSON_body.adminFeatures).to.be.an('array');
   } else {
-    expect(data.adminFeatures).to.be.undefined;
+    expect(JSON_body.adminFeatures).to.be.undefined;
   }
 });
 `;
@@ -462,8 +462,8 @@ it('should handle complex test scenarios', () => {
       expect(request.testCode).toBeDefined();
       expect(request.testCode).toContain('should handle complex test scenarios');
       expect(request.testCode).toContain('forEach((permission, index)');
-      expect(request.testCode).toContain("if (data.user.role === 'admin')");
-      expect(request.testCode).toContain("output('actualUserId', data.user.id)");
+      expect(request.testCode).toContain("if (JSON_body.user.role === 'admin')");
+      expect(request.testCode).toContain("output('actualUserId', JSON_body.user.id)");
     });
 
     it('should handle files with TypeScript imports and exports', () => {

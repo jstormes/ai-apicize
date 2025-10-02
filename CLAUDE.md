@@ -151,18 +151,18 @@ describe('Test Suite', () => {
         expect(response.status).to.equal(200)
 
         // Type-safe body handling
-        const data = (response.body.type == BodyType.JSON)
+        const JSON_body = (response.body.type == BodyType.JSON)
             ? response.body.data
             : expect.fail('Response body is not JSON')
 
         // Access scenario variables
-        expect(data.field).to.equal($.variableName)
+        expect(JSON_body.field).to.equal($.variableName)
 
         // Pass data between tests
         output('key', value)
 
         // Console output
-        console.info(`Message: ${data}`)
+        console.info(`Message: ${JSON_body}`)
     })
 })
 ```
@@ -721,27 +721,27 @@ describe('status', () => {
 // JSON Response Validation
 describe('response', () => {
     it('contains expected data', () => {
-        const data = (response.body.type == BodyType.JSON)
+        const JSON_body = (response.body.type == BodyType.JSON)
             ? response.body.data
             : expect.fail('Response body is not JSON');
 
         // Access variables from scenario via $
-        expect(data.field).to.equal($.expectedValue);
+        expect(JSON_body.field).to.equal($.expectedValue);
 
         // Or use hardcoded values
-        expect(data.status).to.equal('success');
+        expect(JSON_body.status).to.equal('success');
     });
 });
 
 // Capture Output
 describe('capture data', () => {
     it('saves ID for next request', () => {
-        const data = (response.body.type == BodyType.JSON)
+        const JSON_body = (response.body.type == BodyType.JSON)
             ? response.body.data
             : expect.fail('Response body is not JSON');
 
-        output('savedId', data.id);
-        console.info(`Saved ID: ${data.id}`);
+        output('savedId', JSON_body.id);
+        console.info(`Saved ID: ${JSON_body.id}`);
     });
 });
 ```
@@ -832,11 +832,11 @@ describe('CRUD Operations', function() {
             // Original test code from .apicize runs here with response available
             expect(response.status).to.equal(200);
 
-            const data = (response.body.type == BodyType.JSON)
+            const JSON_body = (response.body.type == BodyType.JSON)
                 ? response.body.data
                 : expect.fail('Response body is not JSON');
 
-            output('id', data.id);  // Saves to $ for next test
+            output('id', JSON_body.id);  // Saves to $ for next test
         });
     });
 });

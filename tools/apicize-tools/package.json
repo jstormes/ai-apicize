@@ -32,9 +32,19 @@
     "postversion": "git push && git push --tags",
     "prepublishOnly": "npm run verify:full",
     "publish:dry": "npm publish --dry-run --workspaces",
-    "publish:packages": "npm publish --workspaces --access public"
+    "publish:packages": "npm publish --workspaces --access public",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "release:dry": "standard-version --dry-run",
+    "release:first": "standard-version --first-release",
+    "pre-release": "bash scripts/pre-release.sh",
+    "post-release": "bash scripts/post-release.sh",
+    "verify-publish": "bash scripts/verify-publish.sh"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.5",
     "@types/node": "^20.8.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
@@ -42,11 +52,11 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.7.0",
-    "@types/jest": "^29.5.5",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.2.2",
     "prettier": "^3.0.3",
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+    "standard-version": "^9.5.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">=16.0.0",

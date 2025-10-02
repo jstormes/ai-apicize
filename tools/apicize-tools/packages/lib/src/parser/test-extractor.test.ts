@@ -448,12 +448,12 @@ describe('Demo API Tests', () => {
     it('should create user successfully', () => {
       expect(response.status).to.equal(201);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.name).to.equal('Test User');
-      output('userId', data.id);
+      expect(JSON_body.name).to.equal('Test User');
+      output('userId', JSON_body.id);
     });
   });
 });
@@ -483,7 +483,7 @@ describe('Demo API Tests', () => {
       const test = userSuite.tests[0];
       expect(test.name).toBe('should create user successfully');
       expect(test.body).toContain('expect(response.status).to.equal(201)');
-      expect(test.body).toContain("output('userId', data.id)");
+      expect(test.body).toContain("output('userId', JSON_body.id)");
     });
   });
 });

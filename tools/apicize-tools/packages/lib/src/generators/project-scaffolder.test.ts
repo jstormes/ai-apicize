@@ -232,7 +232,7 @@ describe('ProjectScaffolder', () => {
       expect(packageJson.scripts.build).toBe('tsc');
 
       // Check dependencies
-      expect(packageJson.dependencies['@apicize/lib']).toBeDefined();
+      expect(packageJson.dependencies['@jstormes/apicize-lib']).toBeDefined();
       expect(packageJson.devDependencies.mocha).toBeDefined();
       expect(packageJson.devDependencies.chai).toBeDefined();
       expect(packageJson.devDependencies.typescript).toBeDefined();

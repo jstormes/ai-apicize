@@ -406,10 +406,10 @@ describe('Test', () => {
 });
 
 // Wrong - accessing undefined response
-const data = response.body.data;
+const JSON_body = response.body.data;
 
 // Correct - check response type
-const data = (response.body.type === BodyType.JSON)
+const JSON_body = (response.body.type === BodyType.JSON)
   ? response.body.data
   : expect.fail('Response is not JSON');
 ```

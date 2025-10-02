@@ -14,7 +14,7 @@
               "name": "Create User",
               "url": "https://jsonplaceholder.typicode.com/users",
               "method": "POST",
-              "test": "describe('user creation', () => {\n  it('should create user successfully', () => {\n    expect(response.status).to.equal(201)\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    output('createdUserId', data.id)\n  })\n})",
+              "test": "describe('user creation', () => {\n  it('should create user successfully', () => {\n    expect(response.status).to.equal(201)\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    output('createdUserId', JSON_body.id)\n  })\n})",
               "headers": [
                 {
                   "name": "Content-Type",
@@ -36,7 +36,7 @@
               "name": "Get Created User",
               "url": "https://jsonplaceholder.typicode.com/users/{{createdUserId}}",
               "method": "GET",
-              "test": "describe('user retrieval', () => {\n  it('should retrieve user successfully', () => {\n    expect(response.status).to.equal(200)\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(data.id).to.equal($.createdUserId)\n  })\n})",
+              "test": "describe('user retrieval', () => {\n  it('should retrieve user successfully', () => {\n    expect(response.status).to.equal(200)\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(JSON_body.id).to.equal($.createdUserId)\n  })\n})",
               "timeout": 5000,
               "runs": 1
             }
@@ -49,7 +49,7 @@
           "name": "List All Users",
           "url": "https://jsonplaceholder.typicode.com/users",
           "method": "GET",
-          "test": "describe('user listing', () => {\n  it('should list users successfully', () => {\n    expect(response.status).to.equal(200)\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(Array.isArray(data)).to.be.true\n  })\n})",
+          "test": "describe('user listing', () => {\n  it('should list users successfully', () => {\n    expect(response.status).to.equal(200)\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(Array.isArray(JSON_body)).to.be.true\n  })\n})",
           "timeout": 5000,
           "runs": 1
         }

@@ -471,16 +471,16 @@ describe('User API', () => {
     it('should create user with valid data', () => {
       expect(response.status).to.equal(201);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.id).to.be.a('string');
-      expect(data.name).to.equal($.userName);
-      expect(data.email).to.equal($.userEmail);
+      expect(JSON_body.id).to.be.a('string');
+      expect(JSON_body.name).to.equal($.userName);
+      expect(JSON_body.email).to.equal($.userEmail);
 
-      output('userId', data.id);
-      console.info(\`Created user with ID: \${data.id}\`);
+      output('userId', JSON_body.id);
+      console.info(\`Created user with ID: \${JSON_body.id}\`);
     });
   });
 
@@ -500,13 +500,13 @@ describe('User API', () => {
     it('should retrieve user by ID', () => {
       expect(response.status).to.equal(200);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.id).to.equal($.userId);
-      expect(data.name).to.be.a('string');
-      expect(data.email).to.be.a('string');
+      expect(JSON_body.id).to.equal($.userId);
+      expect(JSON_body.name).to.be.a('string');
+      expect(JSON_body.email).to.be.a('string');
     });
   });
 });
@@ -536,14 +536,14 @@ describe('Product API', () => {
     it('should list products with pagination', () => {
       expect(response.status).to.equal(200);
 
-      const data = (response.body.type == BodyType.JSON)
+      const JSON_body = (response.body.type == BodyType.JSON)
         ? response.body.data
         : expect.fail('Response body is not JSON');
 
-      expect(data.products).to.be.an('array');
-      expect(data.total).to.be.a('number');
-      expect(data.limit).to.equal(10);
-      expect(data.offset).to.equal(0);
+      expect(JSON_body.products).to.be.an('array');
+      expect(JSON_body.total).to.be.a('number');
+      expect(JSON_body.limit).to.equal(10);
+      expect(JSON_body.offset).to.equal(0);
     });
   });
 });

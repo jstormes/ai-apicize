@@ -235,12 +235,12 @@ describe('status', () => {
 ```javascript
 describe('response', () => {
   it('contains expected data', () => {
-    const data = (response.body.type == BodyType.JSON)
+    const JSON_body = (response.body.type == BodyType.JSON)
       ? response.body.data
       : expect.fail('Response body is not JSON')
-    
-    expect(data.id).to.exist
-    expect(data.name).to.be.a('string')
+
+    expect(JSON_body.id).to.exist
+    expect(JSON_body.name).to.be.a('string')
   })
 })
 ```
@@ -249,12 +249,12 @@ describe('response', () => {
 ```javascript
 describe('variables', () => {
   it('uses scenario variable', () => {
-    const data = (response.body.type == BodyType.JSON)
+    const JSON_body = (response.body.type == BodyType.JSON)
       ? response.body.data
       : expect.fail('Response body is not JSON')
-    
+
     // Access scenario variables via $
-    expect(data.field).to.equal($.expectedValue)
+    expect(JSON_body.field).to.equal($.expectedValue)
   })
 })
 ```
@@ -263,13 +263,13 @@ describe('variables', () => {
 ```javascript
 describe('capture', () => {
   it('saves data for next request', () => {
-    const data = (response.body.type == BodyType.JSON)
+    const JSON_body = (response.body.type == BodyType.JSON)
       ? response.body.data
       : expect.fail('Response body is not JSON')
-    
+
     // Pass data to subsequent tests
-    output('userId', data.id)
-    console.info(`Saved user ID: ${data.id}`)
+    output('userId', JSON_body.id)
+    console.info(`Saved user ID: ${JSON_body.id}`)
   })
 })
 ```

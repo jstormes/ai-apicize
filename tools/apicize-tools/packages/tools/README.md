@@ -188,12 +188,12 @@ describe('API Tests', () => {
     it('should return successful response', () => {
         expect(response.status).to.equal(200);
 
-        const data = (response.body.type === BodyType.JSON)
+        const JSON_body = (response.body.type === BodyType.JSON)
             ? response.body.data
             : expect.fail('Response not JSON');
 
-        expect(data.id).to.exist;
-        output('savedId', data.id); // Pass to next test
+        expect(JSON_body.id).to.exist;
+        output('savedId', JSON_body.id); // Pass to next test
     });
 });
 ```

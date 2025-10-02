@@ -119,7 +119,7 @@ describe('TemplateEngine', () => {
       expect(result).toContain('ApicizeContext,');
       expect(result).toContain('ApicizeResponse,');
       expect(result).toContain('BodyType');
-      expect(result).toContain("} from '@apicize/lib';");
+      expect(result).toContain("} from '@jstormes/apicize-lib';");
       expect(result).toContain("describe('API Tests', function() {");
       expect(result).toContain('this.timeout(30000);');
       expect(result).toContain("describe('Authentication', function() {");
@@ -225,11 +225,11 @@ describe('TemplateEngine', () => {
         test: `describe('response validation', () => {
     it('should return user data', () => {
         expect(response.status).to.equal(200);
-        const data = (response.body.type == BodyType.JSON)
+        const JSON_body = (response.body.type == BodyType.JSON)
             ? response.body.data
             : expect.fail('Response body is not JSON');
-        expect(data.id).to.be.a('string');
-        expect(data.email).to.be.a('string');
+        expect(JSON_body.id).to.be.a('string');
+        expect(JSON_body.email).to.be.a('string');
     });
 });`,
         timeout: 10000,
@@ -250,7 +250,7 @@ describe('TemplateEngine', () => {
       expect(result).toContain("method: 'GET'");
       expect(result).toContain("url: 'https://api.example.com/profile'");
       expect(result).toContain('expect(response.status).to.equal(200);');
-      expect(result).toContain("expect(data.id).to.be.a('string');");
+      expect(result).toContain("expect(JSON_body.id).to.be.a('string');");
     });
 
     it('should handle requests without test code', () => {
@@ -288,7 +288,7 @@ describe('TemplateEngine', () => {
       expect(packageJson.private).toBe(true);
       expect(packageJson.description).toContain('Apicize');
       expect(packageJson.scripts.test).toBe('mocha');
-      expect(packageJson.dependencies['@apicize/lib']).toBe('^1.0.0');
+      expect(packageJson.dependencies['@jstormes/apicize-lib']).toBe('^1.0.0');
       expect(packageJson.devDependencies['mocha']).toBeDefined();
       expect(packageJson.devDependencies['chai']).toBeDefined();
       expect(packageJson.devDependencies['typescript']).toBeDefined();

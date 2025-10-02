@@ -6,7 +6,7 @@
       "name": "Protected Endpoint",
       "url": "https://httpbin.org/bearer",
       "method": "GET",
-      "test": "describe('authentication', () => {\n  it('should return 200 with valid token', () => {\n    expect(response.status).to.equal(200)\n  })\n\n  it('should contain authenticated flag', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(data.authenticated).to.be.true\n  })\n})",
+      "test": "describe('authentication', () => {\n  it('should return 200 with valid token', () => {\n    expect(response.status).to.equal(200)\n  })\n\n  it('should contain authenticated flag', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON')\n    expect(JSON_body.authenticated).to.be.true\n  })\n})",
       "headers": [
         {
           "name": "Accept",

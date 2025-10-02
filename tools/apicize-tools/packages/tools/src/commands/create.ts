@@ -293,12 +293,12 @@ async function buildBasicTemplate(_config: any): Promise<any[]> {
   });
 
   it('should return created resource', () => {
-    const data = (response.body.type == BodyType.JSON)
+    const JSON_body = (response.body.type == BodyType.JSON)
       ? response.body.data
       : expect.fail('Response body is not JSON');
 
-    expect(data).to.have.property('id');
-    output('createdId', data.id);
+    expect(JSON_body).to.have.property('id');
+    output('createdId', JSON_body.id);
   });
 });`,
           headers: [{ name: 'Content-Type', value: 'application/json' }],

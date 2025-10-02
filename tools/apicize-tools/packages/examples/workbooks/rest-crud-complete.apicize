@@ -10,7 +10,7 @@
           "name": "Create User",
           "url": "{{baseUrl}}/api/users",
           "method": "POST",
-          "test": "describe('Create User', () => {\n  it('should return 201 status', () => {\n    expect(response.status).to.equal(201);\n  });\n\n  it('should return user with ID', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('id');\n    expect(data.email).to.equal('john.doe@example.com');\n    output('userId', data.id);\n  });\n\n  it('should include creation timestamp', () => {\n    const data = response.body.data;\n    expect(data).to.have.property('createdAt');\n    expect(new Date(data.createdAt)).to.be.a('date');\n  });\n});",
+          "test": "describe('Create User', () => {\n  it('should return 201 status', () => {\n    expect(response.status).to.equal(201);\n  });\n\n  it('should return user with ID', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('id');\n    expect(JSON_body.email).to.equal('john.doe@example.com');\n    output('userId', JSON_body.id);\n  });\n\n  it('should include creation timestamp', () => {\n    const JSON_body = response.body.data;\n    expect(JSON_body).to.have.property('createdAt');\n    expect(new Date(JSON_body.createdAt)).to.be.a('date');\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -43,7 +43,7 @@
           "name": "Get User by ID",
           "url": "{{baseUrl}}/api/users/{{userId}}",
           "method": "GET",
-          "test": "describe('Get User by ID', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return correct user data', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data.id).to.equal($.userId);\n    expect(data.email).to.equal('john.doe@example.com');\n    expect(data.name).to.equal('John Doe');\n  });\n\n  it('should include profile information', () => {\n    const data = response.body.data;\n    expect(data.profile).to.have.property('firstName', 'John');\n    expect(data.profile).to.have.property('lastName', 'Doe');\n  });\n});",
+          "test": "describe('Get User by ID', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return correct user data', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body.id).to.equal($.userId);\n    expect(JSON_body.email).to.equal('john.doe@example.com');\n    expect(JSON_body.name).to.equal('John Doe');\n  });\n\n  it('should include profile information', () => {\n    const JSON_body = response.body.data;\n    expect(JSON_body.profile).to.have.property('firstName', 'John');\n    expect(JSON_body.profile).to.have.property('lastName', 'Doe');\n  });\n});",
           "headers": [
             {
               "name": "Authorization",
@@ -59,7 +59,7 @@
           "name": "Update User",
           "url": "{{baseUrl}}/api/users/{{userId}}",
           "method": "PUT",
-          "test": "describe('Update User', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should update user data', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data.name).to.equal('John Smith');\n    expect(data.profile.department).to.equal('Product');\n  });\n\n  it('should preserve unchanged fields', () => {\n    const data = response.body.data;\n    expect(data.email).to.equal('john.doe@example.com');\n    expect(data.role).to.equal('user');\n  });\n});",
+          "test": "describe('Update User', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should update user data', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body.name).to.equal('John Smith');\n    expect(JSON_body.profile.department).to.equal('Product');\n  });\n\n  it('should preserve unchanged fields', () => {\n    const JSON_body = response.body.data;\n    expect(JSON_body.email).to.equal('john.doe@example.com');\n    expect(JSON_body.role).to.equal('user');\n  });\n});",
           "headers": [
             {
               "name": "Content-Type",
@@ -90,7 +90,7 @@
           "name": "List Users",
           "url": "{{baseUrl}}/api/users",
           "method": "GET",
-          "test": "describe('List Users', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return paginated results', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('items');\n    expect(data).to.have.property('total');\n    expect(data).to.have.property('page');\n    expect(data).to.have.property('limit');\n    expect(data.items).to.be.an('array');\n  });\n\n  it('should include created user in results', () => {\n    const data = response.body.data;\n    const createdUser = data.items.find(user => user.id === $.userId);\n    expect(createdUser).to.exist;\n    expect(createdUser.name).to.equal('John Smith');\n  });\n});",
+          "test": "describe('List Users', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return paginated results', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('items');\n    expect(JSON_body).to.have.property('total');\n    expect(JSON_body).to.have.property('page');\n    expect(JSON_body).to.have.property('limit');\n    expect(JSON_body.items).to.be.an('array');\n  });\n\n  it('should include created user in results', () => {\n    const JSON_body = response.body.data;\n    const createdUser = JSON_body.items.find(user => user.id === $.userId);\n    expect(createdUser).to.exist;\n    expect(createdUser.name).to.equal('John Smith');\n  });\n});",
           "headers": [
             {
               "name": "Authorization",
@@ -135,7 +135,7 @@
           "name": "Verify User Deletion",
           "url": "{{baseUrl}}/api/users/{{userId}}",
           "method": "GET",
-          "test": "describe('Verify User Deletion', () => {\n  it('should return 404 status', () => {\n    expect(response.status).to.equal(404);\n  });\n\n  it('should return error message', () => {\n    const data = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(data).to.have.property('error');\n    expect(data.error.message).to.contain('User not found');\n  });\n});",
+          "test": "describe('Verify User Deletion', () => {\n  it('should return 404 status', () => {\n    expect(response.status).to.equal(404);\n  });\n\n  it('should return error message', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('error');\n    expect(JSON_body.error.message).to.contain('User not found');\n  });\n});",
           "headers": [
             {
               "name": "Authorization",

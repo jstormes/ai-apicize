@@ -1,6 +1,6 @@
 {
   "name": "@jstormes/apicize-lib",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Core library for Apicize tools - TypeScript types, utilities, and runtime support for API testing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

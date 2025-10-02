@@ -187,10 +187,10 @@ describe('TestGenerator', () => {
         test: `describe('response validation', () => {
     it('should return user profile', () => {
         expect(response.status).to.equal(200);
-        const data = (response.body.type == BodyType.JSON)
+        const JSON_body = (response.body.type == BodyType.JSON)
             ? response.body.data
             : expect.fail('Response body is not JSON');
-        expect(data.id).to.be.a('string');
+        expect(JSON_body.id).to.be.a('string');
     });
 });`,
         timeout: 10000,

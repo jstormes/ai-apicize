@@ -52,11 +52,11 @@ describe('API Test', () => {
     it('should return success', () => {
         expect(response.status).to.equal(200);
 
-        const data = (response.body.type === BodyType.JSON)
+        const JSON_body = (response.body.type === BodyType.JSON)
             ? response.body.data
             : expect.fail('Response not JSON');
 
-        output('userId', data.id);
+        output('userId', JSON_body.id);
     });
 });
 ```
@@ -366,12 +366,12 @@ declare global {
 it('should validate response', () => {
     expect(response.status).to.equal(200);
 
-    const data = (response.body.type === BodyType.JSON)
+    const JSON_body = (response.body.type === BodyType.JSON)
         ? response.body.data
         : expect.fail('Expected JSON response');
 
-    expect(data.id).to.exist;
-    output('userId', data.id); // Available in next test as $.userId
+    expect(JSON_body.id).to.exist;
+    output('userId', JSON_body.id); // Available in next test as $.userId
 });
 ```
 
