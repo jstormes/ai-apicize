@@ -63,8 +63,9 @@ export class ProjectScaffolder {
     // Generate main project structure
     this.generateProjectStructure(files, folders, opts);
 
-    // Generate library files
-    this.generateLibraryFiles(files, folders, opts);
+    // ❌ REMOVED: Don't generate library files (Phase 3 - Library-centric architecture)
+    // All runtime code is now in @jstormes/apicize-lib npm package
+    // this.generateLibraryFiles(files, folders, opts);
 
     // Generate configuration files
     this.generateConfigurationFiles(files, folders, workbook, opts);
@@ -100,15 +101,9 @@ export class ProjectScaffolder {
     folders: string[],
     options: ProjectScaffolderOptions
   ): void {
-    // Main project folders
+    // Main project folders (Phase 3: removed all lib/ folders)
     const mainFolders = [
-      'lib',
-      'lib/runtime',
-      'lib/testing',
-      'lib/data',
-      'lib/auth',
-      'lib/output',
-      'lib/import-export',
+      // ❌ Removed lib/ folders - all runtime code is in @jstormes/apicize-lib
       'config',
       'config/environments',
       'config/auth',
@@ -125,6 +120,7 @@ export class ProjectScaffolder {
       'reports/coverage',
       'reports/apicize',
       'scripts',
+      'metadata', // ✅ Added for workbook.json storage
     ];
 
     folders.push(...mainFolders);
@@ -144,106 +140,9 @@ export class ProjectScaffolder {
     });
   }
 
-  /**
-   * Generate library files
-   */
-  private generateLibraryFiles(
-    files: GeneratedFile[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _folders: string[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _options: ProjectScaffolderOptions
-  ): void {
-    // Main library index
-    files.push({
-      path: 'lib/index.ts',
-      content: this.generateLibraryIndex(),
-      type: 'config',
-    });
-
-    // Runtime files
-    files.push({
-      path: 'lib/runtime/index.ts',
-      content: this.generateRuntimeIndex(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/runtime/types.ts',
-      content: this.generateRuntimeTypes(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/runtime/context.ts',
-      content: this.generateRuntimeContext(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/runtime/client.ts',
-      content: this.generateRuntimeClient(),
-      type: 'config',
-    });
-
-    // Testing utilities
-    files.push({
-      path: 'lib/testing/index.ts',
-      content: this.generateTestingIndex(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/testing/helpers.ts',
-      content: this.generateTestingHelpers(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/testing/assertions.ts',
-      content: this.generateTestingAssertions(),
-      type: 'config',
-    });
-
-    // Auth system
-    files.push({
-      path: 'lib/auth/index.ts',
-      content: this.generateAuthIndex(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/auth/manager.ts',
-      content: this.generateAuthManager(),
-      type: 'config',
-    });
-
-    // Data handling
-    files.push({
-      path: 'lib/data/index.ts',
-      content: this.generateDataIndex(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/data/loader.ts',
-      content: this.generateDataLoader(),
-      type: 'config',
-    });
-
-    // Output management
-    files.push({
-      path: 'lib/output/index.ts',
-      content: this.generateOutputIndex(),
-      type: 'config',
-    });
-
-    files.push({
-      path: 'lib/output/collector.ts',
-      content: this.generateOutputCollector(),
-      type: 'config',
-    });
-  }
+  // ❌ REMOVED: generateLibraryFiles() and all related methods
+  // Phase 3: Library-centric architecture - all runtime code is in @jstormes/apicize-lib
+  // No longer generating scaffolded lib/ directory
 
   /**
    * Generate configuration files
@@ -547,12 +446,14 @@ ${options.packageManager || 'npm'} run test:debug
 
 ## Project Structure
 
-- \`lib/\` - Shared library code
 - \`config/\` - Configuration files
 - \`tests/\` - Generated test files
 - \`data/\` - Test data files
+- \`metadata/\` - Workbook metadata for round-trip conversion
 - \`scripts/\` - Utility scripts
 - \`reports/\` - Test reports
+
+**Note**: All runtime code is provided by the \`@jstormes/apicize-lib\` npm package.
 
 ## Environment Variables
 
@@ -570,310 +471,22 @@ ${options.packageManager || 'npm'} run validate
 `;
   }
 
-  private generateLibraryIndex(): string {
-    return `export * from './runtime';
-export * from './testing';
-export * from './data';
-export * from './auth';
-export * from './output';
-`;
-  }
-
-  private generateRuntimeIndex(): string {
-    return `export * from './types';
-export * from './context';
-export * from './client';
-`;
-  }
-
-  private generateRuntimeTypes(): string {
-    return `import { ApicizeWorkbook, ApicizeResponse, BodyType } from '@jstormes/apicize-lib';
-
-export interface ApicizeContext {
-    $: Record<string, any>;
-    execute(request: RequestConfig): Promise<ApicizeResponse>;
-    substituteVariables(text: string): string;
-    output(key: string, value: any): void;
-}
-
-export interface RequestConfig {
-    url: string;
-    method: string;
-    headers?: Array<{ name: string; value: string }>;
-    body?: any;
-    queryStringParams?: Array<{ name: string; value: string }>;
-    timeout?: number;
-    auth?: string;
-    service?: string;
-    endpoint?: string;
-}
-
-export interface TestConfig {
-    scenario?: string;
-    environment?: string;
-    auth?: string;
-    timeout?: number;
-}
-
-export { ApicizeResponse, BodyType };
-`;
-  }
-
-  private generateRuntimeContext(): string {
-    return `import { ApicizeContext, RequestConfig } from './types';
-import { ApicizeResponse } from '@jstormes/apicize-lib';
-import { ApicizeClient } from './client';
-
-export class TestContext implements ApicizeContext {
-    public $: Record<string, any> = {};
-
-    constructor(
-        private client: ApicizeClient,
-        variables: Record<string, any> = {}
-    ) {
-        this.$ = { ...variables };
-    }
-
-    async execute(request: RequestConfig): Promise<ApicizeResponse> {
-        return this.client.execute(request);
-    }
-
-    substituteVariables(text: string): string {
-        return text.replace(/\\{\\{([^}]+)\\}\\}/g, (match, variable) => {
-            const value = this.getNestedProperty(this.$, variable.trim());
-            return value !== undefined ? String(value) : match;
-        });
-    }
-
-    output(key: string, value: any): void {
-        this.$[key] = value;
-    }
-
-    private getNestedProperty(obj: any, path: string): any {
-        return path.split('.').reduce((current, key) => {
-            return current && current[key] !== undefined ? current[key] : undefined;
-        }, obj);
-    }
-}
-`;
-  }
-
-  private generateRuntimeClient(): string {
-    return `import { ApicizeResponse, BodyType } from '@jstormes/apicize-lib';
-import { RequestConfig } from './types';
-
-export class ApicizeClient {
-    constructor(
-        private config: any,
-        private auth: any
-    ) {}
-
-    async execute(request: RequestConfig): Promise<ApicizeResponse> {
-        // This is a simplified implementation
-        // In a full implementation, this would handle:
-        // - Authentication
-        // - Base URL resolution
-        // - Variable substitution
-        // - Request execution via HTTP client
-
-        const response = await fetch(request.url, {
-            method: request.method,
-            headers: this.buildHeaders(request.headers),
-            body: request.body ? JSON.stringify(request.body) : undefined
-        });
-
-        const text = await response.text();
-        let bodyData: any = text;
-        let bodyType = BodyType.Text;
-
-        try {
-            bodyData = JSON.parse(text);
-            bodyType = BodyType.JSON;
-        } catch {
-            // Keep as text
-        }
-
-        return {
-            status: response.status,
-            statusText: response.statusText,
-            headers: Array.from(response.headers.entries()).map(([name, value]) => ({ name, value })),
-            body: {
-                type: bodyType,
-                data: bodyData
-            }
-        };
-    }
-
-    private buildHeaders(headers: Array<{ name: string; value: string }> = []): Record<string, string> {
-        const headerMap: Record<string, string> = {};
-        headers.forEach(({ name, value }) => {
-            headerMap[name] = value;
-        });
-        return headerMap;
-    }
-}
-`;
-  }
-
-  private generateTestingIndex(): string {
-    return `export * from './helpers';
-export * from './assertions';
-`;
-  }
-
-  private generateTestingHelpers(): string {
-    return `import { TestContext } from '../runtime/context';
-import { ApicizeClient } from '../runtime/client';
-
-export class TestHelper {
-    async setupTest(testName: string): Promise<TestContext> {
-        // Load configuration
-        const config = this.loadConfig();
-        const auth = await this.loadAuth();
-
-        // Create client
-        const client = new ApicizeClient(config, auth);
-
-        // Load scenario variables
-        const variables = this.loadVariables(testName);
-
-        return new TestContext(client, variables);
-    }
-
-    private loadConfig(): any {
-        // Load from config files
-        return {};
-    }
-
-    private async loadAuth(): Promise<any> {
-        // Load authentication configuration
-        return {};
-    }
-
-    private loadVariables(testName: string): Record<string, any> {
-        // Load scenario variables
-        return {};
-    }
-}
-`;
-  }
-
-  private generateTestingAssertions(): string {
-    return `import { expect } from 'chai';
-import { BodyType } from '@jstormes/apicize-lib';
-
-// Custom Chai assertions for Apicize tests
-declare global {
-    namespace Chai {
-        interface Assertion {
-            json(): Assertion;
-            status(code: number): Assertion;
-        }
-    }
-}
-
-// Extend Chai with custom assertions
-chai.use(function(chai, utils) {
-    chai.Assertion.addMethod('json', function() {
-        const response = utils.flag(this, 'object');
-        expect(response.body.type).to.equal(BodyType.JSON);
-        utils.flag(this, 'object', response.body.data);
-    });
-
-    chai.Assertion.addMethod('status', function(expectedStatus: number) {
-        const response = utils.flag(this, 'object');
-        expect(response.status).to.equal(expectedStatus);
-    });
-});
-`;
-  }
-
-  private generateAuthIndex(): string {
-    return `export * from './manager';
-`;
-  }
-
-  private generateAuthManager(): string {
-    return `export class AuthManager {
-    async getHeaders(authType?: string): Promise<Record<string, string>> {
-        if (!authType) return {};
-
-        // Load auth configuration and generate headers
-        // This would integrate with the auth providers configuration
-
-        return {};
-    }
-
-    async authenticate(provider: string): Promise<string> {
-        // Perform authentication flow based on provider type
-        return 'mock-token';
-    }
-}
-`;
-  }
-
-  private generateDataIndex(): string {
-    return `export * from './loader';
-`;
-  }
-
-  private generateDataLoader(): string {
-    return `import * as fs from 'fs';
-import * as path from 'path';
-
-export class DataLoader {
-    loadCSV(filePath: string): Record<string, any>[] {
-        // CSV parsing implementation
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const lines = content.split('\\n').filter(line => line.trim());
-        if (lines.length === 0) return [];
-
-        const headers = lines[0].split(',').map(h => h.trim());
-        return lines.slice(1).map(line => {
-            const values = line.split(',').map(v => v.trim());
-            const row: Record<string, any> = {};
-            headers.forEach((header, index) => {
-                row[header] = values[index] || '';
-            });
-            return row;
-        });
-    }
-
-    loadJSON(filePath: string): any {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        return JSON.parse(content);
-    }
-}
-`;
-  }
-
-  private generateOutputIndex(): string {
-    return `export * from './collector';
-`;
-  }
-
-  private generateOutputCollector(): string {
-    return `export class OutputCollector {
-    private outputs: Map<string, any> = new Map();
-
-    collect(key: string, value: any): void {
-        this.outputs.set(key, value);
-    }
-
-    get(key: string): any {
-        return this.outputs.get(key);
-    }
-
-    getAll(): Record<string, any> {
-        return Object.fromEntries(this.outputs.entries());
-    }
-
-    clear(): void {
-        this.outputs.clear();
-    }
-}
-`;
-  }
+  // ❌ REMOVED: All library file generation methods (Phase 3)
+  // - generateLibraryIndex()
+  // - generateRuntimeIndex()
+  // - generateRuntimeTypes()
+  // - generateRuntimeContext()
+  // - generateRuntimeClient()
+  // - generateTestingIndex()
+  // - generateTestingHelpers()
+  // - generateTestingAssertions()
+  // - generateAuthIndex()
+  // - generateAuthManager()
+  // - generateDataIndex()
+  // - generateDataLoader()
+  // - generateOutputIndex()
+  // - generateOutputCollector()
+  // All runtime functionality is now provided by @jstormes/apicize-lib
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private generateApicizeConfig(_options: ProjectScaffolderOptions): string {
@@ -881,11 +494,12 @@ export class DataLoader {
       {
         version: '1.0.0',
         activeEnvironment: 'development',
-        libPath: './lib',
+        // Phase 3: Removed 'libPath: ./lib' - no local lib directory
         configPath: './config',
         testsPath: './tests',
         dataPath: './data',
         reportsPath: './reports',
+        metadataPath: './metadata', // ✅ Added metadata path
         settings: {
           defaultTimeout: 30000,
           retryAttempts: 3,
@@ -900,7 +514,7 @@ export class DataLoader {
         },
         exports: {
           includeMetadata: true,
-          generateHelpers: true,
+          generateHelpers: false, // Phase 3: No local helpers generated
           splitByGroup: true,
         },
       },
@@ -930,7 +544,8 @@ export class DataLoader {
           typeRoots: ['./node_modules/@types'],
           types: ['mocha', 'chai', 'node'],
         },
-        include: ['lib/**/*', 'tests/**/*', 'scripts/**/*'],
+        // Phase 3: Removed 'lib/**/*' - no local lib code, only @jstormes/apicize-lib
+        include: ['tests/**/*', 'scripts/**/*'],
         exclude: ['node_modules', 'dist', 'reports'],
         'ts-node': {
           files: true,
@@ -1211,8 +826,8 @@ REDIS_URL=
           'config:set': 'node scripts/config-manager.js set',
         },
         dependencies: {
-          '@jstormes/apicize-lib': '^1.0.0',
-          dotenv: '^16.0.0',
+          // Phase 4: Only @jstormes/apicize-lib dependency needed
+          '@jstormes/apicize-lib': '^1.0.5',
         },
         devDependencies: {
           '@types/mocha': '^10.0.0',

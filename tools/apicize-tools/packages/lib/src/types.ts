@@ -304,14 +304,19 @@ export interface ApicizeContext {
   substituteVariables: (text: string) => string;
   headers?: NameValuePair[];
   body?: RequestBody;
+  cleanup?: () => Promise<void>;
 }
 
 export interface RequestConfig {
+  id?: string;
   url: string;
   method: HttpMethod | string;
   headers?: NameValuePair[] | Record<string, string>;
   body?: RequestBody | string | Buffer | Record<string, unknown>;
+  queryStringParams?: NameValuePair[];
   timeout?: number;
+  numberOfRedirects?: number;
+  acceptInvalidCerts?: boolean;
   auth?: string;
   service?: string;
   endpoint?: string;
@@ -322,6 +327,8 @@ export interface RequestConfig {
 
 export interface ITestHelper {
   setupTest(testName: string): Promise<ApicizeContext>;
+  setupWorkbook(workbookName: string): Promise<ApicizeContext>;
+  setupRequest(requestId: string): Promise<ApicizeContext>;
   loadScenario(scenarioId: string): Promise<Scenario>;
   loadData(dataId: string): Promise<unknown>;
 }

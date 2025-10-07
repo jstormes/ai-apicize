@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "activeEnvironment": "development",
+  "libPath": "./lib",
+  "configPath": "./config",
+  "testsPath": "./tests",
+  "dataPath": "./data",
+  "reportsPath": "./reports",
+  "settings": {
+    "defaultTimeout": 30000,
+    "retryAttempts": 3,
+    "parallelExecution": false,
+    "verboseLogging": true,
+    "preserveMetadata": true
+  },
+  "imports": {
+    "autoGenerateIds": true,
+    "validateOnImport": true,
+    "preserveComments": true
+  },
+  "exports": {
+    "includeMetadata": true,
+    "generateHelpers": true,
+    "splitByGroup": true
+  }
+}

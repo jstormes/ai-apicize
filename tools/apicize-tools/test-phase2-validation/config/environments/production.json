@@ -1,0 +1,20 @@
+{
+  "name": "production",
+  "baseUrls": {
+    "api": "https://api.example.com",
+    "auth": "https://auth.example.com",
+    "cdn": "https://cdn.example.com"
+  },
+  "headers": {
+    "X-Environment": "production"
+  },
+  "timeouts": {
+    "default": 30000,
+    "long": 60000
+  },
+  "features": {
+    "debugMode": false,
+    "mockResponses": false,
+    "rateLimiting": true
+  }
+}

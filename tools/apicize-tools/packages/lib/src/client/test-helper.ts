@@ -9,9 +9,12 @@ import {
   RequestBody,
   BodyType,
   HttpMethod,
+  Variable,
 } from '../types';
 import { VariableEngine } from '../variables/variable-engine';
 import { ApicizeClient } from './apicize-client';
+import { promises as fs } from 'fs';
+import * as path from 'path';
 
 /**
  * Implementation of TestHelper for use in exported TypeScript test files
@@ -20,6 +23,7 @@ export class TestHelperImpl implements ITestHelper {
   private variableEngine: VariableEngine;
   private client: ApicizeClient;
   private outputData: Record<string, unknown> = {};
+  private workbookCache: Map<string, ApicizeWorkbook> = new Map();
 
   constructor() {
     this.variableEngine = new VariableEngine();
@@ -29,13 +33,147 @@ export class TestHelperImpl implements ITestHelper {
   }
 
   /**
-   * Setup test context for a specific test
+   * Setup test context for an entire workbook
+   * This is the main method called by generated tests
    */
-  async setupTest(testName: string): Promise<ApicizeContext> {
-    // Create a basic context for the test
-    const context = new TestContext(testName, this.variableEngine, this.client, this.outputData);
+  async setupWorkbook(workbookName: string): Promise<ApicizeContext> {
+    // 1. Load workbook metadata from metadata/workbook.json
+    const workbook = await this.loadWorkbookMetadata(workbookName);
+
+    // 2. Load default scenario (if exists)
+    const scenario = workbook.defaults?.selectedScenario
+      ? await this.loadScenario(workbook.defaults.selectedScenario.id)
+      : undefined;
+
+    // 3. Initialize variables from scenario
+    const variables = scenario?.variables
+      ? this.initializeVariables(scenario.variables)
+      : {};
+
+    // 4. Create context with workbook and scenario
+    const context = new TestContext(
+      workbookName,
+      this.variableEngine,
+      this.client,
+      this.outputData,
+      workbook,
+      scenario
+    );
+
+    // 5. Initialize $ with scenario variables
+    context.$ = { ...variables };
 
     return context;
+  }
+
+  /**
+   * Setup test context for a specific test
+   * Kept for backward compatibility - delegates to setupWorkbook
+   */
+  async setupTest(testName: string): Promise<ApicizeContext> {
+    return this.setupWorkbook(testName);
+  }
+
+  /**
+   * Setup test context for a specific request
+   * Similar to setupWorkbook but focused on a single request
+   */
+  async setupRequest(requestId: string): Promise<ApicizeContext> {
+    // Load workbook to get request metadata
+    const workbook = await this.loadWorkbookMetadata(requestId);
+
+    // Find the request in the workbook (could be nested in groups)
+    // For now, use the same setup as setupWorkbook
+    const scenario = workbook.defaults?.selectedScenario
+      ? await this.loadScenario(workbook.defaults.selectedScenario.id)
+      : undefined;
+
+    const variables = scenario?.variables
+      ? this.initializeVariables(scenario.variables)
+      : {};
+
+    const context = new TestContext(
+      requestId,
+      this.variableEngine,
+      this.client,
+      this.outputData,
+      workbook,
+      scenario
+    );
+
+    context.$ = { ...variables };
+
+    return context;
+  }
+
+  /**
+   * Load workbook metadata from exported project
+   */
+  private async loadWorkbookMetadata(workbookName: string): Promise<ApicizeWorkbook> {
+    // Check cache first
+    if (this.workbookCache.has(workbookName)) {
+      return this.workbookCache.get(workbookName)!;
+    }
+
+    // Load from metadata/workbook.json
+    const metadataPath = path.join(process.cwd(), 'metadata', 'workbook.json');
+
+    try {
+      const content = await fs.readFile(metadataPath, 'utf-8');
+      const workbook: ApicizeWorkbook = JSON.parse(content);
+      this.workbookCache.set(workbookName, workbook);
+      return workbook;
+    } catch (error) {
+      // Fallback: create minimal workbook
+      const workbook: ApicizeWorkbook = {
+        version: 1.0,
+        requests: [],
+        scenarios: [],
+        authorizations: [],
+        certificates: [],
+        proxies: [],
+        data: [],
+        defaults: {},
+      };
+      return workbook;
+    }
+  }
+
+  /**
+   * Initialize variables from scenario
+   */
+  private initializeVariables(variables: Variable[]): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+
+    for (const variable of variables) {
+      if (!variable.disabled) {
+        result[variable.name] = this.parseVariableValue(variable);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Parse variable value based on type
+   */
+  private parseVariableValue(variable: Variable): unknown {
+    switch (variable.type) {
+      case 'TEXT':
+        return variable.value;
+      case 'JSON':
+        try {
+          return JSON.parse(variable.value);
+        } catch {
+          return variable.value;
+        }
+      case 'FILE-JSON':
+      case 'FILE-CSV':
+        // Load from file (to be implemented in future phase)
+        return variable.value;
+      default:
+        return variable.value;
+    }
   }
 
   /**
@@ -77,13 +215,15 @@ class TestContext implements ApicizeContext {
     _testName: string,
     _variableEngine: VariableEngine,
     private client: ApicizeClient,
-    private outputData: Record<string, unknown>
+    private outputData: Record<string, unknown>,
+    workbook?: ApicizeWorkbook,
+    scenario?: Scenario
   ) {
     // Initialize $ with current output data
     this.$ = { ...outputData };
 
-    // Basic workbook structure
-    this.workbook = {
+    // Use provided workbook or create basic structure
+    this.workbook = workbook || {
       version: 1.0,
       requests: [],
       scenarios: [],
@@ -93,6 +233,11 @@ class TestContext implements ApicizeContext {
       data: [],
       defaults: {},
     };
+
+    // Set scenario if provided
+    if (scenario !== undefined) {
+      this.scenario = scenario;
+    }
   }
 
   /**
@@ -166,6 +311,22 @@ class TestContext implements ApicizeContext {
     this.outputData[key] = value;
     this.$[key] = value;
   };
+
+  /**
+   * Cleanup resources after test execution
+   */
+  async cleanup(): Promise<void> {
+    // Close any open connections
+    if (this.client && typeof (this.client as any).close === 'function') {
+      await (this.client as any).close();
+    }
+
+    // Clear output data
+    this.outputData = {};
+    this.$ = {};
+
+    // Clear variable cache (if any cleanup is needed in the future)
+  }
 
   /**
    * Normalize headers to NameValuePair array

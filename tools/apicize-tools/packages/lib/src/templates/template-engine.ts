@@ -205,11 +205,15 @@ export class TemplateEngine {
         const property = trimmedKey.substring(15, trimmedKey.length - 1);
         const value = this.getNestedProperty(context, property);
         try {
+          // Convert null/undefined to 'undefined' to avoid TypeScript errors with 'body: null'
+          if (value === null || value === undefined) {
+            return 'undefined';
+          }
           // Use proper JSON serialization with null replacer to ensure safe formatting
-          return JSON.stringify(value || null, null, 0);
+          return JSON.stringify(value, null, 0);
         } catch (error) {
           console.warn(`Failed to serialize ${property}:`, error);
-          return 'null';
+          return 'undefined';
         }
       }
 
@@ -380,7 +384,7 @@ describe('API Tests', function() {
     });
 
     after(async function() {
-        await context?.cleanup();
+        await context?.cleanup?.();
     });
 
 {{#if hasRequests}}
@@ -436,7 +440,7 @@ const output = (key: string, value: any): void => {
 describe('{{groupName}}', function() {
     before(async function() {
         const helper = new TestHelper();
-        context = await helper.setupGroup('{{group.id}}');
+        context = await helper.setupWorkbook('{{groupName}}');
         $ = context.$;
     });
 
@@ -514,7 +518,7 @@ describe('{{groupName}}', function() {
 
     before(async function() {
         const helper = new TestHelper();
-        context = await helper.setupGroup('{{group.id}}');
+        context = await helper.setupWorkbook('{{groupName}}');
         $ = context.$;
     });
 
