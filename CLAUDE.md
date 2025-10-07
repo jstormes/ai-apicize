@@ -62,6 +62,50 @@ Use the timeout parameter in bash commands:
 <parameter name="timeout">600000</parameter>
 ```
 
+### NPM Publishing with OTP (One-Time Password)
+
+When publishing packages to npm that require 2FA/OTP authentication:
+
+**IMPORTANT**: Always build packages BEFORE requesting OTP from the user, as OTP codes expire quickly (typically 30 seconds).
+
+#### Publishing Workflow:
+
+1. **Pre-publish checklist:**
+   ```bash
+   # 1. Ensure all tests pass
+   npm test
+
+   # 2. Build all packages (DO THIS BEFORE REQUESTING OTP)
+   npm run build
+
+   # 3. Verify package contents
+   npm pack --dry-run
+   ```
+
+2. **Request OTP from user:**
+   - Ask user for their current OTP code
+   - User should have their authenticator app ready
+
+3. **Publish immediately with OTP:**
+   ```bash
+   # Publish all workspace packages with OTP
+   npm publish --workspaces --access public --otp=<OTP_CODE>
+
+   # Or publish individual packages
+   cd packages/lib
+   npm publish --access public --otp=<OTP_CODE>
+
+   cd ../tools
+   npm publish --access public --otp=<OTP_CODE>
+   ```
+
+**DO NOT** run build commands after receiving OTP as they may timeout the code. The build should already be complete before requesting OTP.
+
+#### Troubleshooting:
+- If OTP expires: Request a new code and retry the publish command immediately
+- If publish fails: Check npm login status with `npm whoami`
+- Packages marked as `"private": true` will be skipped automatically
+
 ## .apicize File Format Specification
 
 ### Top-Level Structure
