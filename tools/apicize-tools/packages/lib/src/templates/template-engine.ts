@@ -205,15 +205,15 @@ export class TemplateEngine {
         const property = trimmedKey.substring(15, trimmedKey.length - 1);
         const value = this.getNestedProperty(context, property);
         try {
-          // Convert null/undefined to 'undefined' to avoid TypeScript errors with 'body: null'
+          // Convert null/undefined to JSON null (valid JSON, unlike 'undefined')
           if (value === null || value === undefined) {
-            return 'undefined';
+            return 'null';
           }
           // Use proper JSON serialization with null replacer to ensure safe formatting
           return JSON.stringify(value, null, 0);
         } catch (error) {
           console.warn(`Failed to serialize ${property}:`, error);
-          return 'undefined';
+          return 'null';
         }
       }
 

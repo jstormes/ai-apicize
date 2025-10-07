@@ -12,7 +12,7 @@ import {
 {
     "version": 1,
     "source": "api-tests.apicize",
-    "exportDate": "2025-10-07T16:01:35.999Z",
+    "exportDate": "2025-10-07T17:01:00.520Z",
     "workbook": {"version":1,"requests":[{"id":"test-localhost","name":"Localhost Layout Search Test","url":"https://localhost:7152/v1/layoutsearch","method":"GET","timeout":30000,"numberOfRedirects":10,"runs":1,"multiRunExecution":"SEQUENTIAL","keepAlive":false,"acceptInvalidCerts":true,"test":"\ndescribe('Localhost Layout Search', () => {\n    it('should connect to localhost API', () => {\n        console.log('Response status: ' + response.status)\n        console.log('Response headers: ' + JSON.stringify(response.headers))\n        \n        if (response.status >= 200 && response.status < 300) {\n            console.log('✓ Successfully connected to localhost API')\n            \n            if (response.body.type == BodyType.JSON) {\n                const data = response.body.data\n                console.log('Response data type: ' + typeof data)\n                console.log('Response data: ' + JSON.stringify(data))\n            } else {\n                console.log('Response body type: ' + response.body.type)\n                console.log('Response body: ' + response.body.text)\n            }\n        } else {\n            console.log('✗ Failed to connect to localhost API')\n            console.log('Status: ' + response.status)\n            console.log('Body: ' + response.body.text)\n        }\n    })\n})"}],"scenarios":[],"authorizations":[],"certificates":[],"proxies":[],"defaults":{},"data":[]}
 }
 @apicize-file-metadata-end */
