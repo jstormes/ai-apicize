@@ -7,9 +7,30 @@ export function createDocsCommand(): Command {
   const command = new Command('docs');
 
   command
-    .description('Export documentation files for AI assistants and developers')
-    .option('-o, --output <path>', 'Output directory for documentation', '.')
-    .option('-t, --type <type>', 'Documentation type: ai|all', 'all')
+    .description(`Export documentation files for AI assistants and developers
+
+Exports comprehensive documentation to help AI assistants and developers work
+effectively with Apicize tools. Includes LLM-friendly guides, examples, and
+best practices.
+
+📝 Examples:
+  # Export to current directory
+  apicize-tools docs
+
+  # Export to custom directory
+  apicize-tools docs --output ./docs
+
+  # Export only AI assistant guide
+  apicize-tools docs --type ai
+
+Documentation exported:
+  • AI_ASSISTANT_GUIDE.md - Complete guide for AI assistants (LLMs)
+    - LLM-friendly features (--llm-friendly, --auto-fix)
+    - Common workflows and patterns
+    - Code examples and templates
+    - Best practices for file generation`)
+    .option('-o, --output <path>', 'output directory for documentation files (default: current directory)', '.')
+    .option('-t, --type <type>', 'documentation type: "ai" for AI guide only, "all" for everything (default: all)', 'all')
     .action(async (options) => {
       try {
         const outputDir = resolve(options.output);

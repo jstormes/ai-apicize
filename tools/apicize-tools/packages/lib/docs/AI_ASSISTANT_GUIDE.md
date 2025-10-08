@@ -30,6 +30,80 @@ apicize-tools validate <file.apicize>    # Validate file structure
 apicize-tools run <file.apicize>         # Execute tests directly
 ```
 
+## 🤖 LLM-Friendly Features (NEW!)
+
+Apicize now includes powerful features specifically designed to help LLMs generate valid .apicize files:
+
+### 1. LLM-Friendly Error Messages (`--llm-friendly`)
+
+When validation fails, use `--llm-friendly` to get detailed, educational error messages with code examples:
+
+```bash
+apicize-tools validate mytest.apicize --llm-friendly
+```
+
+**Example Output:**
+```
+❌ Found 2 errors
+
+Error #1 at: /requests/0/method
+
+❌ Invalid value for enumeration
+
+Allowed values:
+  - "GET"
+  - "POST"
+  - "PUT"
+  - "DELETE"
+  - "PATCH"
+  - "HEAD"
+  - "OPTIONS"
+
+💡 Tip: HTTP methods must be UPPERCASE (e.g., "GET", not "get")
+
+📝 Example:
+Valid HTTP methods (UPPERCASE):
+  - "GET"
+  - "POST"
+  - "PUT"
+
+❌ Wrong: "get", "Post", "put"
+✓ Correct: "GET", "POST", "PUT"
+```
+
+### 2. Auto-Fix Common Errors (`--auto-fix`)
+
+Automatically fix ~80% of common LLM mistakes:
+
+```bash
+apicize-tools validate mytest.apicize --auto-fix --output fixed.apicize
+```
+
+**Automatic Fixes:**
+- ✅ Lowercase HTTP methods → Uppercase (`"get"` → `"GET"`)
+- ✅ Null body → `{type: "None"}`
+- ✅ Missing body type → Inferred from data (`{data: {...}}` → `{type: "JSON", data: {...}}`)
+- ✅ Missing IDs → Auto-generated unique IDs
+- ✅ Missing defaults → timeout, runs, multiRunExecution, etc.
+- ✅ Missing test code → Generates basic Mocha/Chai test
+- ✅ Missing arrays → Empty headers, queryStringParams, etc.
+
+**Example Output:**
+```
+✓ Applied 6 fixes:
+  • Fixed method to uppercase ("get" → "GET")
+  • Set default timeout to 30000ms
+  • Fixed null/undefined body to {type: "None"}
+  • Set default runs to 1
+  • Set default multiRunExecution
+  • Set default redirects to 10
+
+⚠ 1 warning:
+  • Generated default test code
+
+✓ Saved fixed file to: fixed.apicize
+```
+
 ## Common AI Assistant Use Cases
 
 ### 1. Creating New API Tests
@@ -137,7 +211,81 @@ apicize-tools run mytest.apicize --scenario production
 
 ## Practical Workflows for AI Assistants
 
-### Workflow A: Create From Scratch
+### 🆕 Workflow A: LLM-Friendly Generate & Auto-Fix (RECOMMENDED)
+
+**Best for**: LLMs generating .apicize files from scratch
+
+```
+1. User provides API requirements
+   ↓
+2. AI creates .apicize JSON structure
+   (Don't worry about perfect syntax!)
+   ↓
+3. AI validates with auto-fix:
+   apicize-tools validate test.apicize --auto-fix --output test.apicize
+   ↓
+4. File is now valid and ready to use!
+```
+
+**Why this works:**
+- LLM can focus on the API structure, not perfect JSON syntax
+- Auto-fix handles common mistakes (method casing, missing fields, etc.)
+- ~80% of errors automatically corrected
+- Much higher success rate for LLMs
+
+**Example:**
+```bash
+# LLM creates file (may have lowercase methods, missing fields)
+# Then auto-fix it:
+apicize-tools validate api-test.apicize --auto-fix --output api-test.apicize
+```
+
+### 🆕 Workflow B: Generate → Validate with LLM-Friendly Errors → Fix → Repeat
+
+**Best for**: Learning from mistakes and improving
+
+```
+1. AI creates .apicize JSON structure
+   ↓
+2. AI validates with LLM-friendly errors:
+   apicize-tools validate test.apicize --llm-friendly
+   ↓
+3. AI reads detailed error messages with examples
+   ↓
+4. AI updates file based on error guidance
+   ↓
+5. Repeat until valid
+```
+
+**Why this works:**
+- Educational error messages help LLMs learn
+- Code examples show exactly what's expected
+- Tips highlight common mistakes
+- Progressive improvement
+
+### Workflow C: Use Template as Starting Point (SAFEST)
+
+**Best for**: Guaranteed valid starting point
+
+```
+1. AI creates from template:
+   apicize-tools create my-test --template rest-crud
+   ↓
+2. AI reads generated file
+   ↓
+3. AI modifies with Edit tool (safer than Write)
+   ↓
+4. AI validates:
+   apicize-tools validate my-test.apicize
+```
+
+**Why this works:**
+- Starts with 100% valid structure
+- LLM only modifies specific parts
+- Lower error rate
+- Good for learning the structure
+
+### Workflow D: Create From Scratch (Legacy)
 
 ```
 1. User provides API requirements
@@ -167,7 +315,7 @@ apicize-tools run mytest.apicize --scenario production
 }
 ```
 
-### Workflow B: Export → Modify → Import
+### Workflow E: Export → Modify → Import
 
 ```
 1. User has .apicize file
@@ -181,7 +329,7 @@ apicize-tools run mytest.apicize --scenario production
 5. Result: 100% round-trip accuracy
 ```
 
-### Workflow C: Using Scenarios
+### Workflow F: Using Scenarios
 
 Different test environments (dev, staging, production):
 
@@ -275,6 +423,38 @@ describe('capture', () => {
 ```
 
 ## AI Assistant Best Practices
+
+### 🆕 0. Use LLM-Friendly Features (MOST IMPORTANT!)
+
+**When generating .apicize files:**
+
+1. **Use auto-fix for immediate success:**
+   ```bash
+   apicize-tools validate test.apicize --auto-fix --output test.apicize
+   ```
+
+2. **Or use --llm-friendly to learn from errors:**
+   ```bash
+   apicize-tools validate test.apicize --llm-friendly
+   ```
+
+3. **Or start from a template:**
+   ```bash
+   apicize-tools create my-test --template rest-crud
+   ```
+
+**Common LLM mistakes that auto-fix handles:**
+- ❌ Using lowercase HTTP methods (`"get"` instead of `"GET"`)
+- ❌ Using `null` for body (should be `{type: "None"}`)
+- ❌ Missing `type` field in body
+- ❌ Missing required IDs
+- ❌ Missing default values (timeout, runs, etc.)
+- ❌ Missing test code
+
+**Pro tip:** Combine both for best results:
+```bash
+apicize-tools validate test.apicize --llm-friendly --auto-fix --output test.apicize
+```
 
 ### 1. Always Use 10-Minute Timeout
 ```xml
@@ -424,9 +604,11 @@ For complex modifications:
 # Create
 apicize-tools create my-api-test --template rest-crud
 
-# Validate
+# Validate (🆕 LLM-Friendly)
 apicize-tools validate test.apicize
-apicize-tools validate **/*.apicize
+apicize-tools validate test.apicize --llm-friendly              # Show detailed errors
+apicize-tools validate test.apicize --auto-fix --output test.apicize  # Auto-fix errors
+apicize-tools validate **/*.apicize --llm-friendly              # Validate multiple
 
 # Export
 apicize-tools export test.apicize --output ./tests

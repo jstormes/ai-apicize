@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "requests": [
+    {
+      "id": "req-001",
+      "name": "Create User",
+      "url": "{{baseUrl}}/users",
+      "method": "POST",
+      "body": {
+        "data": {
+          "username": "testuser",
+          "email": "test@example.com"
+        },
+        "type": "JSON"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "queryStringParams": [],
+      "timeout": 30000,
+      "test": "describe('Create User', () => {\n  it('should return success', () => {\n    expect(response.status).to.be.within(200, 299);\n  });\n});",
+      "runs": 1,
+      "multiRunExecution": "SEQUENTIAL",
+      "numberOfRedirects": 10,
+      "keepAlive": false,
+      "acceptInvalidCerts": false
+    },
+    {
+      "name": "Missing ID Request",
+      "url": "{{baseUrl}}/products",
+      "method": "PUT",
+      "id": "id-1759943439640-v7aiyqzhg",
+      "timeout": 30000,
+      "headers": [],
+      "queryStringParams": [],
+      "body": {
+        "type": "None"
+      },
+      "test": "describe('Missing ID Request', () => {\n  it('should return success', () => {\n    expect(response.status).to.be.within(200, 299);\n  });\n});",
+      "runs": 1,
+      "multiRunExecution": "SEQUENTIAL",
+      "numberOfRedirects": 10,
+      "keepAlive": false,
+      "acceptInvalidCerts": false
+    }
+  ]
+}

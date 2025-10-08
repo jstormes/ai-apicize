@@ -28,11 +28,30 @@ interface ExportOptions {
 export function exportCommand(program: Command): void {
   program
     .command('export <file>')
-    .description('Export .apicize file to TypeScript Mocha/Chai tests')
-    .option('-o, --output <directory>', 'output directory for generated tests (default: ./tests)')
-    .option('-s, --scenario <name>', 'specific scenario to use for export')
-    .option('--split', 'split large request groups into separate files')
-    .option('--overwrite', 'overwrite existing output directory')
+    .description(`Export .apicize file to TypeScript Mocha/Chai tests
+
+Converts your .apicize JSON file into executable TypeScript test files that can
+run with Mocha/Chai. Preserves all metadata for round-trip compatibility.
+
+📝 Examples:
+  # Basic export to ./tests directory
+  apicize-tools export myfile.apicize
+
+  # Export to custom directory
+  apicize-tools export myfile.apicize --output ./my-tests
+
+  # Export with specific scenario variables
+  apicize-tools export myfile.apicize --scenario production
+
+  # Split large groups into separate files
+  apicize-tools export myfile.apicize --split
+
+  # Overwrite existing tests
+  apicize-tools export myfile.apicize --overwrite`)
+    .option('-o, --output <directory>', 'output directory for generated test files (default: ./tests)')
+    .option('-s, --scenario <name>', 'use specific scenario for variable substitution')
+    .option('--split', 'split large request groups into separate test files for better organization')
+    .option('--overwrite', 'overwrite existing output directory without prompting')
     .action(async (file: string, options: ExportOptions) => {
       await executeCommand(() => exportAction(file, options), 'Export failed');
     });

@@ -1,0 +1,14 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "test-001",
+      "name": "Test Request with Errors",
+      "url": "https://api.example.com/test",
+      "method": "get",
+      "body": null,
+      "headers": [],
+      "queryStringParams": []
+    }
+  ]
+}

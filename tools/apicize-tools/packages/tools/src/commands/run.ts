@@ -31,12 +31,39 @@ interface RunOptions {
 export function runCommand(program: Command): void {
   program
     .command('run <file>')
-    .description('Execute .apicize file tests directly')
-    .option('-s, --scenario <name>', 'scenario to use for execution')
-    .option('-r, --reporter <type>', 'test reporter (spec|json|tap)', 'spec')
-    .option('-t, --timeout <ms>', 'test timeout in milliseconds', '30000')
-    .option('-o, --output <file>', 'output file for test results')
-    .option('--no-cleanup', 'keep generated test files after execution')
+    .description(`Execute .apicize file tests directly
+
+Runs tests from your .apicize file without manual export. Automatically exports
+to temp directory, executes with Mocha, and cleans up.
+
+📝 Examples:
+  # Run tests with default settings
+  apicize-tools run myfile.apicize
+
+  # Run with specific scenario
+  apicize-tools run myfile.apicize --scenario production
+
+  # Run with JSON reporter (for CI/CD)
+  apicize-tools run myfile.apicize --reporter json
+
+  # Save results to file
+  apicize-tools run myfile.apicize --reporter json --output results.json
+
+  # Keep generated test files for debugging
+  apicize-tools run myfile.apicize --no-cleanup
+
+  # Custom timeout (60 seconds)
+  apicize-tools run myfile.apicize --timeout 60000
+
+Available reporters:
+  • spec: Human-readable output (default)
+  • json: Machine-readable JSON output
+  • tap: TAP protocol output`)
+    .option('-s, --scenario <name>', 'use specific scenario for variable substitution')
+    .option('-r, --reporter <type>', 'test reporter: spec (default), json, or tap', 'spec')
+    .option('-t, --timeout <ms>', 'test timeout in milliseconds (default: 30000)', '30000')
+    .option('-o, --output <file>', 'save test results to file')
+    .option('--no-cleanup', 'keep generated test files after execution (useful for debugging)')
     .action(async (file: string, options: RunOptions) => {
       await executeCommand(() => runAction(file, options), 'Test execution failed');
     });

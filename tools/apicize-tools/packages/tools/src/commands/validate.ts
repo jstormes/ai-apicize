@@ -21,14 +21,45 @@ interface ValidateOptions {
   strict?: boolean;
   format?: 'json' | 'text';
   verbose?: boolean;
+  llmFriendly?: boolean;
+  autoFix?: boolean;
+  output?: string;
 }
 
 export function validateCommand(program: Command): void {
   program
     .command('validate <files...>')
-    .description('Validate .apicize file structure and content')
-    .option('--strict', 'enable strict validation mode')
-    .option('--format <type>', 'output format (json|text)', 'text')
+    .description(`Validate .apicize file structure and content
+
+🤖 LLM-Friendly Options:
+  Use --llm-friendly to get detailed error explanations with examples
+  Use --auto-fix to automatically correct common LLM mistakes:
+    • Lowercase HTTP methods (get → GET)
+    • Missing body type (null → {type: "None"})
+    • Missing required fields (timeout, runs, etc.)
+    • Missing IDs (auto-generated)
+    • Missing test code (generates default test)
+
+📝 Examples:
+  # Basic validation
+  apicize-tools validate myfile.apicize
+
+  # Get LLM-friendly error messages
+  apicize-tools validate myfile.apicize --llm-friendly
+
+  # Auto-fix common errors and save
+  apicize-tools validate myfile.apicize --auto-fix --output fixed.apicize
+
+  # Validate multiple files
+  apicize-tools validate *.apicize --llm-friendly
+
+  # JSON output for programmatic use
+  apicize-tools validate myfile.apicize --format json`)
+    .option('--strict', 'enable strict validation mode (no tolerance for warnings)')
+    .option('--format <type>', 'output format: "json" for programmatic use, "text" for humans (default: "text")', 'text')
+    .option('--llm-friendly', '🤖 show detailed, LLM-friendly error messages with code examples')
+    .option('--auto-fix', '🔧 automatically fix common errors (method casing, missing fields, body types, etc.)')
+    .option('-o, --output <file>', '💾 save auto-fixed file (requires --auto-fix flag)')
     .action(async (files: string[], options: ValidateOptions) => {
       await executeCommand(() => validateAction(files, options), 'Validation failed');
     });
@@ -66,9 +97,43 @@ async function validateAction(files: string[], options: ValidateOptions): Promis
       const fileContent = await require('fs').promises.readFile(resolvedFile, 'utf8');
       const data = JSON.parse(fileContent);
 
+      // Apply auto-fix if requested
+      let fixedData = data;
+      let fixResults = null;
+
+      if (options.autoFix) {
+        const { AutoFixer } = require('@jstormes/apicize-lib');
+        const fixer = new AutoFixer();
+        fixResults = fixer.fix(data);
+        fixedData = fixResults.fixed;
+
+        if (options.format === 'text') {
+          console.log(fixer.formatResults(fixResults));
+        }
+
+        // Save fixed file if output specified
+        if (options.output) {
+          const fs = require('fs').promises;
+          await fs.writeFile(
+            options.output,
+            JSON.stringify(fixedData, null, 2),
+            'utf8'
+          );
+          if (options.format === 'text') {
+            success(`Saved fixed file to: ${options.output}`);
+          }
+        }
+      }
+
       // Perform validation (lazy load library only when command runs)
-      const { validateApicizeFile } = require('@jstormes/apicize-lib');
-      const validation = validateApicizeFile(data);
+      const { validateApicizeFile, LLMFriendlyFormatter } = require('@jstormes/apicize-lib');
+      const validation = validateApicizeFile(fixedData);
+
+      // Use LLM-friendly formatting if requested
+      if (options.llmFriendly && !validation.valid && options.format === 'text') {
+        const formatter = new LLMFriendlyFormatter();
+        console.log('\n' + formatter.formatErrors(validation.errors));
+      }
 
       const result: ValidationResult = {
         file: resolvedFile,

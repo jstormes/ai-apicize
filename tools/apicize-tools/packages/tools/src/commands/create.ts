@@ -26,11 +26,37 @@ interface CreateOptions {
 export function createCommand(program: Command): void {
   program
     .command('create <name>')
-    .description('Create a new .apicize file from template')
-    .option('-t, --template <type>', 'template type (basic|rest-crud|graphql)', 'basic')
-    .option('-o, --output <file>', 'output file (default: <name>.apicize)')
-    .option('--overwrite', 'overwrite existing file')
-    .option('-i, --interactive', 'interactive mode with prompts')
+    .description(`Create a new .apicize file from template
+
+Generates a starter .apicize file with proper structure, ready to customize.
+Perfect for getting started quickly with best practices.
+
+🤖 LLM Tip: Use this to generate a valid starting point, then modify the JSON.
+
+📝 Examples:
+  # Create basic .apicize file
+  apicize-tools create my-api-test
+
+  # Create REST CRUD template
+  apicize-tools create user-api --template rest-crud
+
+  # Create GraphQL template
+  apicize-tools create gql-test --template graphql
+
+  # Interactive mode (prompts for details)
+  apicize-tools create my-test --interactive
+
+  # Custom output filename
+  apicize-tools create test --output api-tests.apicize
+
+Available templates:
+  • basic: Simple GET request template
+  • rest-crud: Full CRUD operations (GET, POST, PUT, DELETE)
+  • graphql: GraphQL query and mutation examples`)
+    .option('-t, --template <type>', 'template: basic, rest-crud, or graphql (default: basic)', 'basic')
+    .option('-o, --output <file>', 'output filename (default: {name}.apicize)')
+    .option('--overwrite', 'overwrite existing file without prompting')
+    .option('-i, --interactive', 'interactive mode with step-by-step prompts')
     .action(async (name: string, options: CreateOptions) => {
       await executeCommand(() => createAction(name, options), 'Create failed');
     });

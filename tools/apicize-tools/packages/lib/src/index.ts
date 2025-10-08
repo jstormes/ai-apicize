@@ -7,6 +7,10 @@ export { isJSONBody } from './types';
 
 // Validation utilities
 export * from './validation/validator';
+export { LLMFriendlyFormatter } from './validation/llm-friendly-formatter';
+export { AutoFixer } from './validation/auto-fixer';
+export type { FixResult, FixChange } from './validation/auto-fixer';
+export type { LLMFormattedError } from './validation/llm-friendly-formatter';
 
 // Core utilities
 export * from './config';

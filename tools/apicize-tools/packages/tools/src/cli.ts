@@ -23,10 +23,21 @@ const program = new Command();
 // Configure main program
 program
   .name('apicize-tools')
-  .description('CLI tools for working with .apicize API test files')
+  .description(`CLI tools for working with .apicize API test files
+
+🤖 LLM-Friendly Features:
+  • Use --llm-friendly flag with validate for detailed error messages with examples
+  • Use --auto-fix to automatically correct common errors (method casing, missing fields, etc.)
+  • All commands support JSON output for easy programmatic access
+
+📚 Quick Start:
+  apicize-tools validate myfile.apicize --llm-friendly
+  apicize-tools validate myfile.apicize --auto-fix --output fixed.apicize
+  apicize-tools create new-test --template rest-api
+  apicize-tools export myfile.apicize --output ./tests`)
   .version(version)
-  .option('-v, --verbose', 'enable verbose output')
-  .option('--no-color', 'disable colored output')
+  .option('-v, --verbose', 'enable verbose output (shows detailed logs)')
+  .option('--no-color', 'disable colored output (useful for logs/CI)')
   .hook('preAction', thisCommand => {
     // Set up global options
     const opts = thisCommand.opts();

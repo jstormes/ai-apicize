@@ -1,0 +1,29 @@
+{
+  "version": 1.0,
+  "requests": [
+    {
+      "id": "req-001",
+      "name": "Create User",
+      "url": "{{baseUrl}}/users",
+      "method": "post",
+      "body": {
+        "data": {
+          "username": "testuser",
+          "email": "test@example.com"
+        }
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "queryStringParams": []
+    },
+    {
+      "name": "Missing ID Request",
+      "url": "{{baseUrl}}/products",
+      "method": "PUT"
+    }
+  ]
+}
