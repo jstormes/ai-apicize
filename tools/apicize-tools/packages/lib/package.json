@@ -1,6 +1,6 @@
 {
   "name": "@jstormes/apicize-lib",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Core library for Apicize tools - TypeScript types, utilities, and runtime support for API testing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,8 +9,7 @@
     "test": "cd ../.. && npm run test:lib",
     "lint": "echo 'Linting handled at root level'",
     "clean": "rimraf dist",
-    "dev": "tsc --watch",
-    "prepublishOnly": "npm run clean && npm run build"
+    "dev": "tsc --watch"
   },
   "files": [
     "dist/**/*",
