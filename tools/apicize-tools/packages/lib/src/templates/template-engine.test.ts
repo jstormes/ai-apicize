@@ -123,7 +123,7 @@ describe('TemplateEngine', () => {
       expect(result).toContain("describe('API Tests', function() {");
       expect(result).toContain('this.timeout(30000);');
       expect(result).toContain("describe('Authentication', function() {");
-      expect(result).toContain("import './suites/0-Authentication.spec';");
+      expect(result).toContain("import './suites/0-authentication.spec';"); // sanitized to lowercase
     });
 
     it('should handle workbook without optional fields', () => {
@@ -328,7 +328,7 @@ describe('TemplateEngine', () => {
       const mochaConfig = JSON.parse(result);
 
       expect(mochaConfig.require).toContain('ts-node/register');
-      expect(mochaConfig.extensions).toContain('ts');
+      expect(mochaConfig.extension).toContain('ts'); // Mocha uses 'extension' not 'extensions'
       expect(mochaConfig.spec).toBe('tests/**/*.spec.ts');
       expect(mochaConfig.timeout).toBe(30000);
       expect(mochaConfig.reporter).toBe('spec');

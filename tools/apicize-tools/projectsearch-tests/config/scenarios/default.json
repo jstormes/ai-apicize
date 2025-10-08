@@ -1,0 +1,10 @@
+{
+  "name": "default",
+  "description": "Default test scenario",
+  "variables": {
+    "baseUrl": "https://api.example.com",
+    "apiKey": "dev-api-key-here",
+    "timeout": 30000,
+    "retries": 3
+  }
+}

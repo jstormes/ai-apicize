@@ -430,7 +430,7 @@ export class TestGenerator {
   }
 
   private sanitizeFileName(name: string): string {
-    return name.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-');
+    return name.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').toLowerCase();
   }
 
   private escapeString(str: string): string {

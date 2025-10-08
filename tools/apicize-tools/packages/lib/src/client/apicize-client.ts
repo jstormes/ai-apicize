@@ -232,7 +232,7 @@ export class ApicizeClient {
    * Build request body for fetch
    */
   private async buildBody(
-    body?: RequestBody | string | Buffer | Record<string, unknown>
+    body?: RequestBody | string | Buffer | Record<string, unknown> | null
   ): Promise<string | URLSearchParams | Uint8Array | undefined> {
     if (!body) {
       return undefined;

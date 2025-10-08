@@ -3,6 +3,7 @@
 
 // Type definitions
 export * from './types';
+export { isJSONBody } from './types';
 
 // Validation utilities
 export * from './validation/validator';

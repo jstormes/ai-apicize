@@ -292,6 +292,13 @@ export interface ApicizeResponse {
   }>;
 }
 
+/**
+ * Type guard to check if response body is JSON
+ */
+export function isJSONBody(body: ApicizeResponseBody): body is ApicizeResponseBody & { data: Record<string, unknown> } {
+  return body.type === BodyType.JSON && body.data !== null && body.data !== undefined;
+}
+
 // ============= Execution Context Interfaces =============
 
 export interface ApicizeContext {
@@ -312,7 +319,7 @@ export interface RequestConfig {
   url: string;
   method: HttpMethod | string;
   headers?: NameValuePair[] | Record<string, string>;
-  body?: RequestBody | string | Buffer | Record<string, unknown>;
+  body?: RequestBody | string | Buffer | Record<string, unknown> | null;
   queryStringParams?: NameValuePair[];
   timeout?: number;
   numberOfRedirects?: number;

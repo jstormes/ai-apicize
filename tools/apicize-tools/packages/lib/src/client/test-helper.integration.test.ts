@@ -10,7 +10,7 @@ describe('TestHelper Integration Tests', () => {
   let originalCwd: string;
   let testHelper: TestHelper;
 
-  before(async function() {
+  before(async function(this: Mocha.Context) {
     this.timeout(10000); // Increase timeout for setup
 
     // Save original working directory
@@ -59,7 +59,7 @@ describe('TestHelper Integration Tests', () => {
     testHelper = new TestHelper();
   });
 
-  after(async function() {
+  after(async function(this: Mocha.Context) {
     this.timeout(10000); // Increase timeout for cleanup
 
     // Restore original working directory
@@ -142,7 +142,7 @@ describe('TestHelper Integration Tests', () => {
   });
 
   describe('missing workbook.json', () => {
-    it('should fallback to minimal workbook when file not found', async function() {
+    it('should fallback to minimal workbook when file not found', async function(this: Mocha.Context) {
       this.timeout(5000);
 
       // Save current directory and change to temp without metadata

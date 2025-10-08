@@ -45,13 +45,13 @@ describe('ProjectScaffolder', () => {
       expect(result.files.find(f => f.path === 'README.md')).toBeDefined();
 
       // Check folder structure metadata
-      expect(result.metadata.folders).toContain('lib');
+      // Note: 'lib' folder no longer generated - runtime code comes from @jstormes/apicize-lib npm package
       expect(result.metadata.folders).toContain('config');
       expect(result.metadata.folders).toContain('tests');
       expect(result.metadata.folders).toContain('data');
     });
 
-    it('should generate library files', () => {
+    it('should NOT generate library files (uses npm package instead)', () => {
       const workbook: ApicizeWorkbook = {
         version: 1.0,
         requests: [],
@@ -59,21 +59,22 @@ describe('ProjectScaffolder', () => {
 
       const result = scaffolder.scaffoldProject(workbook);
 
-      // Check core library files
-      expect(result.files.find(f => f.path === 'lib/index.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/runtime/index.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/runtime/types.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/runtime/context.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/runtime/client.ts')).toBeDefined();
+      // Library files are NO LONGER generated locally
+      // All runtime code comes from @jstormes/apicize-lib npm package
+      // This is the new Phase 3 library-centric architecture
+      expect(result.files.find(f => f.path === 'lib/index.ts')).toBeUndefined();
+      expect(result.files.find(f => f.path === 'lib/runtime/index.ts')).toBeUndefined();
+      expect(result.files.find(f => f.path === 'lib/runtime/types.ts')).toBeUndefined();
+      expect(result.files.find(f => f.path === 'lib/runtime/context.ts')).toBeUndefined();
+      expect(result.files.find(f => f.path === 'lib/runtime/client.ts')).toBeUndefined();
 
-      // Check testing utilities
-      expect(result.files.find(f => f.path === 'lib/testing/helpers.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/testing/assertions.ts')).toBeDefined();
-
-      // Check other library modules
-      expect(result.files.find(f => f.path === 'lib/auth/manager.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/data/loader.ts')).toBeDefined();
-      expect(result.files.find(f => f.path === 'lib/output/collector.ts')).toBeDefined();
+      // Instead, package.json should have @jstormes/apicize-lib as dependency
+      const packageJson = result.files.find(f => f.path === 'package.json');
+      expect(packageJson).toBeDefined();
+      if (packageJson) {
+        const pkg = JSON.parse(packageJson.content);
+        expect(pkg.dependencies).toHaveProperty('@jstormes/apicize-lib');
+      }
     });
 
     it('should generate configuration files', () => {
@@ -259,8 +260,7 @@ describe('ProjectScaffolder', () => {
       expect(tsconfig.compilerOptions.strict).toBe(true);
       expect(tsconfig.compilerOptions.esModuleInterop).toBe(true);
 
-      // Check includes
-      expect(tsconfig.include).toContain('lib/**/*');
+      // Check includes (lib/**/* no longer included - using npm package)
       expect(tsconfig.include).toContain('tests/**/*');
       expect(tsconfig.include).toContain('scripts/**/*');
 
@@ -375,7 +375,7 @@ describe('ProjectScaffolder', () => {
       const config = JSON.parse(configFile!.content);
       expect(config.version).toBe('1.0.0');
       expect(config.activeEnvironment).toBe('development');
-      expect(config.libPath).toBe('./lib');
+      // libPath no longer exists - runtime code from @jstormes/apicize-lib npm package
       expect(config.configPath).toBe('./config');
       expect(config.testsPath).toBe('./tests');
       expect(config.settings.defaultTimeout).toBe(30000);

@@ -395,7 +395,7 @@ describe('TestGenerator', () => {
       const result = testGenerator.generateTestProject(workbook);
       const groupFile = result.files.find(f => f.path.includes('suites/'));
 
-      expect(groupFile?.path).toContain('API-Tests-Special-Characters-');
+      expect(groupFile?.path).toContain('api-tests-special-characters-'); // sanitized to lowercase
     });
 
     it('should count tests correctly', () => {

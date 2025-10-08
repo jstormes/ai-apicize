@@ -6,6 +6,11 @@ module.exports = {
     '**/__tests__/**/*.ts',
     '**/?(*.)+(spec|test).ts'
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    'test-helper.integration.test.ts' // Mocha-based test, not Jest compatible
+  ],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
@@ -39,6 +44,11 @@ module.exports = {
       testMatch: [
         '<rootDir>/packages/**/__tests__/**/*.ts',
         '<rootDir>/packages/**/?(*.)+(spec|test).ts'
+      ],
+      testPathIgnorePatterns: [
+        '/node_modules/',
+        '/dist/',
+        'test-helper.integration.test.ts' // Mocha-based test, not Jest compatible
       ],
       transform: {
         '^.+\\.ts$': 'ts-jest',

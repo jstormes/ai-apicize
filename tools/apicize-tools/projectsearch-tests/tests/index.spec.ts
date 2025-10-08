@@ -1,0 +1,50 @@
+// Auto-generated from api-tests.apicize
+import { describe, before, after } from 'mocha';
+import { expect } from 'chai';
+import {
+    TestHelper,
+    ApicizeContext,
+    ApicizeResponse,
+    BodyType
+} from '@jstormes/apicize-lib';
+
+/* @apicize-file-metadata
+{
+    "version": 1,
+    "source": "api-tests.apicize",
+    "exportDate": "2025-10-07T18:28:11.737Z",
+    "workbook": {"version":1,"requests":[{"id":"26706ad9-dfae-4ef9-a13b-efcef860ad47","name":"Basic API Tests","children":[{"id":"083b2e62-f570-4d3e-a2ef-9114a1e08eea","name":"Get Example","url":"{{baseUrl}}/example","method":"GET","test":"describe('Get Example', () => {\n  it('should return 200 status', () => {\n    expect(response.status).to.equal(200);\n  });\n\n  it('should return JSON response', () => {\n    expect(response.body.type).to.equal(BodyType.JSON);\n  });\n});","headers":[],"queryStringParams":[],"timeout":30000,"runs":1},{"id":"26bcbfb2-d69e-4f33-9c82-ec0132c4c65b","name":"Post Example","url":"{{baseUrl}}/example","method":"POST","test":"describe('Post Example', () => {\n  it('should return 201 status', () => {\n    expect(response.status).to.equal(201);\n  });\n\n  it('should return created resource', () => {\n    const JSON_body = (response.body.type == BodyType.JSON)\n      ? response.body.data\n      : expect.fail('Response body is not JSON');\n\n    expect(JSON_body).to.have.property('id');\n    output('createdId', JSON_body.id);\n  });\n});","headers":[{"name":"Content-Type","value":"application/json"}],"body":{"type":"JSON","data":{"name":"Example Item","description":"This is an example"}},"queryStringParams":[],"timeout":30000,"runs":1}],"execution":"SEQUENTIAL","runs":1}],"scenarios":[{"id":"438420fc-d878-40cb-bc3d-0d0733dbdb22","name":"Development","variables":[{"name":"baseUrl","value":"https://api-dev.example.com","type":"TEXT"},{"name":"apiKey","value":"dev-api-key-here","type":"TEXT"}]},{"id":"fc74f245-2c0c-437c-8d71-6597f05109f6","name":"Production","variables":[{"name":"baseUrl","value":"https://api.example.com","type":"TEXT"},{"name":"apiKey","value":"prod-api-key-here","type":"TEXT"}]}],"authorizations":[],"certificates":[],"proxies":[],"data":[],"defaults":{"selectedScenario":{"id":"438420fc-d878-40cb-bc3d-0d0733dbdb22","name":"Development"}}}
+}
+@apicize-file-metadata-end */
+
+// Global test context
+let context: ApicizeContext;
+let response: ApicizeResponse;
+let $: Record<string, any>;
+
+const output = (key: string, value: any): void => {
+    context?.output(key, value);
+};
+
+describe('API Tests', function() {
+    this.timeout(30000);
+
+    before(async function() {
+        const helper = new TestHelper();
+        context = await helper.setupWorkbook('api-tests');
+        $ = context.$;
+    });
+
+    after(async function() {
+        await context?.cleanup?.();
+    });
+
+    describe('Basic API Tests', function() {
+        // Group will be implemented in separate file: suites/0-basic-api-tests.spec.ts
+    });
+
+});
+
+// Import group test suites
+
+import './suites/0-basic-api-tests.spec';

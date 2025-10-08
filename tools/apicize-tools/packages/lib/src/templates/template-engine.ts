@@ -153,7 +153,7 @@ export class TemplateEngine {
       hasQueryParams:
         requestWithDefaults.queryStringParams && requestWithDefaults.queryStringParams.length > 0,
       queryParams: requestWithDefaults.queryStringParams || [],
-      testCode: requestWithDefaults.test || this.getDefaultTestCode(),
+      testCode: this.addTypeAssertions(requestWithDefaults.test || this.getDefaultTestCode()),
       timeout: requestWithDefaults.timeout,
       ...options,
     };
@@ -305,8 +305,13 @@ export class TemplateEngine {
     return Boolean(value);
   }
 
-  private getTopLevelGroups(requests: (Request | RequestGroup)[]): RequestGroup[] {
-    return requests.filter((item): item is RequestGroup => 'children' in item);
+  private getTopLevelGroups(requests: (Request | RequestGroup)[]): any[] {
+    return requests
+      .filter((item): item is RequestGroup => 'children' in item)
+      .map(group => ({
+        ...group,
+        sanitizedName: this.sanitizeFileName(group.name)
+      }));
   }
 
   private getRequestsFromGroup(group: RequestGroup): Request[] {
@@ -333,6 +338,19 @@ export class TemplateEngine {
 
   private sanitizePackageName(name: string): string {
     return name.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
+  }
+
+  /**
+   * Add type assertions to test code for TypeScript compatibility
+   * Transforms: response.body.data -> response.body.data as Record<string, any>
+   */
+  private addTypeAssertions(testCode: string): string {
+    // Add type assertion to response.body.data when used in ternary expressions
+    // Pattern: ? response.body.data
+    return testCode.replace(
+      /\?\s*response\.body\.data\b(?!\s+as\s)/g,
+      '? response.body.data as Record<string, any>'
+    );
   }
 
   private getDefaultTestCode(): string {
@@ -390,7 +408,7 @@ describe('API Tests', function() {
 {{#if hasRequests}}
 {{#each requestGroups}}
     describe('{{this.name}}', function() {
-        // Group will be implemented in separate file: suites/{{@index}}-{{this.name}}.spec.ts
+        // Group will be implemented in separate file: suites/{{@index}}-{{this.sanitizedName}}.spec.ts
     });
 {{/each}}
 {{/if}}
@@ -398,7 +416,7 @@ describe('API Tests', function() {
 
 // Import group test suites
 {{#each requestGroups}}
-import './suites/{{@index}}-{{this.name}}.spec';
+import './suites/{{@index}}-{{this.sanitizedName}}.spec';
 {{/each}}
 `;
   }
@@ -705,23 +723,20 @@ describe('{{requestName}}', function() {
     "declarationMap": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
     "typeRoots": ["node_modules/@types"],
     "types": ["mocha", "chai", "node"]
   },
   "include": [
-    "tests/**/*",
-    "lib/**/*",
-    "config/**/*"
+    "tests/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "coverage"
+    "dist"
   ],
   "ts-node": {
-    "esm": false,
+    "files": true,
+    "transpileOnly": true,
     "compilerOptions": {
       "module": "commonjs"
     }
@@ -733,13 +748,12 @@ describe('{{requestName}}', function() {
   private getMochaConfigTemplate(): string {
     return `{
   "require": ["ts-node/register"],
-  "extensions": ["ts"],
+  "extension": ["ts"],
   "spec": "tests/**/*.spec.ts",
   "timeout": 30000,
   "recursive": true,
   "exit": true,
-  "reporter": "spec",
-  "ui": "bdd"
+  "reporter": "spec"
 }
 `;
   }
